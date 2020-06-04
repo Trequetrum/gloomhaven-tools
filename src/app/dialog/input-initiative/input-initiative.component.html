@@ -1,0 +1,12 @@
+<div mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Initiative:</mat-label>
+    <input #init matInput placeholder="Ex. 23" [formControl]="initiative" cdkFocusInitial>
+    <mat-error *ngIf="initiative.invalid">{{getErrorMessage()}}</mat-error>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button [mat-dialog-close]="init.value" [disabled]="initiative.invalid">Enter</button>
+</div>
+

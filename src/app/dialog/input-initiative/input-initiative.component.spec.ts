@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PublicToolsMenuComponent } from './public-tools-menu.component';
+import { InputInitiativeComponent } from './input-initiative.component';
 
-describe('PublicToolsMenuComponent', () => {
-  let component: PublicToolsMenuComponent;
-  let fixture: ComponentFixture<PublicToolsMenuComponent>;
+describe('InputInitiativeComponent', () => {
+  let component: InputInitiativeComponent;
+  let fixture: ComponentFixture<InputInitiativeComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ PublicToolsMenuComponent ]
+      declarations: [ InputInitiativeComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(PublicToolsMenuComponent);
+    fixture = TestBed.createComponent(InputInitiativeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

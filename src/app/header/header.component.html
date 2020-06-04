@@ -1,10 +1,72 @@
-<mat-toolbar>
-    <span>Gloomhaven Tools</span>
+<mat-toolbar role="heading" color="primary">
+    <button mat-icon-button class="button-icon" color="accent" aria-label="Account Actions" routerLink="/home">
+        <mat-icon>home</mat-icon>
+    </button>
+    <span class="flexItem-fill-remaining-space"> </span>
+    <h1>Gloomhaven Tools</h1>
+    <span class="flexItem-fill-remaining-space"> </span>
+
+    <button mat-icon-button class="button-icon" color="accent" aria-label="Account Actions" [matMenuTriggerFor]="accountActionsMenu">
+        <mat-icon>account_circle</mat-icon>
+    </button>
+
+    <button mat-icon-button class="button-icon" color="accent" aria-label="Menu Actions and Navigation"
+        [matMenuTriggerFor]="actionsAndNavigationMenu">
+        <mat-icon>menu</mat-icon>
+    </button>
 </mat-toolbar>
 
-<mat-tab-group>
-    <mat-tab label="First"> <h1>Content 1 Header</h1><p>Content 1 paragraph</p> </mat-tab>
-    <mat-tab label="Second"> <h2>Content 2 Header</h2><p>Content 2 paragraph</p> </mat-tab>
-    <mat-tab label="Third"> <h3>Content 3 Header</h3><p>Content 3 paragraph</p> </mat-tab>
-  </mat-tab-group>
-  
+<mat-menu #accountActionsMenu="matMenu" xPosition="before">
+    <button mat-menu-item>
+        <mat-icon>login</mat-icon>
+        <span>Log in</span>
+    </button>
+    <button mat-menu-item (click)="openInitiativeDialog()">
+        <mat-icon>update</mat-icon>
+        <span>Initiative</span>
+    </button>
+    <!--
+    <button mat-menu-item [matMenuTriggerFor]="campaignSelection"> Campaign </button>
+    <button mat-menu-item [matMenuTriggerFor]="partySelection"> Party </button>
+    <button mat-menu-item [matMenuTriggerFor]="CharacterSelection"> Character </button>
+    -->
+</mat-menu>
+
+<mat-menu #campaignSelection="matMenu">
+    <button mat-menu-item>Campaign1</button>
+    <button mat-menu-item>Campaign2</button>
+</mat-menu>
+
+<mat-menu #partySelection="matMenu">
+    <button mat-menu-item>Party1</button>
+    <button mat-menu-item>Party2</button>
+    <button mat-menu-item>Party3</button>
+    <button mat-menu-item>Party4</button>
+    <button mat-menu-item>Party5</button>
+    <button mat-menu-item>Party6</button>
+    <button mat-menu-item>Party7</button>
+    <button mat-menu-item>Party8</button>
+    <button mat-menu-item>Party9</button>
+    <button mat-menu-item>Party10</button>
+    <button mat-menu-item>Party11</button>
+    <button mat-menu-item>Party12</button>
+    <button mat-menu-item>Party13</button>
+    <button mat-menu-item>Party14</button>
+    <button mat-menu-item>Party15</button>
+    <button mat-menu-item>Party16</button>
+    <button mat-menu-item>Party17</button>
+</mat-menu>
+
+<mat-menu #CharacterSelection="matMenu">
+    <button mat-menu-item>Character1</button>
+    <button mat-menu-item>Character2</button>
+</mat-menu>
+
+<mat-menu #actionsAndNavigationMenu="matMenu" xPosition="before">
+    <button mat-menu-item [matMenuTriggerFor]="partySelection"> Party </button>
+    <button mat-menu-item [matMenuTriggerFor]="CharacterSelection"> Character </button>
+    <button mat-menu-item routerLink="/playerref"> Player Reference </button>
+    <button mat-menu-item>Item Shop</button>
+    <button mat-menu-item>Initiative Tracker</button>
+    <button mat-menu-item>Scenario Tree</button>
+</mat-menu>
