@@ -1,5 +1,11 @@
 # GloomhavenTools
 
+This project is just a few days (DAYS, I tell ya!) old and may eventually become a full-fledged front-end for RestfulGloom. Right now, it's being designed to help test the RestfulGloom API. It's also giving its author(s) a run at learning a font-end web-dev framework. Beats tinkering with Postman all day long.
+
+What does this all mean? The 'font-end' doesn't look like much, but run the thing with a web-app scanner like OWASP zed attack proxy (ZAP) and you're gonna learn a thing or two right quick! 
+
+# Angular Development
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.7.
 
 ## Development server
