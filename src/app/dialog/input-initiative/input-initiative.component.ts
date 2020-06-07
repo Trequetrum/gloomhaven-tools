@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import {FormControl, Validators} from '@angular/forms';
+import {FormControl, Validators, FormGroupDirective, NgForm} from '@angular/forms';
+import {ErrorStateMatcher} from '@angular/material/core';
+import { DirtyErrorStateMatcher } from 'src/app/util/dirty-error-state-matcher';
 
 @Component({
   selector: 'app-input-initiative',
@@ -11,6 +13,7 @@ export class InputInitiativeComponent {
 
   //initiative = new FormControl('', [Validators.pattern('^[a-z]*$')] );
   initiative = new FormControl('', [Validators.max(99), Validators.min(0), Validators.pattern('[0-9][0-9]?')] );
+  matcher = new DirtyErrorStateMatcher();
 
   constructor(
     public dialogRef: MatDialogRef<InputInitiativeComponent>) { 

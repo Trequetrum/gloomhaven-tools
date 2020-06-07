@@ -1,22 +1,35 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
+/* @import '@angular/material/prebuilt-themes/deeppurple-amber.css'; */
+@import '@angular/material/prebuilt-themes/purple-green.css';
 
-/* Calendar Styling */
-.row-striped:nth-of-type(odd){
-    background-color: #efefef;
-    border-left: 4px #000000 solid;
-}
-
-.row-striped:nth-of-type(even){
-    background-color: #ffffff;
-    border-left: 4px #efefef solid;
-}
-
-.row-striped {
-    padding: 15px 0;
-}
-
-/* ---------------- */
-html, body { height: 100%; }
+/* -------Makes Angular Materials play nice--------- */
+/*html, body { height: 100%; }*/
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* -------------- */
+
+.div-page{
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0 5px;
+    /* border: dashed; */
+}
+
+.div-md-centered-text{
+    width: fit-content;
+    max-width:1000px;
+    margin:0 auto;
+    /* border:solid; */
+}
+
+.app-toolbar {
+    position: sticky;
+    position: -webkit-sticky; /* For macOS/iOS Safari */
+    top: 0; /* sticky toolbar to the top of the page */
+    z-index: 1000; /* nothing overlaps the toolbar :) */
+}
+
+.flex-item-fill-remaining-space{
+    flex: 1 1 auto;
+}

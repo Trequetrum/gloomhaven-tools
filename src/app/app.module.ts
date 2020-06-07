@@ -24,6 +24,7 @@ import { CampaignComponent }        from './page/campaign/campaign.component';
 import { InputInitiativeComponent } from './dialog/input-initiative/input-initiative.component';
 import { LogInComponent }           from './dialog/log-in/log-in.component';
 import { PlayerRefComponent } from './page/player-ref/player-ref.component';
+import { CharScenarioComponent } from './page/char-scenario/char-scenario.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { PlayerRefComponent } from './page/player-ref/player-ref.component';
     CampaignComponent,
     InputInitiativeComponent,
     LogInComponent,
-    PlayerRefComponent
+    PlayerRefComponent,
+    CharScenarioComponent
   ],
   imports: [
     FormsModule,

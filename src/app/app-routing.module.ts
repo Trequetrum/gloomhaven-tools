@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { HomepageComponent } from './page/home-page/home-page.component';
 import { PageNotFoundComponent } from './page/page-not-found/page-not-found.component';
 import { PlayerRefComponent } from './page/player-ref/player-ref.component';
+import { CharScenarioComponent } from './page/char-scenario/char-scenario.component';
 
 
 const routes: Routes = [
@@ -11,6 +12,7 @@ const routes: Routes = [
   { path: '', redirectTo : 'home', pathMatch: 'full' },
   // Each 'sub-app' (rd: page) gets it's own route
   { path: 'playerref', component : PlayerRefComponent },
+  { path: 'player/scenario', component : CharScenarioComponent},
   // Unkown URLs go to out page not found component at /404
   { path : '404', component : PageNotFoundComponent },
   { path : '**', redirectTo : '/404'}
