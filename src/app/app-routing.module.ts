@@ -4,6 +4,7 @@ import { HomepageComponent } from './page/home-page/home-page.component';
 import { PageNotFoundComponent } from './page/page-not-found/page-not-found.component';
 import { PlayerRefComponent } from './page/player-ref/player-ref.component';
 import { CharScenarioComponent } from './page/char-scenario/char-scenario.component';
+import { PartyComponent } from './page/party/party.component';
 
 
 const routes: Routes = [
@@ -13,6 +14,7 @@ const routes: Routes = [
   // Each 'sub-app' (rd: page) gets it's own route
   { path: 'playerref', component : PlayerRefComponent },
   { path: 'player/scenario', component : CharScenarioComponent},
+  { path: 'party', component : PartyComponent},
   // Unkown URLs go to out page not found component at /404
   { path : '404', component : PageNotFoundComponent },
   { path : '**', redirectTo : '/404'}

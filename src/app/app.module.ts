@@ -25,6 +25,9 @@ import { InputInitiativeComponent } from './dialog/input-initiative/input-initia
 import { LogInComponent }           from './dialog/log-in/log-in.component';
 import { PlayerRefComponent } from './page/player-ref/player-ref.component';
 import { CharScenarioComponent } from './page/char-scenario/char-scenario.component';
+import { CharSelectorComponent } from './sub/char-selector/char-selector.component';
+import { CharSelectorDComponent } from './dialog/char-selector-d/char-selector-d.component';
+import { PartyComponent } from './page/party/party.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +39,10 @@ import { CharScenarioComponent } from './page/char-scenario/char-scenario.compon
     InputInitiativeComponent,
     LogInComponent,
     PlayerRefComponent,
-    CharScenarioComponent
+    CharScenarioComponent,
+    CharSelectorComponent,
+    CharSelectorDComponent,
+    PartyComponent
   ],
   imports: [
     FormsModule,

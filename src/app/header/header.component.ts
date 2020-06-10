@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { InputInitiativeComponent } from '../dialog/input-initiative/input-initiative.component';
+import { MenuDisplayItem } from '../model_ui/menu-display-item';
+import { DataMemoryService } from '../service/data-memory.service';
+import { CampaignMini } from '../model_data/campaign-mini';
+import { PartyMini } from '../model_data/party-mini';
 
 
 @Component({
@@ -10,7 +14,17 @@ import { InputInitiativeComponent } from '../dialog/input-initiative/input-initi
 })
 export class HeaderComponent implements OnInit {
 
-  constructor(public dialog: MatDialog) { }
+  campaignMinis: CampaignMini[];
+  charDisplayList: MenuDisplayItem[];
+
+  constructor(public dialog: MatDialog, private dataService: DataMemoryService) {
+    this.campaignMinis = dataService.getCampaignMinis();
+
+    this.charDisplayList = new Array();
+    this.charDisplayList.push(new MenuDisplayItem("Character1", false));
+    this.charDisplayList.push(new MenuDisplayItem("Character2", false));
+    this.charDisplayList.push(new MenuDisplayItem("JoeBob", false));
+  }
 
   ngOnInit(): void {
   }
@@ -22,4 +36,11 @@ export class HeaderComponent implements OnInit {
     })
   }
 
+  onPartyClick(party :any){
+    if(party instanceof PartyMini){
+      console.log(`TODO: Something about clicking party: ${party.name}`);
+    }else{
+      console.log(`onPartyClick() without PartyMini Object: ${party}`);
+    }
+  }
 }

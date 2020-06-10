@@ -3,7 +3,7 @@
         <mat-icon>home</mat-icon>
     </button>
     <span class="flex-item-fill-remaining-space"> </span>
-    <h1>Gloomhaven Tools</h1>
+    <h1 class="mat-headline">Gloomhaven Tools</h1>
     <span class="flex-item-fill-remaining-space"> </span>
 
     <button mat-icon-button class="button-icon" color="accent" aria-label="Account Actions"
@@ -59,58 +59,21 @@
 </mat-menu>
 
 <mat-menu #partySelection="matMenu">
-    <button mat-menu-item disabled>Campaign1</button>
-    <button mat-menu-item>
-        <mat-icon>group</mat-icon>
-        <span>PartyA</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon>group</mat-icon>
-        <span>PartyB</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon>group</mat-icon>
-        <span>PartyC</span>
-    </button>
-    <button mat-menu-item disabled>Campaign2</button>
-    <button mat-menu-item>
-        <mat-icon>group</mat-icon>
-        <span>PartyA</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon>group</mat-icon>
-        <span>PartyB</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon>group</mat-icon>
-        <span>PartyC</span>
-    </button>
-    <button mat-menu-item disabled>Campaign3</button>
-    <button mat-menu-item>
-        <mat-icon>group</mat-icon>
-        <span>Whoay</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon>group</mat-icon>
-        <span>PartyName!</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon>group</mat-icon>
-        <span>Winners:)</span>
-    </button>
+    <ng-template ngFor let-camp [ngForOf]="campaignMinis" let-i="index">
+        <hr *ngIf="i>0" (click)="$event.stopPropagation();">
+        <div class="appGlm-div-centered" (click)="$event.stopPropagation();">{{camp.name}}</div>
+        <ng-template ngFor let-prty [ngForOf]="camp.parties">
+            <button mat-menu-item (click)="onPartyClick(prty)" routerLink="/party" [queryParams]="{id: prty.id}">
+                <mat-icon>group</mat-icon>
+                <span>{{prty.name}}</span>
+            </button>
+        </ng-template>
+    </ng-template>
 </mat-menu>
 
 <mat-menu #CharacterSelection="matMenu">
-    <button mat-menu-item>
-        <mat-icon>person</mat-icon>
-        <span>Character1</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon>person</mat-icon>
-        <span>Character2</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon>person</mat-icon>
-        <span>JoeBob</span>
+    <button mat-menu-item [disabled]="disp.disabled" *ngFor="let disp of charDisplayList;">
+        <mat-icon *ngIf="!(disp.disabled)">person</mat-icon>
+        <span>{{disp.text}}</span>
     </button>
 </mat-menu>
