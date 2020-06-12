@@ -2,9 +2,9 @@
     <button mat-icon-button class="button-icon" color="accent" aria-label="Account Actions" routerLink="/home">
         <mat-icon>home</mat-icon>
     </button>
-    <span class="flex-item-fill-remaining-space"> </span>
+    <span class="appGlm-flex-item-fill-remaining-space"> </span>
     <h1 class="mat-headline">Gloomhaven Tools</h1>
-    <span class="flex-item-fill-remaining-space"> </span>
+    <span class="appGlm-flex-item-fill-remaining-space"> </span>
 
     <button mat-icon-button class="button-icon" color="accent" aria-label="Account Actions"
         [matMenuTriggerFor]="accountActionsMenu">
@@ -59,21 +59,30 @@
 </mat-menu>
 
 <mat-menu #partySelection="matMenu">
-    <ng-template ngFor let-camp [ngForOf]="campaignMinis" let-i="index">
-        <hr *ngIf="i>0" (click)="$event.stopPropagation();">
-        <div class="appGlm-div-centered" (click)="$event.stopPropagation();">{{camp.name}}</div>
+    <ng-template ngFor let-camp [ngForOf]="campaignMinis">
+        <div class="appGlm-menu-title" (click)="$event.stopPropagation();">{{camp.name}}</div>
         <ng-template ngFor let-prty [ngForOf]="camp.parties">
-            <button mat-menu-item (click)="onPartyClick(prty)" routerLink="/party" [queryParams]="{id: prty.id}">
+            <button mat-menu-item routerLink="/party" [queryParams]="{id: prty.id}">
                 <mat-icon>group</mat-icon>
                 <span>{{prty.name}}</span>
             </button>
         </ng-template>
+        <hr (click)="$event.stopPropagation();">
     </ng-template>
+    <button mat-menu-item routerLink="/party" [queryParams]="{id: -1}">
+        <mat-icon>group_add</mat-icon>
+        <span>New Party</span>
+    </button>
 </mat-menu>
 
 <mat-menu #CharacterSelection="matMenu">
-    <button mat-menu-item [disabled]="disp.disabled" *ngFor="let disp of charDisplayList;">
+    <button mat-menu-item [disabled]="disp.disabled" *ngFor="let disp of charDisplayList;" routerLink="/character" [queryParams]="{id: -1}">
         <mat-icon *ngIf="!(disp.disabled)">person</mat-icon>
         <span>{{disp.text}}</span>
+    </button>
+    <hr (click)="$event.stopPropagation();">
+    <button mat-menu-item routerLink="/character" [queryParams]="{id: -1}">
+        <mat-icon>person_add</mat-icon>
+        <span>New Character</span>
     </button>
 </mat-menu>

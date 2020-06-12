@@ -10,6 +10,10 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 /* -------------- */
 
+$primary: #7b1fa2;
+$accent: #69f0ae;
+$warn: #f44336;
+
 .div-page{
     box-sizing: border-box;
     width: 100%;
@@ -24,9 +28,40 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     /* border:solid; */
 }
 
+.appGlm-button-margin{
+    margin: 2px !important;
+    border: solid;
+}
+
 .appGlm-div-centered{
     margin:0 auto;
     width: fit-content;
+}
+
+.appGlm-div-rcorners {
+    border-radius: 25px;
+    border: 2px solid $primary;
+    padding: 20px;
+    margin: 5px;
+}
+
+.appGlm-flex-row{
+    display: flex;
+}
+
+.appGlm-flex-column{
+    display: flex;
+    flex-direction: column;
+}
+
+.appGlm-menu-title{
+    display: flex;
+    justify-content: center;
+    color: $accent;
+}
+
+.appGlm-flex-item-fill-remaining-space{
+    flex: 1 1 auto;
 }
 
 .app-toolbar {
@@ -34,8 +69,4 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     position: -webkit-sticky; /* For macOS/iOS Safari */
     top: 0; /* sticky toolbar to the top of the page */
     z-index: 1000; /* nothing overlaps the toolbar :) */
-}
-
-.flex-item-fill-remaining-space{
-    flex: 1 1 auto;
 }

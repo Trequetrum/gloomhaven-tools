@@ -1,6 +1,5 @@
 export class PartyMini {
     constructor(
-        public id: number,
-        public uriPath:string, 
+        public id: number, 
         public name:string){ }
 }

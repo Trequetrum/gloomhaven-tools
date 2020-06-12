@@ -18,7 +18,7 @@ export class HeaderComponent implements OnInit {
   charDisplayList: MenuDisplayItem[];
 
   constructor(public dialog: MatDialog, private dataService: DataMemoryService) {
-    this.campaignMinis = dataService.getCampaignMinis();
+    this.campaignMinis = dataService.campaignWithCharMinis;
 
     this.charDisplayList = new Array();
     this.charDisplayList.push(new MenuDisplayItem("Character1", false));

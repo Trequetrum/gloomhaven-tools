@@ -1,1 +1,45 @@
-<p>party works!</p>
+<div class="div-page">
+    <div class="div-md-centered-text" *ngIf="!(newParty)">
+        <div class="appGlm-flex-row">
+            <div class="appGlm-flex-column">
+                <div class="appGlm-div-rcorners appGlm-flex-column">
+                    <div class="appGlm-flex-row">
+                        <h2>{{campaign.name}}</h2>
+                        <span class="appGlm-flex-item-fill-remaining-space"> </span>
+                        <mat-icon *ngIf="campaign.edit">edit</mat-icon>
+                    </div>
+                    <button mat-raised-button color="primary" 
+                            (click)="setSingleView(GLOBAL_ACHIEVEMENTS)"
+                            class="appGlm-button-margin">
+                                Global Acheivements
+                    </button>
+                    <button mat-raised-button color="primary" 
+                            (click)="setSingleView(10)" 
+                            class="appGlm-button-margin">
+                                More about this campaign</button>
+                    <p>So much campaign - much wow!</p>
+                </div>
+                <div class="appGlm-div-rcorners">
+                    <div class="appGlm-flex-row">
+                        <h2>{{party.name}}</h2>
+                        <span class="appGlm-flex-item-fill-remaining-space"> </span>
+                        <mat-icon *ngIf="party.edit">edit</mat-icon>
+                    </div>
+                    <p>About this party</p>
+                    <p>More about this party</p>
+                    <p>So much party - much wow!</p>
+                </div>
+            </div>
+            <div class="appGlm-flex-column">
+                <!-- View Zero - if true, display global acheivements -->
+                <div *ngIf="viewSelect[GLOBAL_ACHIEVEMENTS]" class="appGlm-div-rcorners">
+                    <mat-chip-list class="mat-chip-list-stacked">
+                        <mat-chip color="primary" selectable="true">The Drake: slain</mat-chip>
+                        <mat-chip color="primary" selectable="true" disabled="true">City Rule</mat-chip>
+                    </mat-chip-list>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -14,13 +14,13 @@ import { MatListModule }            from '@angular/material/list';
 import { MatDialogModule }          from '@angular/material/dialog';
 import { MatFormFieldModule }       from '@angular/material/form-field';
 import { MatInputModule }           from '@angular/material/input';
+import {MatChipsModule}             from '@angular/material/chips';
 
 import { AppRoutingModule }         from './app-routing.module';
 import { AppComponent }             from './app.component';
 import { HeaderComponent }          from './header/header.component';
 import { HomepageComponent }        from './page/home-page/home-page.component';
 import { PageNotFoundComponent }    from './page/page-not-found/page-not-found.component';
-import { CampaignComponent }        from './page/campaign/campaign.component';
 import { InputInitiativeComponent } from './dialog/input-initiative/input-initiative.component';
 import { LogInComponent }           from './dialog/log-in/log-in.component';
 import { PlayerRefComponent } from './page/player-ref/player-ref.component';
@@ -28,6 +28,7 @@ import { CharScenarioComponent } from './page/char-scenario/char-scenario.compon
 import { CharSelectorComponent } from './sub/char-selector/char-selector.component';
 import { CharSelectorDComponent } from './dialog/char-selector-d/char-selector-d.component';
 import { PartyComponent } from './page/party/party.component';
+import { CharacterComponent } from './page/character/character.component';
 
 @NgModule({
   declarations: [
@@ -35,14 +36,14 @@ import { PartyComponent } from './page/party/party.component';
     HeaderComponent,
     HomepageComponent,
     PageNotFoundComponent,
-    CampaignComponent,
     InputInitiativeComponent,
     LogInComponent,
     PlayerRefComponent,
     CharScenarioComponent,
     CharSelectorComponent,
     CharSelectorDComponent,
-    PartyComponent
+    PartyComponent,
+    CharacterComponent
   ],
   imports: [
     FormsModule,
@@ -61,7 +62,8 @@ import { PartyComponent } from './page/party/party.component';
     MatMenuModule,
     MatDialogModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    MatChipsModule
   ],
   providers: [],
   bootstrap: [AppComponent],
