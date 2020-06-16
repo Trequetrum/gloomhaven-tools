@@ -32,12 +32,29 @@
             </div>
             <div class="appGlm-flex-column">
                 <!-- View Zero - if true, display global acheivements -->
-                <div *ngIf="viewSelect[GLOBAL_ACHIEVEMENTS]" class="appGlm-div-rcorners">
+                <div *ngIf="viewSelect[GLOBAL_ACHIEVEMENTS]" class="appGlm-div-rcorners appGlm-flex-row">
                     <mat-chip-list class="mat-chip-list-stacked">
-                        <mat-chip color="primary" selectable="true">The Drake: slain</mat-chip>
-                        <mat-chip color="primary" selectable="true" disabled="true">City Rule</mat-chip>
+                        <mat-chip color="accent" *ngFor="let achievement of globalAcheivementsOwned" selected="true">
+                            {{achievement.name}} <span *ngIf="achievement.options"> : {{achievement.options[0]}}</span>
+                            <span class="appGlm-flex-item-fill-remaining-space"> </span>
+                            <mat-icon matChipRemove>cancel</mat-icon>
+                        </mat-chip>
+
+                        
+
+
+
                     </mat-chip-list>
-                    
+                    <button mat-icon-button class="ppGlm-add-button-left-margin" style="margin-left: 40px;" [matMenuTriggerFor]="globalAcheivementsLeftMenu">
+                        <mat-icon>add_circle_outline</mat-icon>
+                    </button>
+                    <mat-menu #globalAcheivementsLeftMenu="matMenu" xPosition="before">
+                        <mat-chip-list class="mat-chip-list-stacked">
+                            <mat-chip color="accent" *ngFor="let achievement of globalAcheivementsLeft" selected="true">
+                                {{achievement.name}}<span *ngIf="achievement.options"><span *ngFor="let option of achievement.options"> : {{option}}</span></span>
+                            </mat-chip>
+                        </mat-chip-list>
+                    </mat-menu>
                 </div>
             </div>
         </div>

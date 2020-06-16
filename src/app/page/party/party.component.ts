@@ -4,6 +4,8 @@ import { DataMemoryService } from 'src/app/service/data-memory.service';
 import { Campaign } from 'src/app/model_data/campaign';
 import { Party } from 'src/app/model_data/party';
 
+import SampleJson from 'src/assets/json/achievements.json';
+
 @Component({
   selector: 'app-party',
   templateUrl: './party.component.html',
@@ -16,17 +18,38 @@ export class PartyComponent implements OnInit {
   campaign: Campaign;
   party: Party;
 
+  globalAcheivementsOwned = new Array();
+  globalAcheivementsLeft = new Array();
+  
+  partyAcheivements = SampleJson.PartyAcheivements;
+
   readonly GLOBAL_ACHIEVEMENTS = 0;
   viewSelect = new Array<boolean>(1);
 
   constructor(
     private route: ActivatedRoute, 
-    private data: DataMemoryService) { }
+    private data: DataMemoryService) { 
+    }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(
       params => this.onQueryParamChange(params)
     );
+
+    let globalAcheivements = SampleJson.GlobalAcheivements;
+    if(globalAcheivements.length > 2){
+      for(let i = 0; i < 3; i++){
+        this.globalAcheivementsOwned.push(globalAcheivements[i]);
+      }
+      for(let i = 3; i < globalAcheivements.length; i++){
+        this.globalAcheivementsLeft.push(globalAcheivements[i]);
+      }
+    }else{
+      for(let acheivement of globalAcheivements){
+        this.globalAcheivementsLeft.push(acheivement);
+      }
+    }
+
   }
   
   onQueryParamChange(params: Params){

@@ -29,6 +29,8 @@ import { CharSelectorComponent } from './sub/char-selector/char-selector.compone
 import { CharSelectorDComponent } from './dialog/char-selector-d/char-selector-d.component';
 import { PartyComponent } from './page/party/party.component';
 import { CharacterComponent } from './page/character/character.component';
+import { SelectLgAchieveChipComponent } from './dialog/select-lg-achieve-chip/select-lg-achieve-chip.component';
+import { SelectLpAchieveChipComponent } from './dialog/select-lp-achieve-chip/select-lp-achieve-chip.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +45,9 @@ import { CharacterComponent } from './page/character/character.component';
     CharSelectorComponent,
     CharSelectorDComponent,
     PartyComponent,
-    CharacterComponent
+    CharacterComponent,
+    SelectLgAchieveChipComponent,
+    SelectLpAchieveChipComponent
   ],
   imports: [
     FormsModule,
