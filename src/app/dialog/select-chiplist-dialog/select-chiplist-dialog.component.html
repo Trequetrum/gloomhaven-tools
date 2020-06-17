@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>{{dialogData.header}}</h2>
+<mat-dialog-content>
+    <p *ngIf="dialogData.subtext">{{dialogData.subtext}}</p>
+    <mat-chip-list class="mat-chip-list-stacked">
+        <mat-chip color="accent" *ngFor="let item of dialogData.ChipDialogItems" selected="true" (click)="onChipClick(item)">
+            {{item.text}}
+        </mat-chip>
+    </mat-chip-list>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-raised-button color="primary" (click)="onNoClick()">Cancel</button>
+</mat-dialog-actions>

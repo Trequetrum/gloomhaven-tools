@@ -5,6 +5,9 @@ import { Campaign } from 'src/app/model_data/campaign';
 import { Party } from 'src/app/model_data/party';
 
 import SampleJson from 'src/assets/json/achievements.json';
+import { MatDialog } from '@angular/material/dialog';
+import { SelectChiplistDialogComponent } from 'src/app/dialog/select-chiplist-dialog/select-chiplist-dialog.component';
+import { ChipDialogData, ChipDialogItem } from 'src/app/model_ui/chip-dialog-data';
 
 @Component({
   selector: 'app-party',
@@ -28,8 +31,8 @@ export class PartyComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute, 
-    private data: DataMemoryService) { 
-    }
+    private data: DataMemoryService, 
+    public dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(
@@ -69,6 +72,46 @@ export class PartyComponent implements OnInit {
     }else{
       this.paramError = true;
     }
+  }
+
+  onAddGlobalAchievements(){
+    let injectData = new ChipDialogData("Global Achievements", "Select");
+    for(let itm of this.globalAcheivementsLeft){
+      injectData.ChipDialogItems.push(new ChipDialogItem(itm.name, itm));
+    }
+    let dialogRef = this.dialog.open(SelectChiplistDialogComponent, {data: injectData});
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log("result:", result);
+      /* Remove the result from globalAcheivementsLeft and add it to globalAcheivementsOwned */
+      if(result){
+        let index = this.globalAcheivementsLeft.indexOf(result);
+        if(index > -1){
+          this.globalAcheivementsLeft.splice(index,1);
+          this.globalAcheivementsOwned.push(result);
+        }else{
+          console.log('PartyComponent.onAddGlobalAchievements() index not found. This shouldn\'t happen');
+        }
+      }else{
+        console.log('PartyComponent.onAddGlobalAchievements() dialog closed without result');
+      }
+    });
+  }
+
+  onRemoveGlobalAchievements(achievement: any){
+    /* Remove the achievement from globalAcheivementsOwned and add it to globalAcheivementsLeft */
+    if(achievement){
+      let index = this.globalAcheivementsOwned.indexOf(achievement);
+      if(index > -1){
+        this.globalAcheivementsOwned.splice(index,1);
+        this.globalAcheivementsLeft.push(achievement);
+      }else{
+        console.log('PartyComponent.onAddGlobalAchievements() index not found. This shouldn\'t happen');
+      }
+    }else{
+      console.log('PartyComponent.onRemoveGlobalAchievements() called without achievement');
+    }
+
   }
 
   setSingleView(view: number){

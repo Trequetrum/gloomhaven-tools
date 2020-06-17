@@ -37,24 +37,13 @@
                         <mat-chip color="accent" *ngFor="let achievement of globalAcheivementsOwned" selected="true">
                             {{achievement.name}} <span *ngIf="achievement.options"> : {{achievement.options[0]}}</span>
                             <span class="appGlm-flex-item-fill-remaining-space"> </span>
-                            <mat-icon matChipRemove>cancel</mat-icon>
+                            <mat-icon matChipRemove (click)="onRemoveGlobalAchievements(achievement)">cancel</mat-icon>
                         </mat-chip>
 
-                        
-
-
-
                     </mat-chip-list>
-                    <button mat-icon-button class="ppGlm-add-button-left-margin" style="margin-left: 40px;" [matMenuTriggerFor]="globalAcheivementsLeftMenu">
+                    <button mat-icon-button *ngIf="globalAcheivementsLeft.length > 0" class="ppGlm-add-button-left-margin" style="margin-left: 40px;" (click)="onAddGlobalAchievements()">
                         <mat-icon>add_circle_outline</mat-icon>
                     </button>
-                    <mat-menu #globalAcheivementsLeftMenu="matMenu" xPosition="before">
-                        <mat-chip-list class="mat-chip-list-stacked">
-                            <mat-chip color="accent" *ngFor="let achievement of globalAcheivementsLeft" selected="true">
-                                {{achievement.name}}<span *ngIf="achievement.options"><span *ngFor="let option of achievement.options"> : {{option}}</span></span>
-                            </mat-chip>
-                        </mat-chip-list>
-                    </mat-menu>
                 </div>
             </div>
         </div>

@@ -26,11 +26,9 @@ import { LogInComponent }           from './dialog/log-in/log-in.component';
 import { PlayerRefComponent } from './page/player-ref/player-ref.component';
 import { CharScenarioComponent } from './page/char-scenario/char-scenario.component';
 import { CharSelectorComponent } from './sub/char-selector/char-selector.component';
-import { CharSelectorDComponent } from './dialog/char-selector-d/char-selector-d.component';
 import { PartyComponent } from './page/party/party.component';
 import { CharacterComponent } from './page/character/character.component';
-import { SelectLgAchieveChipComponent } from './dialog/select-lg-achieve-chip/select-lg-achieve-chip.component';
-import { SelectLpAchieveChipComponent } from './dialog/select-lp-achieve-chip/select-lp-achieve-chip.component';
+import { SelectChiplistDialogComponent } from './dialog/select-chiplist-dialog/select-chiplist-dialog.component';
 
 @NgModule({
   declarations: [
@@ -43,11 +41,9 @@ import { SelectLpAchieveChipComponent } from './dialog/select-lp-achieve-chip/se
     PlayerRefComponent,
     CharScenarioComponent,
     CharSelectorComponent,
-    CharSelectorDComponent,
     PartyComponent,
     CharacterComponent,
-    SelectLgAchieveChipComponent,
-    SelectLpAchieveChipComponent
+    SelectChiplistDialogComponent
   ],
   imports: [
     FormsModule,
