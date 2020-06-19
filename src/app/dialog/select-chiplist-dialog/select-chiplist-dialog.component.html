@@ -1,11 +1,26 @@
 <h2 mat-dialog-title>{{dialogData.header}}</h2>
 <mat-dialog-content>
     <p *ngIf="dialogData.subtext">{{dialogData.subtext}}</p>
-    <mat-chip-list class="mat-chip-list-stacked">
-        <mat-chip color="accent" *ngFor="let item of dialogData.ChipDialogItems" selected="true" (click)="onChipClick(item)">
-            {{item.text}}
-        </mat-chip>
-    </mat-chip-list>
+    <mat-accordion>
+        <ng-template ngFor let-item [ngForOf]="dialogData.chipDialogItems" let-i="index">
+            <mat-expansion-panel [disabled]="!(item.subMenu.length > 0)" [(expanded)]="item.expanded">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <mat-chip color="accent" selected="true" style="width: 100%;" (click)="onChipClick(item)">
+                        {{item.text}}
+                    </mat-chip>
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <ng-template matExpansionPanelContent>
+                    <mat-chip-list class="mat-chip-list-stacked" *ngFor="let subItem of item.subMenu">
+                        <mat-chip color="accent" selected="true" (click)="onChipSubClick(subItem)">
+                            {{subItem.text}}
+                        </mat-chip>
+                    </mat-chip-list>
+                </ng-template>
+              </mat-expansion-panel>
+        </ng-template>
+    </mat-accordion>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
     <button mat-raised-button color="primary" (click)="onNoClick()">Cancel</button>

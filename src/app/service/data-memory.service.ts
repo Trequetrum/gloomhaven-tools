@@ -4,6 +4,7 @@ import { PartyMini } from '../model_data/party-mini';
 import { timer } from 'rxjs';
 import { Campaign } from '../model_data/campaign';
 import { Party } from '../model_data/party';
+import { PartyAchievement, GlobalAchievement } from '../model_data/achievement';
 
 /**
  * In a way, the data service simply needs to maintain a bunch of lists. As specific or otherwise
@@ -132,4 +133,15 @@ export class DataMemoryService {
     return null;
   }
 
+  getAchievementsByPartyId(id: number): PartyAchievement[]{
+    return new Array<PartyAchievement>();
+  }
+
+  getAchievementsByCampaignId(id: number): GlobalAchievement[]{
+    let rtn = new Array<GlobalAchievement>();
+    rtn.push(new GlobalAchievement("The Drake", true, ["Slain"], 0));
+    rtn.push(new GlobalAchievement("Artifact", true, ["Lost"], 0));
+    rtn.push(new GlobalAchievement("The Power of Enhancement", true));
+    return rtn;
+  }
 }

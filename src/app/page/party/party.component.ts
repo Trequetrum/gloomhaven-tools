@@ -4,10 +4,11 @@ import { DataMemoryService } from 'src/app/service/data-memory.service';
 import { Campaign } from 'src/app/model_data/campaign';
 import { Party } from 'src/app/model_data/party';
 
-import SampleJson from 'src/assets/json/achievements.json';
 import { MatDialog } from '@angular/material/dialog';
 import { SelectChiplistDialogComponent } from 'src/app/dialog/select-chiplist-dialog/select-chiplist-dialog.component';
-import { ChipDialogData, ChipDialogItem } from 'src/app/model_ui/chip-dialog-data';
+import { ChipDialogData, ChipDialogItem, ChipDialogSubItem } from 'src/app/model_ui/chip-dialog-data';
+import { AchievementsService } from 'src/app/service/achievements.service';
+import { GlobalAchievement } from 'src/app/model_data/achievement';
 
 @Component({
   selector: 'app-party',
@@ -21,38 +22,21 @@ export class PartyComponent implements OnInit {
   campaign: Campaign;
   party: Party;
 
-  globalAcheivementsOwned = new Array();
-  globalAcheivementsLeft = new Array();
-  
-  partyAcheivements = SampleJson.PartyAcheivements;
-
   readonly GLOBAL_ACHIEVEMENTS = 0;
   viewSelect = new Array<boolean>(1);
 
   constructor(
     private route: ActivatedRoute, 
-    private data: DataMemoryService, 
-    public dialog: MatDialog) { }
+    private data: DataMemoryService,
+    public dialog: MatDialog,
+    achievements: AchievementsService) { 
+      
+    }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(
       params => this.onQueryParamChange(params)
     );
-
-    let globalAcheivements = SampleJson.GlobalAcheivements;
-    if(globalAcheivements.length > 2){
-      for(let i = 0; i < 3; i++){
-        this.globalAcheivementsOwned.push(globalAcheivements[i]);
-      }
-      for(let i = 3; i < globalAcheivements.length; i++){
-        this.globalAcheivementsLeft.push(globalAcheivements[i]);
-      }
-    }else{
-      for(let acheivement of globalAcheivements){
-        this.globalAcheivementsLeft.push(acheivement);
-      }
-    }
-
   }
   
   onQueryParamChange(params: Params){
@@ -65,6 +49,7 @@ export class PartyComponent implements OnInit {
         this.newParty = false;
         this.campaign = this.data.getCampaignByPartyId(params.id);
         this.party = this.data.getPartyByPartyId(params.id);
+        this.achievements.setAchievementsByIds(this.campaign.id, this.party.id);
         if(!(this.campaign && this.party)){
           this.paramError = true;
         }
@@ -75,43 +60,56 @@ export class PartyComponent implements OnInit {
   }
 
   onAddGlobalAchievements(){
+    /* Collect all unearned achievements and send them to the dialog */
     let injectData = new ChipDialogData("Global Achievements", "Select");
-    for(let itm of this.globalAcheivementsLeft){
-      injectData.ChipDialogItems.push(new ChipDialogItem(itm.name, itm));
+    console.log("Iterating over global achievements: ", this.achievements.globalAchievements);
+    for(let globAcheiv of this.achievements.globalAchievements){
+      console.log("Looking at global achievement: ", globAcheiv);
+      if(!globAcheiv.earned){
+        let chipItm;
+        if(globAcheiv.options){
+          chipItm = new ChipDialogItem(globAcheiv.name, null);
+          for(let option of globAcheiv.options){
+            chipItm.subMenu.push(new ChipDialogSubItem(`: ${option}`, new GlobalAchievement(globAcheiv.name, true, [option], 0)));
+          }
+        }else{
+          chipItm = new ChipDialogItem(globAcheiv.name, new GlobalAchievement(globAcheiv.name, true));
+        }
+        if(chipItm){ /* Sanity Check, this should never fail */
+          console.log("Pushing chipItm: ", chipItm);
+          injectData.chipDialogItems.push(chipItm);
+        }
+      }
     }
+    console.log("Injecting: ", injectData);
     let dialogRef = this.dialog.open(SelectChiplistDialogComponent, {data: injectData});
 
+    /* Wait on result and deal with any newly earned achievements */
     dialogRef.afterClosed().subscribe(result => {
       console.log("result:", result);
-      /* Remove the result from globalAcheivementsLeft and add it to globalAcheivementsOwned */
-      if(result){
-        let index = this.globalAcheivementsLeft.indexOf(result);
-        if(index > -1){
-          this.globalAcheivementsLeft.splice(index,1);
-          this.globalAcheivementsOwned.push(result);
-        }else{
-          console.log('PartyComponent.onAddGlobalAchievements() index not found. This shouldn\'t happen');
-        }
+      if(result instanceof GlobalAchievement){
+        this.achievements.mergeGlobalAchievements([result]);
       }else{
         console.log('PartyComponent.onAddGlobalAchievements() dialog closed without result');
       }
     });
   }
 
-  onRemoveGlobalAchievements(achievement: any){
-    /* Remove the achievement from globalAcheivementsOwned and add it to globalAcheivementsLeft */
-    if(achievement){
-      let index = this.globalAcheivementsOwned.indexOf(achievement);
-      if(index > -1){
-        this.globalAcheivementsOwned.splice(index,1);
-        this.globalAcheivementsLeft.push(achievement);
-      }else{
-        console.log('PartyComponent.onAddGlobalAchievements() index not found. This shouldn\'t happen');
-      }
-    }else{
-      console.log('PartyComponent.onRemoveGlobalAchievements() called without achievement');
-    }
+  /**
+   * Expects to be given a reference to an achievement found in this.achievements.globalAchievements.
+   * We can use the referense directly (no lookup needed)
+   */
+  onRemoveGlobalAchievements(achievement: GlobalAchievement){
+    achievement.earned = false;
+    achievement.selectedOption = 0;
+  }
 
+  /**
+   * Expects to be given a reference to an achievement found in this.achievements.globalAchievements.
+   * We can use the referense directly (no lookup needed)
+   */
+  onChangeGlobalAchievementOption(achievement: GlobalAchievement, option: number){
+    achievement.selectedOption = option;
   }
 
   setSingleView(view: number){

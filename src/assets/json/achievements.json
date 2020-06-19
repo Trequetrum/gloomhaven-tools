@@ -1,5 +1,5 @@
 {
-    "GlobalAcheivements" : [
+    "GlobalAchievements" : [
         {
             "name":"The Drake",
             "options":[
@@ -51,7 +51,7 @@
             "name": "End of Gloom"
         }
     ],
-    "PartyAcheivements" : [
+    "PartyAchievements" : [
         "A Demon's Errand",
         "A Map to Treasure",
         "A Strongbox",

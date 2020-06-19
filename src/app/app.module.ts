@@ -14,7 +14,8 @@ import { MatListModule }            from '@angular/material/list';
 import { MatDialogModule }          from '@angular/material/dialog';
 import { MatFormFieldModule }       from '@angular/material/form-field';
 import { MatInputModule }           from '@angular/material/input';
-import {MatChipsModule}             from '@angular/material/chips';
+import { MatChipsModule }             from '@angular/material/chips';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 import { AppRoutingModule }         from './app-routing.module';
 import { AppComponent }             from './app.component';
@@ -63,7 +64,9 @@ import { SelectChiplistDialogComponent } from './dialog/select-chiplist-dialog/s
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatChipsModule
+    MatChipsModule,
+    MatExpansionModule
+    
   ],
   providers: [],
   bootstrap: [AppComponent],
