@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ChipDialogData, ChipDialogItem, ChipDialogSubItem } from 'src/app/model_ui/chip-dialog-data';
+import { ChipMenuData, ChipMenuItem, ChipSubmenuItem } from 'src/app/model_ui/chip-menu-data';
 
 @Component({
   selector: 'app-select-chiplist-dialog',
@@ -11,13 +11,13 @@ export class SelectChiplistDialogComponent implements OnInit {
 
   constructor(
     public dialogRef: MatDialogRef<SelectChiplistDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public dialogData: ChipDialogData) { 
+    @Inject(MAT_DIALOG_DATA) public dialogData: ChipMenuData) { 
   }
 
   ngOnInit(): void {
   }
 
-  onChipClick(chipData: ChipDialogItem){
+  onChipClick(chipData: ChipMenuItem){
     if(chipData.subMenu.length > 0){
       chipData.expanded = !chipData.expanded;
     }else{
@@ -25,7 +25,7 @@ export class SelectChiplistDialogComponent implements OnInit {
     }
   }
 
-  onChipSubClick(chipData: ChipDialogSubItem){
+  onChipSubClick(chipData: ChipSubmenuItem){
     this.dialogRef.close(chipData.data);
   }
 

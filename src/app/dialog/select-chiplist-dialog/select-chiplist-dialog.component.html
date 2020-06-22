@@ -2,7 +2,7 @@
 <mat-dialog-content>
     <p *ngIf="dialogData.subtext">{{dialogData.subtext}}</p>
     <mat-accordion>
-        <ng-template ngFor let-item [ngForOf]="dialogData.chipDialogItems" let-i="index">
+        <ng-template ngFor let-item [ngForOf]="dialogData.chipMenuItems" let-i="index">
             <mat-expansion-panel [disabled]="!(item.subMenu.length > 0)" [(expanded)]="item.expanded">
                 <mat-expansion-panel-header>
                   <mat-panel-title>
@@ -12,8 +12,8 @@
                   </mat-panel-title>
                 </mat-expansion-panel-header>
                 <ng-template matExpansionPanelContent>
-                    <mat-chip-list class="mat-chip-list-stacked" *ngFor="let subItem of item.subMenu">
-                        <mat-chip color="accent" selected="true" (click)="onChipSubClick(subItem)">
+                    <mat-chip-list class="mat-chip-list-stacked">
+                        <mat-chip color="accent" selected="true" (click)="onChipSubClick(subItem)" *ngFor="let subItem of item.subMenu">
                             {{subItem.text}}
                         </mat-chip>
                     </mat-chip-list>

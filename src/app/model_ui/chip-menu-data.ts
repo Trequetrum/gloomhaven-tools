@@ -1,19 +1,19 @@
-export class ChipDialogData {
+export class ChipMenuData {
     constructor(
         public header: string, 
         public subtext?: string,
-        public chipDialogItems = new Array<ChipDialogItem>()){}
+        public chipMenuItems = new Array<ChipMenuItem>()){}
 }
 
-export class ChipDialogItem{
+export class ChipMenuItem{
     constructor(
         public text:string, 
         public data?:any, 
-        public subMenu = new Array<ChipDialogSubItem>(),
+        public subMenu = new Array<ChipSubmenuItem>(),
         public expanded = false) {}
 }
 
-export class ChipDialogSubItem{
+export class ChipSubmenuItem{
     constructor(
         public text:string, 
         public data?:any){}
