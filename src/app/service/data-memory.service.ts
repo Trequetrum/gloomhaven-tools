@@ -35,6 +35,7 @@ export class DataMemoryService {
     /* Start the data service with 3 campaigns */
 
     let tmpCmpgn = new Campaign(campaignId++, false, "Campaign1");
+    this.campaignsWithChar.push(tmpCmpgn);
     let tmpPrty = new Party(partyId++, false, "PartyA");
     this.partiesInCompaignsWithChar.push(tmpPrty);
     tmpCmpgn.parties.push(tmpPrty.dev_returnMini());
@@ -44,9 +45,9 @@ export class DataMemoryService {
     tmpPrty = new Party(partyId++, false, "PartyC");
     this.partiesInCompaignsWithChar.push(tmpPrty);
     tmpCmpgn.parties.push(tmpPrty.dev_returnMini());
-    this.campaignsWithChar.push(tmpCmpgn);
 
     tmpCmpgn = new Campaign(campaignId++, false, "Campaign2");
+    this.campaignsWithChar.push(tmpCmpgn);
     tmpPrty = new Party(partyId++, false, "PartyX");
     this.partiesInCompaignsWithChar.push(tmpPrty);
     tmpCmpgn.parties.push(tmpPrty.dev_returnMini());
@@ -56,9 +57,10 @@ export class DataMemoryService {
     tmpPrty = new Party(partyId++, true, "PartyZ");
     this.partiesInCompaignsWithChar.push(tmpPrty);
     tmpCmpgn.parties.push(tmpPrty.dev_returnMini());
-    this.campaignsWithChar.push(tmpCmpgn);
+    
 
     tmpCmpgn = new Campaign(campaignId++, true, "Realm of the Ages");
+    this.campaignsWithChar.push(tmpCmpgn);
     tmpPrty = new Party(partyId++, true, "Mortar & Fire");
     this.partiesInCompaignsWithChar.push(tmpPrty);
     tmpCmpgn.parties.push(tmpPrty.dev_returnMini());
@@ -68,7 +70,12 @@ export class DataMemoryService {
     tmpPrty = new Party(partyId++, true, "Impatient Imbeciles");
     this.partiesInCompaignsWithChar.push(tmpPrty);
     tmpCmpgn.parties.push(tmpPrty.dev_returnMini());
-    this.campaignsWithChar.push(tmpCmpgn);
+    
+
+    tmpCmpgn.globalAchievements.push(new GlobalAchievement("The Drake", true, ["Slain"], 0));
+    tmpCmpgn.globalAchievements.push(new GlobalAchievement("Artifact", true, ["Lost"], 0));
+    tmpCmpgn.globalAchievements.push(new GlobalAchievement("The Power of Enhancement", true));
+
     
     /* Create our minis based off of established campaigns. Kinda backwards to how this
       will really work in the back end. Meh */
@@ -138,10 +145,27 @@ export class DataMemoryService {
   }
 
   getAchievementsByCampaignId(id: number): GlobalAchievement[]{
-    let rtn = new Array<GlobalAchievement>();
-    rtn.push(new GlobalAchievement("The Drake", true, ["Slain"], 0));
-    rtn.push(new GlobalAchievement("Artifact", true, ["Lost"], 0));
-    rtn.push(new GlobalAchievement("The Power of Enhancement", true));
-    return rtn;
+    let campg = this.getCampaignById(id);
+    return campg.globalAchievements;
+  }
+
+  setAchievementsByCampaignId(id: number, globAchieves: GlobalAchievement[]):void{
+    let campg = this.getCampaignById(id);
+    campg.globalAchievements;
+    for(let glob of globAchieves){
+      if(glob.earned){
+        let earned = false;
+        for(let globEarned of campg.globalAchievements){
+          if(glob.name == globEarned.name){
+            earned = true;
+            break;
+          }
+        }
+        if(!earned){
+          campg.globalAchievements.push(glob);
+        }
+      }
+    }
+
   }
 }

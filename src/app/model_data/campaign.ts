@@ -1,6 +1,7 @@
 import { Party } from './party';
 import { CampaignMini } from './campaign-mini';
 import { PartyMini } from './party-mini';
+import { GlobalAchievement } from './achievement';
 
 export class Campaign {
 
@@ -9,7 +10,8 @@ export class Campaign {
     constructor(
         public id?: number,
         public edit?: boolean,
-        public name?:string){}
+        public name?: string,
+        public globalAchievements = new Array<GlobalAchievement>()){}
 
     /* This is not a production-level function. It's just so that fake data is easier to
         initialize in the data-memory-service. For development use only.

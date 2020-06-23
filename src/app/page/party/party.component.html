@@ -1,68 +1,88 @@
 <div class="div-page">
-    <div class="div-md-centered-text" *ngIf="!(newParty)">
-        <div class="appGlm-flex-row">
-            <div class="appGlm-flex-column">
-                <div class="appGlm-div-rcorners appGlm-flex-column">
-                    <div class="appGlm-flex-row">
-                        <h2>{{campaign.name}}</h2>
-                        <span class="appGlm-flex-item-fill-remaining-space"> </span>
-                        <mat-icon *ngIf="campaign.edit">edit</mat-icon>
-                    </div>
-                    <button mat-raised-button color="primary" 
-                            (click)="setSingleView(GLOBAL_ACHIEVEMENTS)"
-                            class="appGlm-button-margin">
-                                Global Acheivements
-                    </button>
-                    <button mat-raised-button color="primary" 
-                            (click)="setSingleView(10)" 
-                            class="appGlm-button-margin">
-                                More about this campaign</button>
-                    <p>So much campaign - much wow!</p>
-                </div>
-                <div class="appGlm-div-rcorners">
-                    <div class="appGlm-flex-row">
-                        <h2>{{party.name}}</h2>
-                        <span class="appGlm-flex-item-fill-remaining-space"> </span>
-                        <mat-icon *ngIf="party.edit">edit</mat-icon>
-                    </div>
-                    <p>About this party</p>
-                    <p>More about this party</p>
-                    <p>So much party - much wow!</p>
-                </div>
+    <div class="div-md-centered-text appGlm-flex-column" *ngIf="!(newParty)">
+        <div class="appGlm-flex-column appGlm-div-rcorners">
+            <div class="appGlm-flex-row">
+                <h2>{{campaign.name}}</h2>
+                <span class="appGlm-flex-item-fill-remaining-space"> </span>
+                <mat-icon *ngIf="campaign.edit">edit</mat-icon>
             </div>
-            <div class="appGlm-flex-column">
-                <!-- display global acheivements that are earned-->
-                <div *ngIf="viewSelect[GLOBAL_ACHIEVEMENTS]" class="appGlm-div-rcorners appGlm-flex-row">
-                    <mat-chip-list class="mat-chip-list-stacked">
-                        <ng-template ngFor let-item [ngForOf]="globalAchievementsModel.chipMenuItems">
-                            <span *ngIf="item.data.earned">
-                                <mat-chip color="accent" selected="true" (click)="onChipClick(item)">
-                                    {{item.text}}
-                                    <span *ngIf="item.subMenu.length > 0">: {{item.data.options[item.data.selectedOption]}} </span>
-                                    <mat-icon *ngIf="item.subMenu.length > 0 && item.expanded">expand_less</mat-icon>
-                                    <mat-icon *ngIf="item.subMenu.length > 0 && !item.expanded">expand_more</mat-icon>
-                                    <span class="appGlm-flex-item-fill-remaining-space"> </span>
-                                    <mat-icon matChipRemove (click)="onRemoveGlobalAchievements(item.data)">cancel</mat-icon>
-                                </mat-chip>
-                                <mat-expansion-panel *ngIf="item.subMenu.length > 0" [(expanded)]="item.expanded">
-                                    <ng-template matExpansionPanelContent>
-                                        <mat-chip-list class="mat-chip-list-stacked">
-                                            <mat-chip color="accent" selected="true" *ngFor="let subItem of item.subMenu" (click)="onSubChipClick(item, subItem)">
-                                                {{subItem.text}}
-                                                <span class="appGlm-flex-item-fill-remaining-space"> </span>
-                                                <mat-icon>expand_less</mat-icon>
-                                            </mat-chip>
-                                        </mat-chip-list>
-                                    </ng-template>
-                                </mat-expansion-panel>
-                            </span>
-                        </ng-template>
-                    </mat-chip-list>
-                    <button mat-icon-button style="margin-left: 40px;" (click)="onAddGlobalAchievements()">
-                        <mat-icon>add_circle_outline</mat-icon>
-                    </button>
-                </div>
+
+            <mat-accordion>
+
+                <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            Global Acheivements
+                            </mat-panel-title>
+                            <mat-panel-description>
+                            Earn, Remove, Review.
+                            </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <ng-template matExpansionPanelContent>
+
+                        <div class="appGlm-flex-row">
+                            <mat-chip-list class="mat-chip-list-stacked">
+                                <ng-template ngFor let-item [ngForOf]="globalAchievementsModel.chipMenuItems">
+                                    <span *ngIf="item.data.earned">
+                                        <mat-chip color="accent" selected="true" (click)="onChipClick(item)">
+                                            {{item.text}}
+                                            <span *ngIf="item.subMenu.length > 0">: {{item.data.options[item.data.selectedOption]}} </span>
+                                            <mat-icon *ngIf="item.subMenu.length > 0 && item.expanded">expand_less</mat-icon>
+                                            <mat-icon *ngIf="item.subMenu.length > 0 && !item.expanded">expand_more</mat-icon>
+                                            <span class="appGlm-flex-item-fill-remaining-space"> </span>
+                                            <mat-icon matChipRemove (click)="onRemoveGlobalAchievements(item.data)">cancel</mat-icon>
+                                        </mat-chip>
+                                        <mat-expansion-panel *ngIf="item.subMenu.length > 0" [(expanded)]="item.expanded">
+                                            <ng-template matExpansionPanelContent>
+                                                <mat-chip-list class="mat-chip-list-stacked">
+                                                    <ng-template ngFor let-subItem [ngForOf]="item.subMenu" let-i="index">
+                                                        <mat-chip color="accent" selected="true" *ngIf="!(item.data.selectedOption == i)" (click)="onSubChipClick(item, subItem)">
+                                                            {{subItem.text}}
+                                                            <span class="appGlm-flex-item-fill-remaining-space"> </span>
+                                                            <mat-icon>expand_less</mat-icon>
+                                                        </mat-chip>
+                                                    </ng-template>
+                                                </mat-chip-list>
+                                            </ng-template>
+                                        </mat-expansion-panel>
+                                    </span>
+                                </ng-template>
+                            </mat-chip-list>
+                            <button mat-icon-button color="accent" style="margin-left: 40px;" (click)="onAddGlobalAchievements()">
+                                <mat-icon>add_circle_outline</mat-icon>
+                            </button>
+                        </div>
+
+                    </ng-template>
+                </mat-expansion-panel>
+                
+                <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            Learn More...
+                            </mat-panel-title>
+                            <mat-panel-description>
+                            Jokes!
+                            </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <ng-template matExpansionPanelContent>
+                        This the expansion 2 content
+                    </ng-template>
+                
+                </mat-expansion-panel>
+                
+            </mat-accordion>
+
+        </div>     
+        <div class="appGlm-div-rcorners appGlm-flex-column">
+            <div class="appGlm-flex-row">
+                <h2>{{party.name}}</h2>
+                <span class="appGlm-flex-item-fill-remaining-space"> </span>
+                <mat-icon *ngIf="party.edit">edit</mat-icon>
             </div>
-        </div>
+            <p>About this party</p>
+            <p>More about this party</p>
+            <p>So much party - much wow!</p>
+        </div>   
     </div>
 </div>

@@ -163,15 +163,4 @@ export class PartyComponent implements OnInit {
       }
     }
   }
-
-  setSingleView(view: number){
-    // Clear all views (set them false)
-    for(let i in this.viewSelect){
-      this.viewSelect[i] = false;
-    }
-    // Set the view we've been passed in
-    if (view < this.viewSelect.length) {
-      this.viewSelect[view] = true;
-    }
-  }
 }
