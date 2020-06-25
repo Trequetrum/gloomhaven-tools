@@ -9,6 +9,9 @@ import { GlobalAchievement, PartyAchievement } from '../model_data/achievement';
 })
 export class AchievementsService implements OnInit {
 
+  private currentPartyId: number = -1;
+  private currentGlobalId: number = -1;
+
   globalAchievements = new Array<GlobalAchievement>();
   partyAchievements = new Array<PartyAchievement>();
 
@@ -57,37 +60,62 @@ export class AchievementsService implements OnInit {
 
     /* Merge New Achievements */
     let acheived = this.data.getAchievementsByCampaignId(id);
-    this.mergeGlobalAchievements(acheived);
+    this.mergeGlobalAchievements(acheived, false);
   }
 
   setAchievementsByPartyId(id: number){
     let acheived = this.data.getAchievementsByPartyId(id);
   }
   
-  mergeGlobalAchievements(achievements: GlobalAchievement[]): void {
-    for(let itm of achievements){
-      if(itm.earned){
-        for(let achievement of this.globalAchievements){
-          if(achievement.name == itm.name){
-            achievement.earned = true;
-            if(achievement.options && itm.options){
-              if(itm.selectedOption < 0 || itm.selectedOption >= itm.options.length){
-                achievement.earned = false;
-              }else{
-                for(let i in achievement.options){
-                  if(achievement.options[i] == itm.options[itm.selectedOption]){
-                    achievement.selectedOption = +i;
-                  }
-                }
+  mergeGlobalAchievements(achievements: GlobalAchievement[], commitMerge = true): void {
+    console.log("mergeGlobalAchievements()");
+
+    // The delta and commitMerge flags tell us whether we push our change to 
+    // the backend data service
+    let delta = false;
+    for(let target of achievements){
+      for(let source of this.globalAchievements){
+
+        // Check for newly earned or removed achievements. If yes, make change and
+        // set delta true.
+        if(source.name == target.name && source.earned != target.earned){
+          source.earned = target.earned;
+          delta=true;
+        }
+
+        // If a target isn't earned, we don't bother to check the options in the source
+        if(!target.earned){
+          source.selectedOption = 0;
+        
+        // If the target is earned, we check the options for a delta
+        }else if(source.options && target.options){
+
+          // We compare the options by value rather than index since there is no
+          // connonical order on options
+          for(let i in source.options){
+            // Check for matching options regardless of index
+            if(source.options[i] == target.options[target.selectedOption]){
+
+              // Check if the match found requires the index to change, if yes
+              // set delta true
+              if(source.selectedOption != +i){
+                source.selectedOption = +i;
+                delta = true;
               }
+              break;
             }
           }
         }
       }
     }
+    // Only commit if there are changes to the source
+    if(commitMerge && delta){
+      console.log("mergeGlobalAchievements() : Commit!");
+      this.data.setAchievementsByCampaignId(this.currentGlobalId, this.globalAchievements);
+    }
   }
 
-  mergePartyAchievements(achievements: PartyAchievement[]): void {
+  mergePartyAchievements(achievements: PartyAchievement[], commitMerge = true): void {
 
   }
 }

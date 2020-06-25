@@ -151,21 +151,16 @@ export class DataMemoryService {
 
   setAchievementsByCampaignId(id: number, globAchieves: GlobalAchievement[]):void{
     let campg = this.getCampaignById(id);
-    campg.globalAchievements;
-    for(let glob of globAchieves){
-      if(glob.earned){
-        let earned = false;
-        for(let globEarned of campg.globalAchievements){
-          if(glob.name == globEarned.name){
-            earned = true;
-            break;
-          }
-        }
-        if(!earned){
-          campg.globalAchievements.push(glob);
-        }
+    
+    // Empty out the previous achievements. References to the old array are allowed
+    // (Hence why we don't use the more performant campg.globalAchievements.length = 0)
+    campg.globalAchievements = new Array<GlobalAchievement>();
+
+    // Add in target achievements if they've been earned
+    for(let target of globAchieves){
+      if(target.earned){
+        campg.globalAchievements.push(target.clone());
       }
     }
-
   }
 }
