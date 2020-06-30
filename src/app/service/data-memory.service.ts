@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CampaignMini } from '../model_data/campaign-mini';
 import { PartyMini } from '../model_data/party-mini';
-import { timer } from 'rxjs';
+import { timer, Observable } from 'rxjs';
 import { Campaign } from '../model_data/campaign';
 import { Party } from '../model_data/party';
 import { PartyAchievement, GlobalAchievement } from '../model_data/achievement';
@@ -82,85 +82,126 @@ export class DataMemoryService {
 
     this.campaignsWithChar.forEach(cmpgn =>
       this.campaignWithCharMinis.push(cmpgn.dev_returnMini()));
-
-    /******************************* <TESTING> ***************************************
-    After 10 Seconds, the backend adds campaign2 to the data service. This should be reflected in the frontend 
-    timer(10000).subscribe(val => {
-        this.campaignMinis.push(new CampaignMini(campaignId++, "Campaign2", 
-          [ new PartyMini(partyId++, "PartyA"),
-            new PartyMini(partyId++, "PartyB"),
-            new PartyMini(partyId++, "PartyC")
-          ]));
-      })
-
-    After 20 Seconds, the backend adds campaign3 to the data service. This should be reflected in the frontend 
-    timer(20000).subscribe(val => {
-        this.campaignMinis.push(new CampaignMini(campaignId++, "Realm of the Ages", 
-          [ new PartyMini(partyId++, "Mortar & Fire"),
-            new PartyMini(partyId++, "Bestial Advancers"),
-            new PartyMini(partyId++, "Impatient Imbeciles")
-          ]));
-      })
-    ******************************** </TESTING> ***************************************/
     
   }
 
   addCampaign(campaign: Campaign){
-    // Check if this user has a chracter in this campaign
+    // Check if this user has a character in this campaign
     // If yes, add it to campaignsWithChar & campaignsWithCharMini
   }
 
-  getCampaignById(id: number): Campaign{
-    for(let cmpgn of this.campaignsWithChar){
-      if(cmpgn.id == id){
-        return cmpgn;
-      }
-    }
-    return null;
+  getCampaignById(id: number): Observable<Campaign>{
+
+    return new Observable<Campaign>(observer => {
+      const timeoutId = setTimeout(() => {
+        for(let cmpgn of this.campaignsWithChar){
+          if(cmpgn.id == id){
+            observer.next(Object.assign({}, cmpgn));
+          }
+        }
+        observer.complete();
+      }, 1000);
+
+      // Unsubscribe should clear the timeout to stop execution
+      return {unsubscribe() {
+        clearTimeout(timeoutId);
+      }};
+    });
   }
 
-  getCampaignByPartyId(id: number): Campaign{
+  getCampaignByPartyId(id: number): Observable<Campaign>{
+    return new Observable<Campaign>(observer => {
+      const timeoutId = setTimeout(() => {
+        for(let cmpgn of this.campaignsWithChar){
+          for(let prty of cmpgn.parties){
+            if(prty.id == id){
+              observer.next(Object.assign({}, cmpgn));
+            }
+          }
+        }
+        observer.complete();
+      }, 1000);
 
-    for(let cmpgn of this.campaignsWithChar){
-      for(let prty of cmpgn.parties){
-        if(prty.id == id){
-          return cmpgn;
+      // Unsubscribe should clear the timeout to stop execution
+      return {unsubscribe() {
+        clearTimeout(timeoutId);
+      }};
+    });
+  }
+
+  getPartyByPartyId(id: number): Observable<Party>{
+    
+    return new Observable<Party>(observer => {
+      const timeoutId = setTimeout(() => {
+        for(let prty of this.partiesInCompaignsWithChar){
+          if(prty.id == id){
+            observer.next(Object.assign({}, prty));
+          }
+        }
+        observer.complete();
+      }, 1000);
+
+      // Unsubscribe should clear the timeout to stop execution
+      return {unsubscribe() {
+        clearTimeout(timeoutId);
+      }};
+    });
+
+  }
+
+  getAchievementsByPartyId(id: number): Observable<PartyAchievement[]>{
+    
+    return new Observable<PartyAchievement[]>(observer => {
+      const timeoutId = setTimeout(() => {
+        observer.next(new Array<PartyAchievement>());
+        observer.complete();
+      }, 1000);
+
+      // Unsubscribe should clear the timeout to stop execution
+      return {unsubscribe() {
+        clearTimeout(timeoutId);
+      }};
+    });
+
+  }
+
+  getAchievementsByCampaignId(id: number): Observable<GlobalAchievement[]>{
+
+    // Hook into getCampaignById: Observable and just emit the global achievements
+    // array contained within the returned Array.
+    return new Observable<GlobalAchievement[]>(observer => {
+      const sub = this.getCampaignById(id).subscribe({
+        next(campg){
+          const clonedGlobalAchievements = new Array<GlobalAchievement>(); 
+          campg.globalAchievements.forEach(val => clonedGlobalAchievements.push(Object.assign({}, val)));
+          observer.next(clonedGlobalAchievements);
+        },
+        complete(){
+          observer.complete();
+        }
+      });
+
+      // Unsubscribe just passes along to the getCampaignById: Observable
+      return {unsubscribe() {
+        sub.unsubscribe();
+      }};
+    });
+
+  }
+
+  setAchievementsByCampaignId(id: number, globAchieves: GlobalAchievement[]) : void{
+    const sub = this.getCampaignById(id).subscribe({
+      next(campg){
+        // Empty out the previous achievements.
+        campg.globalAchievements.length = 0;
+
+        // Add in target achievements if they've been earned
+        for(let target of globAchieves){
+          if(target.earned){
+            campg.globalAchievements.push(target.clone());
+          }
         }
       }
-    }
-    return null;
-  }
-
-  getPartyByPartyId(id: number): Party{
-    for(let prty of this.partiesInCompaignsWithChar){
-      if(prty.id == id){
-        return prty;
-      }
-    }
-    return null;
-  }
-
-  getAchievementsByPartyId(id: number): PartyAchievement[]{
-    return new Array<PartyAchievement>();
-  }
-
-  getAchievementsByCampaignId(id: number): GlobalAchievement[]{
-    let campg = this.getCampaignById(id);
-    return campg.globalAchievements;
-  }
-
-  setAchievementsByCampaignId(id: number, globAchieves: GlobalAchievement[]):void{
-    let campg = this.getCampaignById(id);
-    
-    // Empty out the previous achievements. References to the old array are allowed
-    // (Hence why we don't use the more performant campg.globalAchievements.length = 0)
-    campg.globalAchievements = new Array<GlobalAchievement>();
-
-    // Add in target achievements if they've been earned
-    for(let target of globAchieves){
-      if(target.earned){
-        campg.globalAchievements.push(target.clone());
-      }
-    }
+    });
   }
 }

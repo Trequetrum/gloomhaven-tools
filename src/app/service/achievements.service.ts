@@ -1,30 +1,29 @@
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { DataMemoryService } from './data-memory.service';
 
 import AchievementJson from 'src/assets/json/achievements.json';
 import { GlobalAchievement, PartyAchievement } from '../model_data/achievement';
+import { Observable } from 'rxjs';
 
+/********************
+ * Achievments given by the API are only those which are earned. This service parses
+ * a JSON file to make our app aware of all possible achievements. It can connect to
+ * the backend to return a list of earned AND unearned achievements. 
+ ********************/
 @Injectable({
   providedIn: 'root'
 })
-export class AchievementsService implements OnInit {
+export class AchievementsService{
 
-  private currentPartyId: number = -1;
-  private currentGlobalId: number = -1;
-
-  globalAchievements = new Array<GlobalAchievement>();
-  partyAchievements = new Array<PartyAchievement>();
+  private globalAchievements = new Array<GlobalAchievement>();
+  private partyAchievements = new Array<PartyAchievement>();
 
   constructor(private data: DataMemoryService) {
     this.parseGlobalAchievements();
     this.parsePartyAchievements();
   }
 
-  ngOnInit(): void {
-    console.log(">>>> Achievements service ngOnInit()!!!");
-  }
-
-  parseGlobalAchievements(){
+  private parseGlobalAchievements(){
     for(let achievement of AchievementJson.GlobalAchievements){
       let glob = new GlobalAchievement(achievement.name);
       if(achievement.options){
@@ -39,83 +38,88 @@ export class AchievementsService implements OnInit {
     console.log(this.globalAchievements);
   }
 
-  parsePartyAchievements(){
+  private parsePartyAchievements(){
     for(let achievement of AchievementJson.PartyAchievements){
       this.partyAchievements.push(new PartyAchievement(achievement))
     }
   }
 
-  setAchievementsByIds(campaignId: number, partyId: number){
-    this.setAchievementsByCampaignId(campaignId);
-    this.setAchievementsByPartyId(partyId);
-  }
+  getAndFillAchievementsByCampaignId(id: number): Observable<GlobalAchievement[]>{
 
-  setAchievementsByCampaignId(id: number){
+    // Hook into getCampaignById: Observable and just emit the global achievements
+    // array contained within the returned Array.
+    return new Observable<GlobalAchievement[]>(observer => {
+      const sub = this.data.getAchievementsByCampaignId(id).subscribe({
+        next(globList: GlobalAchievement[]){
+          // Clone a list of the full achievements
+          const clonedGlobalAchievements = new Array<GlobalAchievement>(); 
+          this.globalAchievements.forEach(val => clonedGlobalAchievements.push(Object.assign({}, val)));
 
-    /* Clear Previous Achievements */
-    for(let achievement of this.globalAchievements){
-      achievement.earned = false;
-      achievement.selectedOption = -1;
-    }
-
-    /* Merge New Achievements */
-    let acheived = this.data.getAchievementsByCampaignId(id);
-    this.mergeGlobalAchievements(acheived, false);
-  }
-
-  setAchievementsByPartyId(id: number){
-    let acheived = this.data.getAchievementsByPartyId(id);
-  }
-  
-  mergeGlobalAchievements(achievements: GlobalAchievement[], commitMerge = true): void {
-    console.log("mergeGlobalAchievements()");
-
-    // The delta and commitMerge flags tell us whether we push our change to 
-    // the backend data service
-    let delta = false;
-    for(let target of achievements){
-      for(let source of this.globalAchievements){
-
-        // Check for newly earned or removed achievements. If yes, make change and
-        // set delta true.
-        if(source.name == target.name && source.earned != target.earned){
-          source.earned = target.earned;
-          delta=true;
-        }
-
-        // If a target isn't earned, we don't bother to check the options in the source
-        if(!target.earned){
-          source.selectedOption = 0;
-        
-        // If the target is earned, we check the options for a delta
-        }else if(source.options && target.options){
-
-          // We compare the options by value rather than index since there is no
-          // connonical order on options
-          for(let i in source.options){
-            // Check for matching options regardless of index
-            if(source.options[i] == target.options[target.selectedOption]){
-
-              // Check if the match found requires the index to change, if yes
-              // set delta true
-              if(source.selectedOption != +i){
-                source.selectedOption = +i;
-                delta = true;
+          // Merge by setting earned and selectedOption where appropriate. 
+          for(let source of clonedGlobalAchievements){
+            for(let target of globList){
+              if(target.earned && source.name == target.name){
+                source.earned = true;
+                if(source.options){
+                  for(let i in source.options){
+                    if(source.options[i] == target.options[target.selectedOption]){
+                      source.selectedOption = +i;
+                    }
+                  }
+                }
               }
-              break;
             }
           }
+
+          observer.next(clonedGlobalAchievements);
+        },
+        complete(){
+          observer.complete();
         }
-      }
-    }
-    // Only commit if there are changes to the source
-    if(commitMerge && delta){
-      console.log("mergeGlobalAchievements() : Commit!");
-      this.data.setAchievementsByCampaignId(this.currentGlobalId, this.globalAchievements);
-    }
+      });
+
+      // Unsubscribe just passes along to the getCampaignById: Observable
+      return {unsubscribe() {
+        sub.unsubscribe();
+      }};
+    });
+
+
+    
   }
 
-  mergePartyAchievements(achievements: PartyAchievement[], commitMerge = true): void {
+  getAndFillAchievementsByPartyId(id: number) : Observable<PartyAchievement[]>{
+    let acheived = this.data.getAchievementsByPartyId(id);
+
+    return new Observable<PartyAchievement[]>(observer => {
+      const sub = this.data.getAchievementsByPartyId(id).subscribe({
+        next(partyList: PartyAchievement[]){
+          // Clone a list of the full achievements
+          const clonedPartyAchievements = new Array<PartyAchievement>(); 
+          this.partyAchievements.forEach(val => clonedPartyAchievements.push(Object.assign({}, val)));
+
+          // Merge by setting earned where appropriate. 
+          for(let source of clonedPartyAchievements){
+            for(let target of partyList){
+              if(target.earned && source.name == target.name){
+                source.earned = true;
+              }
+            }
+          }
+
+          observer.next(clonedPartyAchievements);
+        },
+        complete(){
+          observer.complete();
+        }
+      });
+
+      // Unsubscribe just passes along to the getCampaignById: Observable
+      return {unsubscribe() {
+        sub.unsubscribe();
+      }};
+    });
 
   }
+
 }

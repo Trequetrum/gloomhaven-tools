@@ -32,21 +32,12 @@ export class PartyComponent implements OnInit {
     private data: DataMemoryService,
     public dialog: MatDialog,
     public achievements: AchievementsService) {
-      /* Wrap the achievements so that we can model the opening and closing of menus.
-        This does mean that we use references to the achievments and not the array directly.
-        Altering the array in AchievementsService won't be reflected here, but 
-        altering the achievements within the array still should be.
-        
-        I'm not sure if this is the most desirable behaviour. It's not super encapsulated.
-        We can re-wrap and/or copy-wrap if needed.
-        
-        This way, though, changing the achievements for a newly selected campaign/party is
-        simple.
-        */
+      
       this.globalAchievementsModel = this.wrapGlobalAchievements(this.achievements.globalAchievements);
       for (let item of this.globalAchievementsModel.chipMenuItems){
         item.text
       }
+
     }
 
   ngOnInit(): void {
