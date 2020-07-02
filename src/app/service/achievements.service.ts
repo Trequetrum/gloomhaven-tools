@@ -50,10 +50,10 @@ export class AchievementsService{
     // array contained within the returned Array.
     return new Observable<GlobalAchievement[]>(observer => {
       const sub = this.data.getAchievementsByCampaignId(id).subscribe({
-        next(globList: GlobalAchievement[]){
+        next: (globList: GlobalAchievement[]) => {
           // Clone a list of the full achievements
           const clonedGlobalAchievements = new Array<GlobalAchievement>(); 
-          this.globalAchievements.forEach(val => clonedGlobalAchievements.push(Object.assign({}, val)));
+          this.globalAchievements.forEach(val => clonedGlobalAchievements.push(val.clone()));
 
           // Merge by setting earned and selectedOption where appropriate. 
           for(let source of clonedGlobalAchievements){
@@ -73,7 +73,7 @@ export class AchievementsService{
 
           observer.next(clonedGlobalAchievements);
         },
-        complete(){
+        complete: () => {
           observer.complete();
         }
       });
@@ -93,10 +93,10 @@ export class AchievementsService{
 
     return new Observable<PartyAchievement[]>(observer => {
       const sub = this.data.getAchievementsByPartyId(id).subscribe({
-        next(partyList: PartyAchievement[]){
+        next: (partyList: PartyAchievement[]) => {
           // Clone a list of the full achievements
           const clonedPartyAchievements = new Array<PartyAchievement>(); 
-          this.partyAchievements.forEach(val => clonedPartyAchievements.push(Object.assign({}, val)));
+          this.partyAchievements.forEach(val => clonedPartyAchievements.push(val.clone()));
 
           // Merge by setting earned where appropriate. 
           for(let source of clonedPartyAchievements){
@@ -109,7 +109,7 @@ export class AchievementsService{
 
           observer.next(clonedPartyAchievements);
         },
-        complete(){
+        complete: () => {
           observer.complete();
         }
       });

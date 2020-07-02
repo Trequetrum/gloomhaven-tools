@@ -7,6 +7,13 @@ export class Party {
         public edit: boolean,
         public name:string){ }
     
+    clone(): Party{
+        return new Party(
+            this.id, 
+            this.edit, 
+            this.name
+        );
+    }
     dev_returnMini(): PartyMini{
         return new PartyMini(this.id, this.name);
     }

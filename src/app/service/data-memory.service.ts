@@ -96,7 +96,7 @@ export class DataMemoryService {
       const timeoutId = setTimeout(() => {
         for(let cmpgn of this.campaignsWithChar){
           if(cmpgn.id == id){
-            observer.next(Object.assign({}, cmpgn));
+            observer.next(cmpgn.clone());
           }
         }
         observer.complete();
@@ -115,7 +115,7 @@ export class DataMemoryService {
         for(let cmpgn of this.campaignsWithChar){
           for(let prty of cmpgn.parties){
             if(prty.id == id){
-              observer.next(Object.assign({}, cmpgn));
+              observer.next(cmpgn.clone());
             }
           }
         }
@@ -129,13 +129,13 @@ export class DataMemoryService {
     });
   }
 
-  getPartyByPartyId(id: number): Observable<Party>{
+  getPartyById(id: number): Observable<Party>{
     
     return new Observable<Party>(observer => {
       const timeoutId = setTimeout(() => {
         for(let prty of this.partiesInCompaignsWithChar){
           if(prty.id == id){
-            observer.next(Object.assign({}, prty));
+            observer.next(prty.clone());
           }
         }
         observer.complete();
@@ -171,12 +171,12 @@ export class DataMemoryService {
     // array contained within the returned Array.
     return new Observable<GlobalAchievement[]>(observer => {
       const sub = this.getCampaignById(id).subscribe({
-        next(campg){
-          const clonedGlobalAchievements = new Array<GlobalAchievement>(); 
-          campg.globalAchievements.forEach(val => clonedGlobalAchievements.push(Object.assign({}, val)));
+        next: (campg) => {
+          const clonedGlobalAchievements = new Array<GlobalAchievement>();
+          campg.globalAchievements.forEach(val => clonedGlobalAchievements.push(val.clone()));
           observer.next(clonedGlobalAchievements);
         },
-        complete(){
+        complete: () => {
           observer.complete();
         }
       });
@@ -191,7 +191,7 @@ export class DataMemoryService {
 
   setAchievementsByCampaignId(id: number, globAchieves: GlobalAchievement[]) : void{
     const sub = this.getCampaignById(id).subscribe({
-      next(campg){
+      next: (campg) => {
         // Empty out the previous achievements.
         campg.globalAchievements.length = 0;
 

@@ -7,7 +7,7 @@ export class GlobalAchievement {
     ){}
 
     clone(): GlobalAchievement{
-        return Object.assign({}, this);
+        return new GlobalAchievement(this.name, this.earned, this.options, this.selectedOption);
     }
 }
 
@@ -18,6 +18,6 @@ export class PartyAchievement {
     ){}
 
     clone(): PartyAchievement{
-        return Object.assign({}, this);
+        return new PartyAchievement(this.name, this.earned);
     }
 }

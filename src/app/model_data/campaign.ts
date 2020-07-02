@@ -5,13 +5,22 @@ import { GlobalAchievement } from './achievement';
 
 export class Campaign {
 
-    public parties = new Array<PartyMini>()
-
     constructor(
         public id?: number,
         public edit?: boolean,
         public name?: string,
-        public globalAchievements = new Array<GlobalAchievement>()){}
+        public globalAchievements = new Array<GlobalAchievement>(),
+        public parties = new Array<PartyMini>()){}
+
+    clone(): Campaign{
+        return new Campaign(
+            this.id, 
+            this.edit, 
+            this.name, 
+            this.globalAchievements, 
+            this.parties
+        );
+    }
 
     /* This is not a production-level function. It's just so that fake data is easier to
         initialize in the data-memory-service. For development use only.

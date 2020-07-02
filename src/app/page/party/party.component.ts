@@ -18,27 +18,19 @@ import { GlobalAchievement } from 'src/app/model_data/achievement';
 export class PartyComponent implements OnInit {
 
   paramError = false;
-  newParty: boolean;
+  dataLoaded = false;
+  newParty = false;
   campaign: Campaign;
   party: Party;
 
   globalAchievementsModel: ChipMenuData;
-
-  readonly GLOBAL_ACHIEVEMENTS = 0;
-  viewSelect = new Array<boolean>(1);
+  globalAchievements: GlobalAchievement[];
 
   constructor(
     private route: ActivatedRoute, 
     private data: DataMemoryService,
-    public dialog: MatDialog,
-    public achievements: AchievementsService) {
-      
-      this.globalAchievementsModel = this.wrapGlobalAchievements(this.achievements.globalAchievements);
-      for (let item of this.globalAchievementsModel.chipMenuItems){
-        item.text
-      }
-
-    }
+    private dataAchieve: AchievementsService,
+    public dialog: MatDialog){}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(
@@ -47,28 +39,68 @@ export class PartyComponent implements OnInit {
   }
   
   /**
+   * IMPURE
+   * 
    * Params sent in give us a party id. We can use that to grab the relevant campaign
    * and display all the needed information.
    * @param params 
    */
   onQueryParamChange(params: Params){
+    this.dataLoaded = false;
+
+    let partyLoaded = false;
+    let campaignLoaded = false;
+    let achievementsLoaded = false;
+
+    const checkIfLoaded = () => {
+      if(partyLoaded && campaignLoaded && achievementsLoaded){
+        this.dataLoaded = true;
+      }
+    }
+
     if(params.id){
       if(params.id < 0){
         this.newParty = true;
       }else{
         this.newParty = false;
-        this.campaign = this.data.getCampaignByPartyId(params.id);
-        this.party = this.data.getPartyByPartyId(params.id);
-        this.achievements.setAchievementsByIds(this.campaign.id, this.party.id);
-        if(!(this.campaign && this.party)){
-          this.paramError = true;
+
+        this.data.getPartyById(params.id).subscribe({
+          next: prty => {
+            this.party = prty;
+            partyLoaded = true;
+          },
+          complete: checkIfLoaded
+        });
+
+        const achievementsObserver = {
+          next: (globList: GlobalAchievement[]) => {
+            this.globalAchievements = globList;
+            this.globalAchievementsModel = this.wrapGlobalAchievements(globList);
+            achievementsLoaded = true;
+          },
+          complete: checkIfLoaded
         }
+
+        this.data.getCampaignByPartyId(params.id).subscribe({
+          next: campg => {
+            this.campaign = campg;
+            campaignLoaded = true;
+            this.dataAchieve.getAndFillAchievementsByCampaignId(campg.id)
+              .subscribe(achievementsObserver);
+          },
+          complete: checkIfLoaded
+        });
       }
     }else{
       this.paramError = true;
     }
   }
 
+  /***
+   * PURE
+   * 
+   * Take a list of GlobalAchiements and transform them into the data structure we use to display them in a menu.
+   ***/
   wrapGlobalAchievements(globList: Array<GlobalAchievement>): ChipMenuData{
     let result = new ChipMenuData("Global Achievements Earned");
     
@@ -88,7 +120,7 @@ export class PartyComponent implements OnInit {
 
   onAddGlobalAchievements(){
     /* Collect all unearned achievements and send them to the dialog */
-    let injectData = new ChipMenuData("Global Achievements", "Select");
+    const injectData = new ChipMenuData("Global Achievements", "Select");
 
     for(let chipMenuItem of this.globalAchievementsModel.chipMenuItems){
       if(chipMenuItem.data instanceof GlobalAchievement){
@@ -99,12 +131,10 @@ export class PartyComponent implements OnInit {
         }
       }
     }
-    let dialogRef = this.dialog.open(SelectChiplistDialogComponent, {data: injectData});
+    const dialogRef = this.dialog.open(SelectChiplistDialogComponent, {data: injectData});
 
     // Wait on result and deal with any newly earned achievements
     dialogRef.afterClosed().subscribe(result => {
-      console.log("result:", result);
-
       // We're sharing a model with the dialog that just closed, so expanded items
       // in the dialog will be expanded here. We don't want that, so instead of 
       // separating the models, we just close the menus
@@ -116,9 +146,11 @@ export class PartyComponent implements OnInit {
       if(result){
         if(result instanceof GlobalAchievement){
           result.earned = true;
+          this.data.setAchievementsByCampaignId(this.campaign.id, this.globalAchievements);
         }else if(result.achievement instanceof GlobalAchievement){
           result.achievement.earned = true;
           result.achievement.selectedOption = result.selected;
+          this.data.setAchievementsByCampaignId(this.campaign.id, this.globalAchievements);
         }else{
           // If there's a result, it shouldn't make it here.
           const error = "Unrecognised result from dialogRef.afterClosed() in PartyComponent.onAddGlobalAchievements()";
