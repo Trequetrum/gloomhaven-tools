@@ -183,6 +183,7 @@ export class PartyComponent implements OnInit {
     if(subItem.data){
       if(subItem.data.selected){
         subItem.data.achievement.selectedOption = subItem.data.selected;
+        this.data.setAchievementsByCampaignId(this.campaign.id, this.globalAchievements);
       }
     }
   }

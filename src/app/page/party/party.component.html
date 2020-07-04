@@ -1,5 +1,5 @@
 <div class="div-page" *ngIf="!dataLoaded">
-    <div class="div-md-centered-text">
+    <div class="div-md-centered-text" style="margin-top: 50px;">
         <mat-spinner></mat-spinner>
     </div>
 </div>
@@ -24,7 +24,6 @@
                             </mat-panel-description>
                     </mat-expansion-panel-header>
                     <ng-template matExpansionPanelContent>
-
                         <div class="appGlm-flex-row">
                             <mat-chip-list class="mat-chip-list-stacked">
                                 <ng-template ngFor let-item [ngForOf]="globalAchievementsModel.chipMenuItems">
@@ -57,7 +56,6 @@
                                 <mat-icon>add_circle_outline</mat-icon>
                             </button>
                         </div>
-
                     </ng-template>
                 </mat-expansion-panel>
                 
