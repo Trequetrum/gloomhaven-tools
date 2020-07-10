@@ -43,10 +43,10 @@ export class GooglePickerComponent {
     let src;
     if (authResult && !authResult.error) {
       if (authResult.access_token) {
-        let view = new google.picker.View(google.picker.ViewId.DOCS);
+        const view = new google.picker.View(google.picker.ViewId.DOCS);
         view.setMimeTypes("image/png,image/jpeg,image/jpg,video/mp4");
-        let pickerBuilder = new google.picker.PickerBuilder();
-        let picker = pickerBuilder.
+        const pickerBuilder = new google.picker.PickerBuilder();
+        const picker = pickerBuilder.
           enableFeature(google.picker.Feature.NAV_HIDDEN).
           setOAuthToken(authResult.access_token).
           addView(view).
