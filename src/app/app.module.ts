@@ -31,6 +31,7 @@ import { CharSelectorComponent } from './sub/char-selector/char-selector.compone
 import { PartyComponent } from './page/party/party.component';
 import { CharacterComponent } from './page/character/character.component';
 import { SelectChiplistDialogComponent } from './dialog/select-chiplist-dialog/select-chiplist-dialog.component';
+import { GooglePickerComponent } from './sub/google-picker/google-picker.component';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { SelectChiplistDialogComponent } from './dialog/select-chiplist-dialog/s
     CharSelectorComponent,
     PartyComponent,
     CharacterComponent,
-    SelectChiplistDialogComponent
+    SelectChiplistDialogComponent,
+    GooglePickerComponent
   ],
   imports: [
     FormsModule,
