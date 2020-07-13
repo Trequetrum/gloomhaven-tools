@@ -32,6 +32,7 @@ import { PartyComponent } from './page/party/party.component';
 import { CharacterComponent } from './page/character/character.component';
 import { SelectChiplistDialogComponent } from './dialog/select-chiplist-dialog/select-chiplist-dialog.component';
 import { GooglePickerComponent } from './sub/google-picker/google-picker.component';
+import { GoogleOauth2Component } from './sub/google-oauth2/google-oauth2.component';
 
 @NgModule({
   declarations: [
@@ -47,7 +48,8 @@ import { GooglePickerComponent } from './sub/google-picker/google-picker.compone
     PartyComponent,
     CharacterComponent,
     SelectChiplistDialogComponent,
-    GooglePickerComponent
+    GooglePickerComponent,
+    GoogleOauth2Component
   ],
   imports: [
     FormsModule,

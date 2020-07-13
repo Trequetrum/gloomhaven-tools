@@ -1,21 +1,54 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
 
 declare var gapi: any;
+/*
 declare var google: any;
+*/
 
 @Component({
   selector: 'app-google-picker',
   templateUrl: './google-picker.component.html',
   styleUrls: ['./google-picker.component.scss']
 })
-export class GooglePickerComponent {
+export class GooglePickerComponent implements OnInit {
 
+  pickerApiLoaded = false;
+
+  constructor(private oauthService: GoogleOauth2Service){}
+
+  ngOnInit(): void {
+    // Use the API Loader script to load google.picker
+    gapi.load('picker', this.onPickerApiLoad)
+  }
+
+  onPickerApiLoad(){
+    this.pickerApiLoaded = true;
+  }
+
+  loadGooglePicker() {
+    const oauthToken = this.oauthService.getOauthToken();
+    console.log(">>>> LOAD CALLED");
+    /*
+    if (this.pickerApiLoaded && oauthToken) {
+      var picker = new google.picker.PickerBuilder().
+          addView(google.picker.ViewId.DOCS).
+          setOAuthToken(oauthToken).
+          setDeveloperKey(developerKey).
+          setCallback(pickerCallback).
+          build();
+      picker.setVisible(true);
+    }
+    */
+  }
+
+  /*
   developerKey = 'AIzaSyA-vosulPclQhvWAjkpN4QVodMmwrtUC2g';
   clientId = '321669051884-gr3ctck8nouph8c3cithdte3kgp1j0iq.apps.googleusercontent.com'
   scope = [
     'profile',
     'email',
-    'https://www.googleapis.com/auth/drive.file' //insert scope here
+    'https://www.googleapis.com/auth/drive.file'
   ].join(' ');
   pickerApiLoaded = false;
   oauthToken?: any;
@@ -40,11 +73,13 @@ export class GooglePickerComponent {
   }
 
   handleAuthResult(authResult) {
+    console.log(authResult);
     let src;
     if (authResult && !authResult.error) {
       if (authResult.access_token) {
         const view = new google.picker.View(google.picker.ViewId.DOCS);
-        view.setMimeTypes("image/png,image/jpeg,image/jpg,video/mp4");
+        view.setMimeTypes("application/json");
+        view.setQuery("gloomtools.json");
         const pickerBuilder = new google.picker.PickerBuilder();
         const picker = pickerBuilder.
           enableFeature(google.picker.Feature.NAV_HIDDEN).
@@ -63,5 +98,5 @@ export class GooglePickerComponent {
       }
     }
   }
-
+  */
 }
