@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
 
 declare var gapi: any;
-/*
 declare var google: any;
-*/
+
 
 @Component({
   selector: 'app-google-picker',
@@ -18,28 +17,51 @@ export class GooglePickerComponent implements OnInit {
   constructor(private oauthService: GoogleOauth2Service){}
 
   ngOnInit(): void {
+    console.log("ngOnInit() pickerApiLoaded: ", this.pickerApiLoaded);
     // Use the API Loader script to load google.picker
-    gapi.load('picker', this.onPickerApiLoad)
+    gapi.load('picker', () => this.onPickerApiLoad());
   }
 
   onPickerApiLoad(){
+    console.log("pickerApiLoaded: ", this.pickerApiLoaded);
     this.pickerApiLoaded = true;
+    console.log("pickerApiLoaded: ", this.pickerApiLoaded);
+  }
+
+  signOut(){
+    this.oauthService.signOut();
+  }
+
+  revokeAccess(){
+    this.oauthService.revokeAccess();
   }
 
   loadGooglePicker() {
-    const oauthToken = this.oauthService.getOauthToken();
+    this.oauthService.getOauthToken().subscribe({
+      next: (oauthToken) => {
+        console.log(oauthToken);
+        this.loadGooglePicker_helper(oauthToken);
+      },
+      complete: () => {/* Do nothing */},
+      error: (errorObj) => console.log(errorObj)
+    });
     console.log(">>>> LOAD CALLED");
-    /*
+  }
+
+  loadGooglePicker_helper(oauthToken: string){
+    console.log(this.pickerApiLoaded, oauthToken);
+
     if (this.pickerApiLoaded && oauthToken) {
       var picker = new google.picker.PickerBuilder().
           addView(google.picker.ViewId.DOCS).
           setOAuthToken(oauthToken).
-          setDeveloperKey(developerKey).
-          setCallback(pickerCallback).
+          setDeveloperKey(this.oauthService.developerKey).
+          setCallback(() => {
+            console.log("Hello! Google Picker Callback");
+          }).
           build();
       picker.setVisible(true);
     }
-    */
   }
 
   /*
