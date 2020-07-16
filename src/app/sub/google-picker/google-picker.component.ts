@@ -28,6 +28,14 @@ export class GooglePickerComponent implements OnInit {
     console.log("pickerApiLoaded: ", this.pickerApiLoaded);
   }
 
+  getUserObj(){
+    this.oauthService.getUserName().subscribe({
+      next: userName => {
+        console.log("UserName: ", userName);
+      }
+    });
+  }
+
   signOut(){
     this.oauthService.signOut();
   }

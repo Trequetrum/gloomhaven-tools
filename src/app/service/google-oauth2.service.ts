@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
+
 import { Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 declare var gapi: any;
 
@@ -19,42 +21,68 @@ export class GoogleOauth2Service {
 
   // This flag is for both the client and auth2 api as well as client initialization
   apiLoaded = false;
-  isAuthorized = false;
+
+  // Our OAuth flow should come with the scope we need. So we don't separate signin from
+  // scope auth. If we start needing more scopes, we'll need a new way to handle that.
+  // For now, if the user signs in and denies us the 'drive.file' scope, we just pass that 
+  // error forward any time the user attempts to use those features
+  isSignedIn = false;
+
+  // currentUserName gets updated as user signs in and signs out.
+  currentUserName = "";
 
   constructor() {
 
   }
 
+  /***
+   * Load the google api auth2 and client libraries, then initialize the client.
+   * Google-auth service will load the client if/when it needs it, so this function
+   * likely never needs to be called externally.
+   * 
+   * If initClient() is called early to speed up later calls, make sure that GAPI
+   * (Google Api "https://apis.google.com/js/api.js") is loaded first.
+   */
   initClient(): Observable<boolean>{
     return new Observable<boolean>(observer => {
       // We can't cancel gapi promises, but we can supress the response if we want
       let notify = true;
 
-      // gapi.load returns a promise. Initialize client once loaded then
-      // sign in once client is initialized. 
-      gapi.load('client:auth2', () => {
-        // Load the client
-        gapi.client.init({
-          'apiKey': this.developerKey,
-          'clientId': this.clientId,
-          'discoveryDocs': this.discoveryDocs,
-          'scope': this.scopes
-        }).then(() => {
-          // Client and auth2 api are loaded and client Api is initialized
-          this.apiLoaded = true;
+      // loading libraries fails if gapi isn't loaded
+      if(!gapi){
+        let errorString = "Error: GAPI isn't loaded";
+        console.log(errorString);
+        observer.error(errorString);
+        
+      }else{
 
-          // Listen for sign-in state changes.
-          gapi.auth2.getAuthInstance().isSignedIn.listen(isSignedIn => this.updateSigninStatus(isSignedIn));
-          // Handle the initial sign-in state.
-          this.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-          // Emit completion if not supressed
-          if(notify) observer.complete();
-        }, (error) => {
-          // Emit error if not supressed
-          if(notify) observer.error(error);
+        // gapi.load returns a promise. Initialize client once loaded
+        gapi.load('client:auth2', () => {
+          // Load the client
+          gapi.client.init({
+            'apiKey': this.developerKey,
+            'clientId': this.clientId,
+            'discoveryDocs': this.discoveryDocs,
+            'scope': this.scopes
+          }).then(() => {
+            // Client and auth2 api are loaded and client Api is initialized
+            this.apiLoaded = true;
+
+            // Listen for sign-in state changes.
+            gapi.auth2.getAuthInstance().isSignedIn.listen(isSignedIn => this.updateSigninStatus(isSignedIn));
+            // Handle the initial sign-in state.
+            this.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+            // Emit completion if not supressed
+            if(notify) observer.complete();
+          }, (error) => {
+            // Emit error if not supressed
+            if(notify) observer.error(error);
+          });
         });
-      });
-     
+
+
+
+      }
       // The subscribe() call returns a Subscription object that has an unsubscribe() 
       // method, which you call to stop receiving notifications.
       return {unsubscribe() {
@@ -65,15 +93,26 @@ export class GoogleOauth2Service {
     });
   }
 
+  /***
+   * Tracks whether the current user is signedIn
+   */
   updateSigninStatus(isSignedIn) {
+    // this.isSignedIn = isSignedIn
     if (isSignedIn) {
-      this.isAuthorized = true;
+      console.log(this.isSignedIn, this.currentUserName);
+      this.isSignedIn = true;
+      this.currentUserName = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName();
+      console.log(this.isSignedIn, this.currentUserName);
     } else {
-      this.isAuthorized = false;
+      this.isSignedIn = false;
+      this.currentUserName = "";
     }
   }
 
-
+  /****
+   * Retrieve an Oauth Instance for the current user. Load APIs
+   * and/or initialize OAuth flow if nessesary.
+   */
   getOauthInstance(): Observable<any>{
     return new Observable<any>(observer => {
 
@@ -86,7 +125,7 @@ export class GoogleOauth2Service {
         console.log(errorString);
         observer.error(errorString);
       } else if(this.apiLoaded){
-        if(this.isAuthorized){
+        if(this.isSignedIn){
           // Easiest Scenario. We're ready to go, so just emit an AuthInstance
           if(notify){
             observer.next(gapi.auth2.getAuthInstance());
@@ -126,7 +165,7 @@ export class GoogleOauth2Service {
         });
       }
       return {unsubscribe() {
-        // GAPI doesn't really have 'unsubscribe,' so the best we can do is supress our observable(s)
+        // GAPI doesn't really have 'unsubscribe,' so the best we can do is supress our observable
         if(clientInitSubscription) clientInitSubscription.unsubscribe();
         notify = false;
       }};
@@ -134,27 +173,37 @@ export class GoogleOauth2Service {
     });
   }
 
-  // Call to get an authInstance and then extract the token.
+  /***
+   * Get a Google OAuth token for the current user. Calls getOauthInstance() first,
+   * which starts Auth2 flow if not signedIn.
+   */
   getOauthToken(): Observable<any>{
     // return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token
-
-    return new Observable<string>(observer => {
-      const oauthSubscription = this.getOauthInstance().subscribe({
-        next: (oauthInstance) => observer.next(oauthInstance.currentUser.get().getAuthResponse().access_token),
-        complete: () => observer.complete(),
-        error: (errorObj) => observer.error(errorObj)
-      });
-
-      return {unsubscribe() {
-        oauthSubscription.unsubscribe();
-      }};
-    });
+    return this.getOauthInstance().pipe(
+      map(oauthInstance => oauthInstance.currentUser.get().getAuthResponse().access_token)
+    );
   }
 
-  // Signs the user out of our app, but doesn't revoke our app's access
+  /***
+   * Get a Google user info for the current user. Calls getOauthInstance() first,
+   * which starts Auth2 flow if not signedIn.
+   */
+  getUserName(): Observable<string>{
+    // return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName()
+
+    return this.getOauthInstance().pipe(
+      map(oauthInstance => oauthInstance.currentUser.get().getBasicProfile().getGivenName())
+    );
+  }
+
+  /***
+   * If the user is signed in, then signs the user out of our app. 
+   * This doesn't revoke our app's access, which should remain the
+   * next time this user opts to log in.
+   */ 
   signOut(): void{
     // oauthInstance.signOut();
-    if(this.isAuthorized){
+    if(this.isSignedIn){
       this.getOauthInstance().subscribe({
         next: (oauthInstance) => oauthInstance.signOut(),
         error: (errorObj) => console.log(errorObj)
@@ -162,11 +211,17 @@ export class GoogleOauth2Service {
     }
   }
 
-  // After this is called, the user should be asked anew 
-  // if they want to grant us access to the defined scopes
+  /***
+   * If the user is signed in, then this signs the user out of our app. 
+   * This also revoke our app's access. The user should be asked anew 
+   * if they want to grant us access to the defined scopes.
+   * 
+   * User can do this for themselves via their google account, so this
+   * may be a 'feature' relegated to development and for testing.
+   */ 
   revokeAccess(): void {
     // oauthInstance.disconnect();
-    if(this.isAuthorized){
+    if(this.isSignedIn){
       this.getOauthInstance().subscribe({
         next: (oauthInstance) => oauthInstance.disconnect(),
         error: (errorObj) => console.log(errorObj)

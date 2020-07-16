@@ -5,6 +5,7 @@ import { MenuDisplayItem } from '../model_ui/menu-display-item';
 import { DataMemoryService } from '../service/data-memory.service';
 import { CampaignMini } from '../model_data/campaign-mini';
 import { PartyMini } from '../model_data/party-mini';
+import { GoogleOauth2Service } from '../service/google-oauth2.service';
 
 
 @Component({
@@ -17,7 +18,11 @@ export class HeaderComponent implements OnInit {
   campaignMinis: CampaignMini[];
   charDisplayList: MenuDisplayItem[];
 
-  constructor(public dialog: MatDialog, private dataService: DataMemoryService) {
+  constructor(
+    public dialog: MatDialog, 
+    public authService: GoogleOauth2Service,
+    private dataService: DataMemoryService
+  ) {
     this.campaignMinis = dataService.campaignWithCharMinis;
 
     this.charDisplayList = new Array();
