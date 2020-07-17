@@ -11,12 +11,12 @@ declare var gapi: any;
 export class GoogleOauth2Service {
 
   developerKey = 'AIzaSyA-vosulPclQhvWAjkpN4QVodMmwrtUC2g';
-  clientId = '321669051884-gr3ctck8nouph8c3cithdte3kgp1j0iq.apps.googleusercontent.com'
+  clientId = '321669051884-gr3ctck8nouph8c3cithdte3kgp1j0iq.apps.googleusercontent.com';
+  appId = "321669051884";
   scopes = [
     'profile',
     'email',
-    'https://www.googleapis.com/auth/drive.file',
-    'https://www.googleapis.com/auth/drive.readonly'
+    'https://www.googleapis.com/auth/drive.file'
   ].join(' ');
   discoveryDocs = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
 

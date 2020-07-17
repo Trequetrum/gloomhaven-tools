@@ -46,6 +46,7 @@ export class GooglePickerService {
           const picker = pickerBuilder
             /*.enableFeature(google.picker.Feature.NAV_HIDDEN)*/
             .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+            .setAppId(this.oauthService.appId)
             .setOAuthToken(oauthToken)
             .addView(view)
             .addView(new google.picker.DocsUploadView())
