@@ -15,7 +15,8 @@ export class GoogleOauth2Service {
   scopes = [
     'profile',
     'email',
-    'https://www.googleapis.com/auth/drive.file'
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/drive.readonly'
   ].join(' ');
   discoveryDocs = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
 
@@ -115,7 +116,6 @@ export class GoogleOauth2Service {
    */
   getOauthInstance(): Observable<any>{
     return new Observable<any>(observer => {
-
       let notify = true;
       let clientInitSubscription: Subscription;
 
@@ -185,7 +185,7 @@ export class GoogleOauth2Service {
   }
 
   /***
-   * Get a Google user info for the current user. Calls getOauthInstance() first,
+   * Get a Google user name for the current user. Calls getOauthInstance() first,
    * which starts Auth2 flow if not signedIn.
    */
   getUserName(): Observable<string>{
