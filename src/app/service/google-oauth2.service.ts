@@ -100,10 +100,8 @@ export class GoogleOauth2Service {
   updateSigninStatus(isSignedIn) {
     // this.isSignedIn = isSignedIn
     if (isSignedIn) {
-      console.log(this.isSignedIn, this.currentUserName);
       this.isSignedIn = true;
       this.currentUserName = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName();
-      console.log(this.isSignedIn, this.currentUserName);
     } else {
       this.isSignedIn = false;
       this.currentUserName = "";

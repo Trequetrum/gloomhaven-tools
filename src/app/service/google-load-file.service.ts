@@ -10,7 +10,6 @@ declare var google: any;
 })
 export class GoogleLoadFileService {
 
-  hello = "Hi Here";
   documents = new Map<string, any>();
 
   constructor(
@@ -33,33 +32,79 @@ export class GoogleLoadFileService {
       gapi.client.drive.files.get({
         fileId: docID,
         alt: 'media'
-      }).then(function(success){
-        console.log("HEHEHEHE", success); //the link is in the success.result object
-        //success.result    
-      }, function(fail){
-        console.log("HaHaHaHa", fail);
-        console.log('Error '+ fail.result.error.message);
-      })
+      }).then(success => {
+        console.log("success: ", success); //the link is in the success.result object
+        console.log("success.body: ", success.body);    
+      }, fail => {
+        console.log("Error: ", fail);
+        console.log('Error Message: '+ fail.result.error.message);
+      });
     }
     // If a user is loading this doc again, maybe there's an update we missed?
     else{
-      // TODO: Check doc for update mechanism
+      // TODO: Doc update mechanism
     }
-  } 
+  }
+
+  createNewJsonDocument(): void{
+
+    const testObj = {
+      "Campaign": {
+        "Name": "testing campaign",
+        "GlobalAchievements": [
+          "One",
+          "Two",
+          "Three"
+        ],
+        "Parties": [{
+          "Name": "testing party 1"
+        },{
+          "Name": "testing party 2"
+        }]
+      }
+    };
+
+    console.log("JSON.stringify(testObj): ", JSON.stringify(testObj));
+
+    const fileMetaData = {
+      'name': "newJsonDocument-gloomtools.json",
+      'mimeType': "application/json",
+      'title': "newJsonDocument-gloomtools.json"
+    };
+    const media = {
+      'mimeType': "application/json",
+      'body': JSON.stringify(testObj)
+    };
+
+    gapi.client.drive.files.create({
+      'resource': fileMetaData,
+      'media': media,
+      'fields': 'id'
+    }).then(response => {
+      console.log("Here Here Here Here");
+      console.log("response: ", response);
+    });
+
+    console.log("Did my create call");
+  }
 
   listAllAccessableFiles(){
-    gapi.client.drive.files.list({
-      'fields': "files(name, id)",
-    }).then((response) => {
-      const files = response.result.files;
-      if (files && files.length > 0) {
-        for (var i = 0; i < files.length; i++) {
-          console.log(files[i]);
+    if(this.oauthService.apiLoaded){
+      gapi.client.drive.files.list({
+        'fields': "files(name, id)",
+      }).then(response => {
+        const files = response.result.files;
+        if (files && files.length > 0) {
+          for (var i = 0; i < files.length; i++) {
+            console.log(files[i].name, files[i].id);
+          }
+        } else {
+          console.log('No files found.');
         }
-      } else {
-        console.log('No files found.');
-      }
-    });
+      });
+    } else {
+      console.log('No User; No files found.');
+    }
   }
 }
 

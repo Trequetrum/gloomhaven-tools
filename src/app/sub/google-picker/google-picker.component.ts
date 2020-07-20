@@ -17,13 +17,6 @@ export class GooglePickerComponent implements OnInit {
     private googleFileLoader: GoogleLoadFileService){}
 
   ngOnInit(): void {
-    this.googlePicker.gloomtoolsFileLoad$.subscribe({
-      next: (document) => {
-        console.log("document: ", document);
-      }
-    });
-
-    console.log("this.googleFileLoader.hello", this.googleFileLoader.hello);
   }
 
   listFiles(){
@@ -48,6 +41,10 @@ export class GooglePickerComponent implements OnInit {
 
   revokeAccess(){
     this.oauthService.revokeAccess();
+  }
+
+  createFile(){
+    this.googleFileLoader.createNewJsonDocument();
   }
 
 }
