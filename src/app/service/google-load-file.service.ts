@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { GoogleOauth2Service } from './google-oauth2.service';
 import { GooglePickerService } from './google-picker.service';
+import { DocFile } from '../util/doc-file';
 
 declare var gapi: any;
 declare var google: any;
@@ -64,22 +65,27 @@ export class GoogleLoadFileService {
       }
     };
 
-    console.log("JSON.stringify(testObj): ", JSON.stringify(testObj));
+    const newFile = new File([JSON.stringify(testObj, null, 2)], "newJsonDocument-gloomtools.json", {
+      type: 'application/json',
+    });
 
     const fileMetaData = {
       'name': "newJsonDocument-gloomtools.json",
+      // 'parents': [folderId],
       'mimeType': "application/json",
       'title': "newJsonDocument-gloomtools.json"
     };
     const media = {
       'mimeType': "application/json",
-      'body': JSON.stringify(testObj)
+      'body': newFile.stream(),
+      'name': "newJsonDocument-gloomtools.json",
+      'title': "newJsonDocument-gloomtools.json"
     };
 
     gapi.client.drive.files.create({
       'resource': fileMetaData,
       'media': media,
-      'fields': 'id'
+      'fields': 'id, name'
     }).then(response => {
       console.log("Here Here Here Here");
       console.log("response: ", response);
@@ -106,7 +112,50 @@ export class GoogleLoadFileService {
       console.log('No User; No files found.');
     }
   }
+
+
+  saveFile(file: DocFile, callback: Function) {
+
+    function addContent(fileId) {
+      return gapi.client.request({
+          path: '/upload/drive/v3/files/' + fileId,
+          method: 'PATCH',
+          params: {
+            uploadType: 'media'
+          },
+          body: file.content
+        })
+    }
+
+    let metadata = {
+      mimeType: file.mimeType,
+      name: file.name,
+      fields: 'id, name'
+    }
+
+    if (file.parents) {
+      (metadata as any).parents = file.parents;
+    }
+
+    if (file.id) { //just update
+      addContent(file.id).then(resp => {
+        console.log('File just updated', resp.result);
+        callback(resp.result);
+      })
+    } else { //create and update
+      gapi.client.drive.files.create({
+        resource: metadata
+      }).then(function(resp) {
+        addContent(resp.result.id).then(resp => {
+          console.log('created and added content', resp.result);
+          callback(resp.result);
+        })
+      });
+    }
+  }
+
 }
+
 
 
 /***** Taken from https://developers.google.com/drive/api/v2/reference/files/get#javascript
