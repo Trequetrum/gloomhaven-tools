@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GoogleOauth2Service } from './google-oauth2.service';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 
 declare var gapi: any;
 declare var google: any;
@@ -17,8 +17,16 @@ export class GooglePickerService {
   apiLoaded = false;
 
   // An observable stream of loaded files.
-  gloomtoolsFileLoad$ = new Subject<any>();
+  private gloomtoolsFileLoad$ = new Subject<any>();
   
+  /***
+  * Lets users access the file load stream without giving them 
+  * access to the source methods (next, error, complete, ect)
+  ***/
+  watchLoadedFiles(): Observable<any>{
+    return this.gloomtoolsFileLoad$.asObservable();
+  }
+
   /***
    * Opens a picker with 'application/json' files in view and a search for
    * gloomtools files.
@@ -26,7 +34,7 @@ export class GooglePickerService {
    * Let the user pick files from their google drive or load files to their
    * google drive. Gives our app permission to read/edit those files as per
    * scropes requested by the oauthService.
-   */
+   ***/
   showGloomtoolsGooglePicker(): void{
     // Load the API if it hasn't been loaded yet.
     if(!this.apiLoaded){
@@ -71,7 +79,7 @@ export class GooglePickerService {
   pickerCallback(response: any): void{
     // Check that the user picked at least one file
     if (response[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
-      response[google.picker.Response.DOCUMENTS].forEach((doc)=>this.gloomtoolsFileLoad$.next(doc));
+      response[google.picker.Response.DOCUMENTS].forEach(doc => this.gloomtoolsFileLoad$.next(doc));
       /*
       let doc = data[google.picker.Response.DOCUMENTS][0];
       let src = doc[google.picker.Document.URL];

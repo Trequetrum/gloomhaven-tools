@@ -3,8 +3,9 @@ import { GoogleOauth2Service } from './google-oauth2.service';
 import { GooglePickerService } from './google-picker.service';
 import { DocFile } from '../util/doc-file';
 import { JsonFile } from '../model_data/json-file';
-import { Observable, concat } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import { Observable, concat, from, of } from 'rxjs';
+import { map, mergeMap, filter, flatMap } from 'rxjs/operators';
+import { StringPair } from '../util/string-pair';
 
 declare var gapi: any;
 declare var google: any;
@@ -21,7 +22,7 @@ export class GoogleFileManagerService {
     private oauthService: GoogleOauth2Service,
     private googlePicker: GooglePickerService){
 
-    googlePicker.gloomtoolsFileLoad$.subscribe(
+    googlePicker.watchLoadedFiles().subscribe(
       doc => this.loadGooglePickerDocument(doc));    
   }
 
@@ -121,24 +122,40 @@ export class GoogleFileManagerService {
     });
   }
 
-  listAllAccessableFiles(){
-    if(this.oauthService.apiLoaded){
-      gapi.client.drive.files.list({
-        q: "mimeType='application/json' and trashed = false",
-        fields: "files(name, id)"
-      }).then(response => {
-        const files = response.result.files;
-        if (files && files.length > 0) {
-          for (var i = 0; i < files.length; i++) {
-            console.log(files[i].name, files[i].id);
-          }
-        } else {
-          console.log('No files found.');
-        }
-      });
-    } else {
-      console.log('No User; No files found.');
-    }
+  getAllAccessableFiles(): Observable<StringPair>{
+
+    // Promise that returns an array of google API files
+    const lstPromise = gapi.client.drive.files.list({
+      q: "mimeType='application/json' and trashed = false",
+      fields: "files(name, id)"
+    });
+
+    // Convert promise into observable, filter out results that
+    // don't have files and map the array of files into a stream
+    // of id,name tuples
+    return from(lstPromise).pipe(
+      filter(response => {
+        const files = (response as any).result.files;
+        if (files && files.length > 0) return true;
+        return false;
+      }),
+      flatMap(response => {
+        const files = (response as any).result.files;
+        // responses without files will already be filtered
+        return from(files.map(file => new StringPair(file.id, file.name)));
+      }
+    )) as Observable<StringPair>; // Not the right way to type this?
+  }
+
+  listAllAccessableFiles(): void{
+    let count = 1;
+    console.log("Listing Files (Async): ");
+    this.getAllAccessableFiles().subscribe({
+      next: stringPair => {
+        console.log("File " + count + ": ", stringPair);
+        count++;
+      }
+    });
   }
 
   existsJsonFile(file: JsonFile): boolean{
@@ -240,6 +257,9 @@ export class GoogleFileManagerService {
     }
   };
 
+/***
+ * Works but doesn't do multi-part upload. 
+ *
   saveFile(file: DocFile, callback: Function) {
 
     function addContent(fileId) {
@@ -279,42 +299,5 @@ export class GoogleFileManagerService {
       });
     }
   }
-
-}
-
-
-
-/***** Taken from https://developers.google.com/drive/api/v2/reference/files/get#javascript
- * 
- 
-
-function printFile(fileId) {
-  var request = gapi.client.drive.files.get({
-    'fileId': fileId
-  });
-  request.execute(function(resp) {
-    console.log('Title: ' + resp.title);
-    console.log('Description: ' + resp.description);
-    console.log('MIME type: ' + resp.mimeType);
-  });
-}
-
-function downloadFile(file, callback) {
-  if (file.downloadUrl) {
-    var accessToken = gapi.auth.getToken().access_token;
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', file.downloadUrl);
-    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-    xhr.onload = function() {
-      callback(xhr.responseText);
-    };
-    xhr.onerror = function() {
-      callback(null);
-    };
-    xhr.send();
-  } else {
-    callback(null);
-  }
-}
-
 */
+}
