@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
 import { GooglePickerService } from 'src/app/service/google-picker.service';
-import { GoogleLoadFileService } from 'src/app/service/google-load-file.service';
+import { GoogleFileManagerService } from 'src/app/service/google-file-manager.service';
 
 @Component({
   selector: 'app-google-picker',
@@ -14,7 +14,7 @@ export class GooglePickerComponent implements OnInit {
   constructor(
     private oauthService: GoogleOauth2Service,
     private googlePicker: GooglePickerService, 
-    private googleFileLoader: GoogleLoadFileService){}
+    private googleFileLoader: GoogleFileManagerService){}
 
   ngOnInit(): void {
   }
@@ -44,7 +44,16 @@ export class GooglePickerComponent implements OnInit {
   }
 
   createFile(){
-    this.googleFileLoader.createNewJsonDocument();
+    this.googleFileLoader.createNewJsonFile("HeyThere").subscribe({
+      next: file => console.log("createNewJsonFile: ", file),
+      complete: () => {console.log("Completed createNewJsonFile()")}
+    });
+  }
+
+  setFolder(){
+    this.googleFileLoader.setGloomtoolsFolderId().subscribe({
+      complete: () => {console.log("Completed setGloomtoolsFolderId()")}
+    });
   }
 
 }
