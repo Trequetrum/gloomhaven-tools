@@ -20,7 +20,7 @@ export class GooglePickerComponent implements OnInit {
   }
 
   listFiles(){
-    this.googleFileLoader.listAllAccessableFiles();
+    this.googleFileLoader.listAllAccessibleFiles();
   }
 
   loadGooglePicker(){
@@ -44,10 +44,18 @@ export class GooglePickerComponent implements OnInit {
   }
 
   createFile(){
-    this.googleFileLoader.createNewJsonFile("HeyThere").subscribe({
+    /*
+    this.googleFileLoader.createNewJsonFile_old("HeyThere3").subscribe({
       next: file => console.log("createNewJsonFile: ", file),
       complete: () => {console.log("Completed createNewJsonFile()")}
+    });*/
+
+    this.googleFileLoader.createNewJsonFile("HeyThere8").subscribe({
+      next: file => console.log("createNewJsonFile: ", file),
+      error: err => console.log("Error!", err),
+      complete: () => {console.log("Completed createNewJsonFile()")}
     });
+
   }
 
   setFolder(){

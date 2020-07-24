@@ -3,8 +3,8 @@ import { GoogleOauth2Service } from './google-oauth2.service';
 import { GooglePickerService } from './google-picker.service';
 import { DocFile } from '../util/doc-file';
 import { JsonFile } from '../model_data/json-file';
-import { Observable, concat, from, of } from 'rxjs';
-import { map, mergeMap, filter, flatMap } from 'rxjs/operators';
+import { Observable, concat, from, of, throwError } from 'rxjs';
+import { map, mergeMap, filter, flatMap, concatMap, tap } from 'rxjs/operators';
 import { StringPair } from '../util/string-pair';
 
 declare var gapi: any;
@@ -122,35 +122,44 @@ export class GoogleFileManagerService {
     });
   }
 
-  getAllAccessableFiles(): Observable<StringPair>{
+  /***
+   * Get's all JSON files that the user has given this app
+   * access to. Doesn't verify contents or anything.
+   ***/
+  getAllAccessibleFiles(): Observable<StringPair>{
 
     // Promise that returns an array of google API files
-    const lstPromise = gapi.client.drive.files.list({
+    const lstPromise: Promise<any> = gapi.client.drive.files.list({
       q: "mimeType='application/json' and trashed = false",
       fields: "files(name, id)"
     });
 
-    // Convert promise into observable, filter out results that
-    // don't have files and map the array of files into a stream
+    // Convert promise into observable and map the array of files into a stream
     // of id,name tuples
     return from(lstPromise).pipe(
+      // filter out results that don't have files
       filter(response => {
-        const files = (response as any).result.files;
+        const files = response.result.files;
         if (files && files.length > 0) return true;
         return false;
       }),
+      // map array of files into stream of (id,name) tuples
       flatMap(response => {
-        const files = (response as any).result.files;
+        const files = response.result.files;
         // responses without files will already be filtered
         return from(files.map(file => new StringPair(file.id, file.name)));
       }
     )) as Observable<StringPair>; // Not the right way to type this?
   }
 
-  listAllAccessableFiles(): void{
+  /***
+   * Mostly for debugging. 
+   * Logs all accessible files to the console.
+   */
+  listAllAccessibleFiles(): void{
     let count = 1;
     console.log("Listing Files (Async): ");
-    this.getAllAccessableFiles().subscribe({
+    this.getAllAccessibleFiles().subscribe({
       next: stringPair => {
         console.log("File " + count + ": ", stringPair);
         count++;
@@ -158,35 +167,63 @@ export class GoogleFileManagerService {
     });
   }
 
-  existsJsonFile(file: JsonFile): boolean{
-    // Check if this file has been loaded into memory
-    if(file.id && this.documents[file.id]){
-      return true;
-    }
-
-    // Check there is a file with this name or ID accessable 
-    if(this.oauthService.apiLoaded){
-      gapi.client.drive.files.list({
-        q: "mimeType=" + file.mimeType,
-        fields: "files(name, id)"
-      }).then(response => {
-        const files = response.result.files;
-        if (files && files.length > 0) {
-          for (var i = 0; i < files.length; i++) {
-            console.log(files[i].name, files[i].id);
-          }
-        } else {
-          return false;
-        }
-      });
-    } else {
-      console.error("existsJsonFile: oauthService not loaded");
-      return false;
-    }
-  }
 
   saveJsonFile(file: JsonFile){
 
+  }
+
+  createNewJsonFile(name: string): Observable<JsonFile>{
+
+    // Create a new file. New files start with an empty object 
+    // that has an ID
+    const newJsonFile = new JsonFile();
+    newJsonFile.name = name + '-gloomtools.json';
+    newJsonFile.content = {
+      id: newJsonFile.generateNewObjectId()
+    };
+
+    // Ready a call to create this file on the user's Google drive
+    const boundary = '-------314159265358979323846';
+    const delimiter = "\r\n--" + boundary + "\r\n";
+    const close_delim = "\r\n--" + boundary + "--";
+    
+    const metadata = {
+        'name': newJsonFile.name,
+        'parents': [this.gloomtoolsFolderId],
+        'mimeType': newJsonFile.mimeType + '\r\n\r\n'
+    };
+    
+    const multipartRequestBody = delimiter +  'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) 
+      + delimiter + 'Content-Type: ' + newJsonFile.mimeType + '\r\n\r\n' + newJsonFile.contentAsString(true) + close_delim;
+
+    const postPromise: Promise<any> = gapi.client.request({
+        'path': '/upload/drive/v3/files',
+        'method': 'POST',
+        'params': {
+            'uploadType': 'multipart'
+        },
+        'headers': {
+            'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+        },
+        'body': multipartRequestBody
+    });
+
+    const newfile$ = from(postPromise).pipe(
+      filter(response => {
+        if(response.status == 200) return true;
+        console.error("createNewJsonFile: ", response);
+        return false;
+      }),
+      map(response => {
+        newJsonFile.id = response.result.id;
+        return newJsonFile;
+      })
+    );
+
+    // No idea if this is the best way to do this? The map here is a dummy operation since
+    // setGloomtoolsFolderId() doesn't emit anything.
+    const setFolderComplete$ = this.setGloomtoolsFolderId().pipe(filter(()=>false), map(()=>null));
+    return concat(setFolderComplete$, newfile$);
   }
 
   /***
@@ -194,9 +231,9 @@ export class GoogleFileManagerService {
    * 
    * Calls setGloomtoolsFolderId() and only emits a new file once that call completes
    */
-  createNewJsonFile(name: string): Observable<JsonFile>{
+  createNewJsonFile_old(name: string): Observable<JsonFile>{
 
-    // 
+    
     const newfile$ = new Observable<JsonFile>(observer => {
       const boundary = '-------314159265358979323846';
       const delimiter = "\r\n--" + boundary + "\r\n";
@@ -229,6 +266,7 @@ export class GoogleFileManagerService {
           'body': multipartRequestBody
       }).then(response => {
           console.log(response);
+          console.log("response.result.id: ", response.result.id);
       });
 
       return {unsubscribe() {/* Do Nothing */}};

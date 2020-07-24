@@ -2,7 +2,6 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 
 export class JsonFile {
 
-    objectIdGen = 0;
     mimeType = "application/json";
 
     constructor(
