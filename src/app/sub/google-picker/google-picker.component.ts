@@ -10,6 +10,21 @@ import { GoogleFileManagerService } from 'src/app/service/google-file-manager.se
 })
 export class GooglePickerComponent implements OnInit {
 
+  testObj = {
+    "Campaign": {
+      "Name": "testing campaign",
+      "GlobalAchievements": [
+        "One",
+        "Two",
+        "Three"
+      ],
+      "Parties": [{
+        "Name": "testing party 1"
+      },{
+        "Name": "testing party 2"
+      }]
+    }
+  };
 
   constructor(
     private oauthService: GoogleOauth2Service,
@@ -50,7 +65,7 @@ export class GooglePickerComponent implements OnInit {
       complete: () => {console.log("Completed createNewJsonFile()")}
     });*/
 
-    this.googleFileLoader.createNewJsonFile("HeyThere8").subscribe({
+    this.googleFileLoader.createNewJsonFile("HeyThere2", this.testObj).subscribe({
       next: file => console.log("createNewJsonFile: ", file),
       error: err => console.log("Error!", err),
       complete: () => {console.log("Completed createNewJsonFile()")}
@@ -59,9 +74,8 @@ export class GooglePickerComponent implements OnInit {
   }
 
   setFolder(){
-    this.googleFileLoader.setGloomtoolsFolderId().subscribe({
-      complete: () => {console.log("Completed setGloomtoolsFolderId()")}
+    this.googleFileLoader.getGloomtoolsFolderId().subscribe({
+      next: id => console.log("getGloomtoolsFolderId(): ", id)
     });
   }
-
 }
