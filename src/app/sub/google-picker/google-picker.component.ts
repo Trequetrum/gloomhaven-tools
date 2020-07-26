@@ -11,17 +11,21 @@ import { GoogleFileManagerService } from 'src/app/service/google-file-manager.se
 export class GooglePickerComponent implements OnInit {
 
   testObj = {
-    "Campaign": {
-      "Name": "testing campaign",
-      "GlobalAchievements": [
+    'id': 0,
+    'Campaign': {
+      'id': 1,
+      'Name': "testing campaign",
+      'GlobalAchievements': [
         "One",
         "Two",
         "Three"
       ],
-      "Parties": [{
-        "Name": "testing party 1"
+      'Parties': [{
+        'id': 2,
+        'Name': "testing party 1"
       },{
-        "Name": "testing party 2"
+        'id': 3,
+        'Name': "testing party 2"
       }]
     }
   };

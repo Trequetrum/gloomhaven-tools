@@ -115,7 +115,7 @@ export class GoogleFileManagerService {
       q: "mimeType='application/json' and trashed = false",
       fields: "files(name, id)"
     })) as Observable<any>;
-
+    
     // Convert promise into observable and map the array of files into a stream
     // of id,name tuples
     return files$.pipe(
@@ -149,7 +149,10 @@ export class GoogleFileManagerService {
     });
   }
 
-
+  /***
+   * Saving a JSON file is more complicated than it sounds.
+   *    - We should be patching the most recent file in the drive, 
+   */
   saveJsonFile(file: JsonFile){
 
   }
@@ -173,7 +176,7 @@ export class GoogleFileManagerService {
       };
     }
     
-    const genPostObs = parentId => {
+    const genPostObs = (parentId) => {
       console.log("genPostObs(): ", parentId);
       // Ready a call to create this file on the user's Google drive
       const boundary = '-------314159265358979323846';
@@ -183,6 +186,7 @@ export class GoogleFileManagerService {
       const metadata = {
           'name': newJsonFile.name,
           'parents': [parentId],
+          'fields': "files(id, modifiedTime)",
           'mimeType': newJsonFile.mimeType + '\r\n\r\n'
       };
       
@@ -213,6 +217,7 @@ export class GoogleFileManagerService {
       }),
       map(response => {
         newJsonFile.id = response.result.id;
+        newJsonFile.modifiedTime = response.result.modifiedTime;
         return newJsonFile;
       })
     );

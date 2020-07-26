@@ -6,6 +6,7 @@ export class JsonFile {
 
     constructor(
         public id?: string,
+        public modifiedTime?: string,
         public name?: string,
         public content?: any
     ){}
