@@ -96,7 +96,7 @@ export class GooglePickerComponent implements OnInit {
         this.testFile = file;
       },
       error: err => console.log("Error!", err),
-      complete: () => {console.log("Completed createNewJsonFile()")}
+      complete: () => console.log("Completed createNewJsonFile()")
     });
 
   }
