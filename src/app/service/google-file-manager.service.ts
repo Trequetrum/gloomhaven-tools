@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { GoogleOauth2Service } from './google-oauth2.service';
 import { GooglePickerService } from './google-picker.service';
-import { DocFile } from '../util/doc-file';
 import { JsonFile } from '../model_data/json-file';
-import { Observable, concat, from, of, throwError, defer } from 'rxjs';
-import { map, mergeMap, filter, flatMap, concatMap, tap, take, mapTo } from 'rxjs/operators';
+import { Observable, from, of, throwError, defer, Subject } from 'rxjs';
+import { map, mergeMap, filter, take, mapTo } from 'rxjs/operators';
 import { StringPair } from '../util/string-pair';
 
 declare var google: any;
@@ -19,17 +18,24 @@ export class GoogleFileManagerService {
   documents = new Map<string, JsonFile>();
   gloomtoolsFolderId: string;
 
+  // An observable stream of loaded files.
+  private fileLoad$ = new Subject<JsonFile>();
+
   constructor(
     private oauthService: GoogleOauth2Service,
     private googlePicker: GooglePickerService){
 
     googlePicker.watchLoadedFiles().subscribe(
-      doc => this.loadGooglePickerDocument(doc));    
+      doc => this.loadGooglePickerDocument(doc));
   }
 
-  /**
+  watchLoadedFiles(): Observable<JsonFile>{
+    return this.fileLoad$.asObservable();
+  }
+
+  /****
    * Call back that reacts to files selected by the google picker
-   */
+   ****/
   loadGooglePickerDocument(document: any): void{
     const docID = document[google.picker.Document.ID];
     const docURL = document[google.picker.Document.URL];
@@ -37,19 +43,10 @@ export class GoogleFileManagerService {
     // Only load docs we don't already have
     if(!this.documents.has(docID)){
       console.log("Loading " + document[google.picker.Document.NAME] + ": URL : " + docURL);
-      
-      this.oauthService.getClient().pipe(
-        take(1),
-        mergeMap(client => {
-          return from(client.drive.files.get({
-            fileId: docID,
-            alt: 'media'
-          }));
-        })
-      ).subscribe({
-        next: (success: any) => {
-          console.log("success: ", success); //the link is in the success.result object
-          console.log("success.body: ", success.body);
+      this.loadById(docID).subscribe({
+        next: file => {
+          this.setNewDocument(file);
+          console.log("Loaded file: ", file);
         },
         error: console.error
       });
@@ -60,15 +57,56 @@ export class GoogleFileManagerService {
     }
   }
 
+  setNewDocument(file: JsonFile): void{
+    this.documents.set(file.id, file);
+    this.fileLoad$.next(file);
+  }
+
+  /*****
+   * Goes to the user's google drive and tries to load a
+   * file with the given ID.
+   *****/
+  loadById(docID: string): Observable<JsonFile>{
+    return this.oauthService.getClient().pipe(
+      take(1),
+      mergeMap(client => 
+        from(client.drive.files.get({
+          fileId: docID,
+          fields: 'id, name, modifiedTime, capabilities(canRename, canDownload, canModifyContent)'
+        })).pipe(map(res => [client, res]))
+      ),
+      take(1),
+      map(([client, res]) => {
+        if(!res.result.capabilities.canDownload){
+          throw throwError("Cannot Download File (capabilities.canDownload)", res);
+        }
+        return [client, new JsonFile(
+          res.result.id,
+          res.result.name,
+          res.result.capabilities.canRename && res.result.capabilities.canModifyContent,
+          res.result.modifiedTime
+        )];
+      }),
+      mergeMap(([client, file]) => 
+        from(client.drive.files.get({
+          fileId: docID,
+          alt: 'media'
+        })).pipe(map((res:any) => {
+          file.setContents(JSON.parse(res.body));
+          return file;
+        }))
+      )
+    )
+  }
+
   /***
    * Emits the google drive folder id where we store our files.
    * Performs the nessesary calls to find or create the folder.
    ***/
   getGloomtoolsFolderId(): Observable<string>{
     // If we already have an ID for the folder, this is very straight forward.
-    // We defer to ensure we get the most recent value of the folder ID
     if(this.gloomtoolsFolderId && this.gloomtoolsFolderId.length > 0){
-      return defer(() => of(this.gloomtoolsFolderId));
+      return of(this.gloomtoolsFolderId);
     }
 
     const folderType = "application/vnd.google-apps.folder";
@@ -155,7 +193,7 @@ export class GoogleFileManagerService {
 
   /***
    * For now, we just overwrite whatever content the file in the drive currently
-   * holds. Of course, we should be 
+   * holds. Of course, we should be doing much better than that.
    *    - TODO: We should be patching the most recent file in the drive
    */
   saveJsonFile(file: JsonFile): Observable<JsonFile>{
@@ -173,7 +211,7 @@ export class GoogleFileManagerService {
         };
         
         const multipartRequestBody = delimiter +  'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) 
-          + delimiter + 'Content-Type: ' + file.mimeType + '\r\n\r\n' + file.contentAsString(true) + close_delim;
+          + delimiter + 'Content-Type: ' + file.mimeType + '\r\n\r\n' + file.contentAsString(false, true) + close_delim;
 
         return from(client.request({
           'path': '/upload/drive/v3/files/' + file.id,
@@ -203,9 +241,9 @@ export class GoogleFileManagerService {
     const newJsonFile = new JsonFile();
     newJsonFile.name = name + '-gloomtools.json';
     if(content){
-      newJsonFile.content = content;
+      newJsonFile.originalContent = content;
     }else{
-      newJsonFile.content = {
+      newJsonFile.originalContent = {
         id: newJsonFile.generateNewObjectId()
       };
     }
@@ -223,7 +261,7 @@ export class GoogleFileManagerService {
       };
       
       const multipartRequestBody = delimiter +  'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) 
-        + delimiter + 'Content-Type: ' + newJsonFile.mimeType + '\r\n\r\n' + newJsonFile.contentAsString(true) + close_delim;
+        + delimiter + 'Content-Type: ' + newJsonFile.mimeType + '\r\n\r\n' + newJsonFile.contentAsString(false, true) + close_delim;
 
       return this.oauthService.getClient().pipe(
         mergeMap(client => {

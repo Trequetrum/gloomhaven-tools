@@ -54,7 +54,9 @@ export class GooglePickerComponent implements OnInit {
   constructor(
     private oauthService: GoogleOauth2Service,
     private googlePicker: GooglePickerService, 
-    private googleFileLoader: GoogleFileManagerService){}
+    private googleFileLoader: GoogleFileManagerService){
+      
+  }
 
   ngOnInit(): void {
   }
@@ -102,10 +104,12 @@ export class GooglePickerComponent implements OnInit {
   }
 
   updateFile(){
-    if(this.testFile){
-      this.testFile.content = this.testObj2;
-      this.googleFileLoader.saveJsonFile(this.testFile).subscribe({
-        next: file => console.log("UpdatedFile: ", file),
+    const file = this.testFile;
+    if(file){
+      file.name = "ThisIsANewName-gloomtools.json"
+      file.content = this.testObj2;
+      this.googleFileLoader.saveJsonFile(file).subscribe({
+        next: fileI => console.log("UpdatedFile: ", fileI),
         error: console.error,
         complete: () => console.log("saveJsonFile() complete")
       });

@@ -27,12 +27,11 @@ import { InputInitiativeComponent } from './dialog/input-initiative/input-initia
 import { LogInComponent }           from './dialog/log-in/log-in.component';
 import { PlayerRefComponent } from './page/player-ref/player-ref.component';
 import { CharScenarioComponent } from './page/char-scenario/char-scenario.component';
-import { CharSelectorComponent } from './sub/char-selector/char-selector.component';
 import { PartyComponent } from './page/party/party.component';
 import { CharacterComponent } from './page/character/character.component';
 import { SelectChiplistDialogComponent } from './dialog/select-chiplist-dialog/select-chiplist-dialog.component';
 import { GooglePickerComponent } from './sub/google-picker/google-picker.component';
-import { GoogleOauth2Component } from './sub/google-oauth2/google-oauth2.component';
+import { ManageFilesComponent } from './page/manage-files/manage-files.component';
 
 @NgModule({
   declarations: [
@@ -44,12 +43,11 @@ import { GoogleOauth2Component } from './sub/google-oauth2/google-oauth2.compone
     LogInComponent,
     PlayerRefComponent,
     CharScenarioComponent,
-    CharSelectorComponent,
     PartyComponent,
     CharacterComponent,
     SelectChiplistDialogComponent,
     GooglePickerComponent,
-    GoogleOauth2Component
+    ManageFilesComponent
   ],
   imports: [
     FormsModule,

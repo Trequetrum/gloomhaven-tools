@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CharSelectorComponent } from './char-selector.component';
+import { ManageFilesComponent } from './manage-files.component';
 
-describe('CharSelectorComponent', () => {
-  let component: CharSelectorComponent;
-  let fixture: ComponentFixture<CharSelectorComponent>;
+describe('ManageFilesComponent', () => {
+  let component: ManageFilesComponent;
+  let fixture: ComponentFixture<ManageFilesComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CharSelectorComponent ]
+      declarations: [ ManageFilesComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CharSelectorComponent);
+    fixture = TestBed.createComponent(ManageFilesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -6,6 +6,7 @@ import { PlayerRefComponent } from './page/player-ref/player-ref.component';
 import { CharScenarioComponent } from './page/char-scenario/char-scenario.component';
 import { PartyComponent } from './page/party/party.component';
 import { GooglePickerComponent } from './sub/google-picker/google-picker.component';
+import { ManageFilesComponent } from './page/manage-files/manage-files.component';
 
 
 const routes: Routes = [
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'player/scenario', component : CharScenarioComponent},
   { path: 'party', component : PartyComponent},
   { path: 'login/picker', component: GooglePickerComponent},
+  { path: 'login/managefiles', component: ManageFilesComponent},
   // Unkown URLs go to out page not found component at /404
   { path : '404', component : PageNotFoundComponent },
   { path : '**', redirectTo : '/404'}

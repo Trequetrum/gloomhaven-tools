@@ -2,14 +2,21 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 
 export class JsonFile {
 
-    mimeType = "application/json";
+    readonly mimeType = "application/json";
+    originalContent: any;
+    content: any;
 
     constructor(
         public id?: string,
-        public modifiedTime?: string,
         public name?: string,
-        public content?: any
+        public canEdit?: boolean,
+        public modifiedTime?: string
     ){}
+
+    setContents(contents: any) : void{
+        this.content = contents;
+        this.originalContent = contents;
+    }
 
     generateNewObjectId(): number {
         const listIds = new Array<number>();
@@ -39,11 +46,13 @@ export class JsonFile {
         return newId;
     }
 
-    contentAsString(pretty: boolean): string{
-        if(this.content && pretty)
-            return JSON.stringify(this.content, null, 2);
-        if(this.content)
-            return JSON.stringify(this.content);
+    contentAsString(origional: boolean, pretty: boolean): string{
+        const contents = origional? this.originalContent : this.content; 
+
+        if(contents && pretty)
+            return JSON.stringify(contents, null, 2);
+        if(contents)
+            return JSON.stringify(contents);
 
         return "";
     }
