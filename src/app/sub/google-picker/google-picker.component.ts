@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
 import { GooglePickerService } from 'src/app/service/google-picker.service';
 import { GoogleFileManagerService } from 'src/app/service/google-file-manager.service';
+import { JsonFile } from 'src/app/model_data/json-file';
 
 @Component({
   selector: 'app-google-picker',
@@ -10,6 +11,7 @@ import { GoogleFileManagerService } from 'src/app/service/google-file-manager.se
 })
 export class GooglePickerComponent implements OnInit {
 
+  testFile: JsonFile;
   testObj = {
     'id': 0,
     'Campaign': {
@@ -26,6 +28,25 @@ export class GooglePickerComponent implements OnInit {
       },{
         'id': 3,
         'Name': "testing party 2"
+      }]
+    }
+  };
+  testObj2 = {
+    'id': 0,
+    'Campaign': {
+      'id': 1,
+      'Name': "testing2 campaign2",
+      'GlobalAchievements': [
+        "One2",
+        "Two2",
+        "Three2"
+      ],
+      'Parties': [{
+        'id': 2,
+        'Name': "testing party 1-2"
+      },{
+        'id': 3,
+        'Name': "testing party 2-2"
       }]
     }
   };
@@ -70,11 +91,28 @@ export class GooglePickerComponent implements OnInit {
     });*/
 
     this.googleFileLoader.createNewJsonFile("HeyThere2", this.testObj).subscribe({
-      next: file => console.log("createNewJsonFile: ", file),
+      next: file => {
+        console.log("createNewJsonFile: ", file);
+        this.testFile = file;
+      },
       error: err => console.log("Error!", err),
       complete: () => {console.log("Completed createNewJsonFile()")}
     });
 
+  }
+
+  updateFile(){
+    if(this.testFile){
+      this.testFile.content = this.testObj2;
+      this.googleFileLoader.saveJsonFile(this.testFile).subscribe({
+        next: file => console.log("UpdatedFile: ", file),
+        error: console.error,
+        complete: () => console.log("saveJsonFile() complete")
+      });
+      console.log("called googleFileLoader.saveJsonFile");
+    }else{
+      console.log("No test File created yet");
+    }
   }
 
   setFolder(){

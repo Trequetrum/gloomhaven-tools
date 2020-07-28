@@ -1,24 +1,37 @@
 import { Injectable } from '@angular/core';
 
-import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, Subscription, of, from, defer, throwError } from 'rxjs';
+import { map, mergeMap } from 'rxjs/operators';
 
 declare var gapi: any;
 
+
+/***
+ * Handle user authentication with google drive. Also handle gapi.client loading and initialisation.
+ * We push these two conserns together since we already really care about authentication in order 
+ * to get access to gapi.client (and some minimal user info).
+ * 
+ * Not super happy with my use of Observables here. Was just messing around with them at the time.
+ * Idealy, we shouldn't be subscribing if it's possible to reply on data transformation instead.
+ * This class subscribes early, which isn't as ideal.
+ * 
+ * I really should re-write this, but it's an estetic rather than performance issue (as far as I can
+ * tell), so it stays as is for now
+ ***/
 @Injectable({
   providedIn: 'root'
 })
 export class GoogleOauth2Service {
 
-  developerKey = 'AIzaSyA-vosulPclQhvWAjkpN4QVodMmwrtUC2g';
-  clientId = '321669051884-gr3ctck8nouph8c3cithdte3kgp1j0iq.apps.googleusercontent.com';
-  appId = "321669051884";
-  scopes = [
+  readonly developerKey = 'AIzaSyA-vosulPclQhvWAjkpN4QVodMmwrtUC2g';
+  readonly clientId = '321669051884-gr3ctck8nouph8c3cithdte3kgp1j0iq.apps.googleusercontent.com';
+  readonly appId = "321669051884";
+  readonly scopes = [
     'profile',
     'email',
     'https://www.googleapis.com/auth/drive.file'
   ].join(' ');
-  discoveryDocs = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
+  readonly discoveryDocs = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
 
   // This flag is for both the client and auth2 api as well as client initialization
   apiLoaded = false;
@@ -49,40 +62,43 @@ export class GoogleOauth2Service {
       // We can't cancel gapi promises, but we can supress the response if we want
       let notify = true;
 
-      // loading libraries fails if gapi isn't loaded
-      if(!gapi){
-        let errorString = "Error: GAPI isn't loaded";
-        console.log(errorString);
-        observer.error(errorString);
-        
+      if(this.apiLoaded){
+        observer.next(true);
+        observer.complete();
       }else{
+        // loading libraries fails if gapi isn't loaded
+        if(!gapi){
+          let errorString = "Error: GAPI isn't loaded";
+          console.error(errorString);
+          observer.error(errorString);
+        }else{
+          // gapi.load returns a promise. Initialize client once loaded
+          gapi.load('client:auth2', () => {
+            // Load the client
+            gapi.client.init({
+              'apiKey': this.developerKey,
+              'clientId': this.clientId,
+              'discoveryDocs': this.discoveryDocs,
+              'scope': this.scopes
+            }).then(() => {
+              // Client and auth2 api are loaded and client Api is initialized
+              this.apiLoaded = true;
 
-        // gapi.load returns a promise. Initialize client once loaded
-        gapi.load('client:auth2', () => {
-          // Load the client
-          gapi.client.init({
-            'apiKey': this.developerKey,
-            'clientId': this.clientId,
-            'discoveryDocs': this.discoveryDocs,
-            'scope': this.scopes
-          }).then(() => {
-            // Client and auth2 api are loaded and client Api is initialized
-            this.apiLoaded = true;
-
-            // Listen for sign-in state changes.
-            gapi.auth2.getAuthInstance().isSignedIn.listen(isSignedIn => this.updateSigninStatus(isSignedIn));
-            // Handle the initial sign-in state.
-            this.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-            // Emit completion if not supressed
-            if(notify) observer.complete();
-          }, (error) => {
-            // Emit error if not supressed
-            if(notify) observer.error(error);
+              // Listen for sign-in state changes.
+              gapi.auth2.getAuthInstance().isSignedIn.listen(isSignedIn => this.updateSigninStatus(isSignedIn));
+              // Handle the initial sign-in state.
+              this.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+              // Emit completion if not supressed
+              if(notify) {
+                observer.next(true);
+                observer.complete();
+              }
+            }).catch(error => {
+              // Emit error if not supressed
+              if(notify) observer.error(error);
+            });
           });
-        });
-
-
-
+        }
       }
       // The subscribe() call returns a Subscription object that has an unsubscribe() 
       // method, which you call to stop receiving notifications.
@@ -117,12 +133,7 @@ export class GoogleOauth2Service {
       let notify = true;
       let clientInitSubscription: Subscription;
 
-      // OauthService fails if gapi isn't loaded
-      if(!gapi){
-        let errorString = "Error: GAPI isn't loaded";
-        console.log(errorString);
-        observer.error(errorString);
-      } else if(this.apiLoaded){
+      if(this.apiLoaded){
         if(this.isSignedIn){
           // Easiest Scenario. We're ready to go, so just emit an AuthInstance
           if(notify){
@@ -188,7 +199,6 @@ export class GoogleOauth2Service {
    */
   getUserName(): Observable<string>{
     // return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName()
-
     return this.getOauthInstance().pipe(
       map(oauthInstance => oauthInstance.currentUser.get().getBasicProfile().getGivenName())
     );
@@ -203,8 +213,8 @@ export class GoogleOauth2Service {
     // oauthInstance.signOut();
     if(this.isSignedIn){
       this.getOauthInstance().subscribe({
-        next: (oauthInstance) => oauthInstance.signOut(),
-        error: (errorObj) => console.log(errorObj)
+        next: oauthInstance => oauthInstance.signOut(),
+        error: console.error
       });
     }
   }
@@ -221,10 +231,32 @@ export class GoogleOauth2Service {
     // oauthInstance.disconnect();
     if(this.isSignedIn){
       this.getOauthInstance().subscribe({
-        next: (oauthInstance) => oauthInstance.disconnect(),
-        error: (errorObj) => console.log(errorObj)
+        next: oauthInstance => oauthInstance.disconnect(),
+        error: console.error
       });
     }
+  }
+
+  /***
+   * Return gapi.client. This may be asynconous if the service still
+   * needs to initialise the client. 
+   ***/
+  getClient(): Observable<any>{
+    return defer(()=>of(this.apiLoaded)).pipe(
+      mergeMap(isLoaded => {
+        // Pass the client through if it's truthy
+        if(isLoaded){
+          return of(gapi.client);
+        }else{
+          return from(this.initClient()).pipe(
+            map(isInit => {
+              if(isInit) return gapi.client;
+              else throwError("Failed to Init Client for getClient");
+            })
+          );
+        }
+      })
+    );
   }
 
 }

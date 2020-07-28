@@ -4,10 +4,9 @@ import { GooglePickerService } from './google-picker.service';
 import { DocFile } from '../util/doc-file';
 import { JsonFile } from '../model_data/json-file';
 import { Observable, concat, from, of, throwError, defer } from 'rxjs';
-import { map, mergeMap, filter, flatMap, concatMap, tap } from 'rxjs/operators';
+import { map, mergeMap, filter, flatMap, concatMap, tap, take, mapTo } from 'rxjs/operators';
 import { StringPair } from '../util/string-pair';
 
-declare var gapi: any;
 declare var google: any;
 
 @Injectable({
@@ -17,7 +16,7 @@ export class GoogleFileManagerService {
 
   readonly folderName = "GloomhavenToolsDocs";
 
-  documents = new Map<string, any>();
+  documents = new Map<string, JsonFile>();
   gloomtoolsFolderId: string;
 
   constructor(
@@ -38,17 +37,21 @@ export class GoogleFileManagerService {
     // Only load docs we don't already have
     if(!this.documents.has(docID)){
       console.log("Loading " + document[google.picker.Document.NAME] + ": URL : " + docURL);
-      this.documents.set(docID, document);
       
-      gapi.client.drive.files.get({
-        fileId: docID,
-        alt: 'media'
-      }).then(success => {
-        console.log("success: ", success); //the link is in the success.result object
-        console.log("success.body: ", success.body);    
-      }, fail => {
-        console.log("Error: ", fail);
-        console.log('Error Message: '+ fail.result.error.message);
+      this.oauthService.getClient().pipe(
+        take(1),
+        mergeMap(client => {
+          return from(client.drive.files.get({
+            fileId: docID,
+            alt: 'media'
+          }));
+        })
+      ).subscribe({
+        next: (success: any) => {
+          console.log("success: ", success); //the link is in the success.result object
+          console.log("success.body: ", success.body);
+        },
+        error: console.error
       });
     }
     // If a user is loading this doc again, maybe there's an update we missed?
@@ -59,6 +62,7 @@ export class GoogleFileManagerService {
 
   /***
    * Emits the google drive folder id where we store our files.
+   * Performs the nessesary calls to find or create the folder.
    ***/
   getGloomtoolsFolderId(): Observable<string>{
     // If we already have an ID for the folder, this is very straight forward.
@@ -70,38 +74,38 @@ export class GoogleFileManagerService {
     const folderType = "application/vnd.google-apps.folder";
     const folderName = this.folderName;
 
-    const genFolderObs$ = from(gapi.client.drive.files.list({
-        q: "mimeType='" + folderType + "' and name='" + folderName + "' and trashed = false",
-        fields: "files(id)"
-      })) as Observable<any>;
-
-
-    return genFolderObs$.pipe(
-      mergeMap(response => {
-        const folders = response.result.files;
-
-        // Check if we already have access to a folder with the right name
-        // I suppose there could be more than one folder. If so, emit the first one we find
-        if (folders && folders.length > 0) {
-          return of(folders[0].id);
-        }
-
-        // If we don't have access to such a folder, then create it and return the ID
-        const metadata = {
-          mimeType: folderType,
-          name: folderName,
-          fields: 'id'
-        };
-
-        const createfolder$ = from(gapi.client.drive.files.create({
-          resource: metadata
-        })) as Observable<any>;
-
-        return createfolder$.pipe(
-          map(resp => resp.result.id)
+    return this.oauthService.getClient().pipe(
+      take(1),
+      mergeMap((client: any) => {
+        return from(client.drive.files.list({
+            q: "mimeType='" + folderType + "' and name='" + folderName + "' and trashed = false",
+            fields: "files(id)"
+        })).pipe(
+          mergeMap((response: any) => {
+            const folders = response.result.files;
+    
+            // Check if we already have access to a folder with the right name
+            // I suppose there could be more than one folder. If so, emit the first one we find
+            if (folders && folders.length > 0) {
+              return of(folders[0].id);
+            }
+    
+            // If we don't have access to such a folder, then create it and return the ID
+            const metadata = {
+              mimeType: folderType,
+              name: folderName,
+              fields: 'id'
+            };
+    
+            return from(client.drive.files.create({
+              resource: metadata
+            })).pipe(
+              map((resp: any) => resp.result.id)
+            );
+          }) 
         );
       })
-    );
+    ) as Observable<string>;
   }
 
   /***
@@ -110,28 +114,28 @@ export class GoogleFileManagerService {
    ***/
   getAllAccessibleFiles(): Observable<StringPair>{
 
-    // Promise that returns an array of google API files
-    const files$ = from(gapi.client.drive.files.list({
-      q: "mimeType='application/json' and trashed = false",
-      fields: "files(name, id)"
-    })) as Observable<any>;
-    
-    // Convert promise into observable and map the array of files into a stream
-    // of id,name tuples
-    return files$.pipe(
-      // filter out results that don't have files
-      filter(response => {
-        const files = response.result.files;
-        if (files && files.length > 0) return true;
-        return false;
-      }),
-      // map array of files into stream of (id,name) tuples
-      flatMap(response => {
-        const files = response.result.files;
-        // responses without files will already be filtered
-        return from(files.map(file => new StringPair(file.id, file.name)));
-      }
-    )) as Observable<StringPair>; // Not the right way to type this?
+    return this.oauthService.getClient().pipe(
+      mergeMap(client => {
+        return from(client.drive.files.list({
+          q: "mimeType='application/json' and trashed = false",
+          fields: "files(name, id)"
+        })).pipe(
+          // filter out results that don't have files
+          filter((response: any) => {
+            const files = response.result.files;
+            if (files && files.length > 0) return true;
+            return false;
+          }),
+          // map array of files into stream of (id,name) tuples
+          mergeMap(response => {
+            const files = response.result.files;
+            console.log("response.result.files[0]: ", response.result.files[0]);
+            // responses without files will already be filtered
+            return from(files.map(file => new StringPair(file.id, file.name)));
+          }
+        )) as Observable<StringPair>; // Not the right way to type this?
+      })
+    );
   }
 
   /***
@@ -150,11 +154,41 @@ export class GoogleFileManagerService {
   }
 
   /***
-   * Saving a JSON file is more complicated than it sounds.
-   *    - We should be patching the most recent file in the drive, 
+   * For now, we just overwrite whatever content the file in the drive currently
+   * holds. Of course, we should be 
+   *    - TODO: We should be patching the most recent file in the drive
    */
-  saveJsonFile(file: JsonFile){
+  saveJsonFile(file: JsonFile): Observable<JsonFile>{
+    // Ready a call to Google drive
+    const boundary = '-------314159265358979323846';
+    const delimiter = "\r\n--" + boundary + "\r\n";
+    const close_delim = "\r\n--" + boundary + "--";
 
+    return this.oauthService.getClient().pipe(
+      mergeMap(client => {
+        
+        const metadata = {
+          'name': file.name,
+          'mimeType': file.mimeType
+        };
+        
+        const multipartRequestBody = delimiter +  'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) 
+          + delimiter + 'Content-Type: ' + file.mimeType + '\r\n\r\n' + file.contentAsString(true) + close_delim;
+
+        return from(client.request({
+          'path': '/upload/drive/v3/files/' + file.id,
+          'method': 'PATCH',
+          'params': {
+              'uploadType': 'multipart'
+          },
+          'headers': {
+              'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+          },
+          'body': multipartRequestBody
+        }));
+      }),
+      mapTo(file)
+    );
   }
 
   /***
@@ -177,7 +211,6 @@ export class GoogleFileManagerService {
     }
     
     const genPostObs = (parentId) => {
-      console.log("genPostObs(): ", parentId);
       // Ready a call to create this file on the user's Google drive
       const boundary = '-------314159265358979323846';
       const delimiter = "\r\n--" + boundary + "\r\n";
@@ -186,25 +219,27 @@ export class GoogleFileManagerService {
       const metadata = {
           'name': newJsonFile.name,
           'parents': [parentId],
-          'fields': "files(id, modifiedTime)",
-          'mimeType': newJsonFile.mimeType + '\r\n\r\n'
+          'mimeType': newJsonFile.mimeType
       };
       
       const multipartRequestBody = delimiter +  'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) 
         + delimiter + 'Content-Type: ' + newJsonFile.mimeType + '\r\n\r\n' + newJsonFile.contentAsString(true) + close_delim;
 
-      // Convert promise into observeable and return
-      return from(gapi.client.request({
-          'path': '/upload/drive/v3/files',
-          'method': 'POST',
-          'params': {
-              'uploadType': 'multipart'
-          },
-          'headers': {
-              'Content-Type': 'multipart/related; boundary="' + boundary + '"'
-          },
-          'body': multipartRequestBody
-      })) as Observable<any>;
+      return this.oauthService.getClient().pipe(
+        mergeMap(client => {
+          return from(client.request({
+            'path': '/upload/drive/v3/files',
+            'method': 'POST',
+            'params': {
+                'uploadType': 'multipart'
+            },
+            'headers': {
+                'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+            },
+            'body': multipartRequestBody
+          }));
+        })
+      ) as Observable<any>;
     }
 
     // Get our folder ID and merge it into this call.
@@ -216,6 +251,7 @@ export class GoogleFileManagerService {
         return false;
       }),
       map(response => {
+        console.log("result!!!", response);
         newJsonFile.id = response.result.id;
         newJsonFile.modifiedTime = response.result.modifiedTime;
         return newJsonFile;
