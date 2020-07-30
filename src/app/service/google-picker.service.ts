@@ -23,7 +23,7 @@ export class GooglePickerService {
   * Lets users access the file load stream without giving them 
   * access to the source methods (next, error, complete, ect)
   ***/
-  watchLoadedFiles(): Observable<any>{
+  listenFileLoad(): Observable<any>{
     return this.fileLoad$.asObservable();
   }
 

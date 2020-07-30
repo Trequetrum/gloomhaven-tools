@@ -1,14 +1,12 @@
-<div ngIf*="!(oauthService.isSignedIn)">
+<div *ngIf="!(oauthService.isSignedIn)">
     <p>You're not signed in, so I can't access your data/files</p>
     <button (click)="logIn()">
         <mat-icon>login</mat-icon>
         <span>Log in</span>
     </button>
 </div>
-<div ngIf*="!(oauthService.isSignedIn)">
+<div *ngIf="oauthService.isSignedIn">
     <p>Hello {{oauthService.currentUserName}}, these are your files</p>
-
-    <button (click)="loadGooglePicker()">Load Google Drive</button><br><br>
 </div>
 
 <button (click)="loadGooglePicker()">Load Google Drive</button><br><br>

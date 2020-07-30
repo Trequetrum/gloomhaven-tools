@@ -6,6 +6,7 @@ import { DataMemoryService } from '../service/data-memory.service';
 import { CampaignMini } from '../model_data/campaign-mini';
 import { PartyMini } from '../model_data/party-mini';
 import { GoogleOauth2Service } from '../service/google-oauth2.service';
+import { GoogleFileManagerService } from '../service/google-file-manager.service';
 
 
 @Component({
@@ -21,7 +22,7 @@ export class HeaderComponent implements OnInit {
   constructor(
     public dialog: MatDialog, 
     public authService: GoogleOauth2Service,
-    private dataService: DataMemoryService
+    private dataService: DataMemoryService,
   ) {
     this.campaignMinis = dataService.campaignWithCharMinis;
 
@@ -32,6 +33,10 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit(): void {
+  }
+
+  login(): void {
+    this.authService.getUserName().subscribe();
   }
 
   openInitiativeDialog(): void {

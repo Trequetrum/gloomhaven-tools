@@ -86,12 +86,6 @@ export class GooglePickerComponent implements OnInit {
   }
 
   createFile(){
-    /*
-    this.googleFileLoader.createNewJsonFile_old("HeyThere3").subscribe({
-      next: file => console.log("createNewJsonFile: ", file),
-      complete: () => {console.log("Completed createNewJsonFile()")}
-    });*/
-
     this.googleFileLoader.createNewJsonFile("HeyThere2", this.testObj).subscribe({
       next: file => {
         console.log("createNewJsonFile: ", file);
@@ -119,9 +113,38 @@ export class GooglePickerComponent implements OnInit {
     }
   }
 
+  updateFileMetaData(){
+    const file = this.testFile;
+    if(file){
+      file.name = "ThisIsANewNameMEATADATA-gloomtools.json"
+      file.content = this.testObj2;
+      file.active = false;
+      this.googleFileLoader.saveJsonFileMetadata(file).subscribe({
+        next: fileI => {
+          console.log("UpdatedFile: ", fileI);
+        },
+        error: console.error,
+        complete: () => console.log("updateFileMetaData() complete")
+      });
+      console.log("called googleFileLoader.saveJsonFile");
+    }else{
+      console.log("No test File created yet");
+    }
+  }
+
   setFolder(){
     this.googleFileLoader.getGloomtoolsFolderId().subscribe({
       next: id => console.log("getGloomtoolsFolderId(): ", id)
     });
+  }
+
+  loadFiles(){
+    this.googleFileLoader.loadAllAccessibleFiles().subscribe({
+      complete: ()=>console.log("loadAllAccessibleFiles() Complete")
+    });
+  }
+
+  listLoadedFiles(){
+    this.googleFileLoader.listAllLoadedFiles();
   }
 }

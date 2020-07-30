@@ -19,7 +19,7 @@
 </mat-toolbar>
 
 <mat-menu #accountActionsMenu="matMenu" xPosition="before">
-    <button mat-menu-item routerLink="/login/picker">
+    <button mat-menu-item (click)="login()">
         <mat-icon>login</mat-icon>
         <span>Log in</span>
     </button>

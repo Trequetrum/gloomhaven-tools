@@ -1,9 +1,11 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, NgZone } from '@angular/core';
 import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
 import { GooglePickerService } from 'src/app/service/google-picker.service';
 import { GoogleFileManagerService } from 'src/app/service/google-file-manager.service';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { interval } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 
 @Component({
@@ -25,10 +27,12 @@ export class ManageFilesComponent implements OnInit {
 
   ngOnInit() {
     this.dataSource.sort = this.sort;
+    this.googleFileLoader.getAllAccessibleFiles()
+    this.dataSource.data 
   }
 
   logIn(){
-    this.oauthService.getUserName().subscribe(next => console.log(next));
+    this.oauthService.getUserName().subscribe();
   }
 
   loadGooglePicker(){

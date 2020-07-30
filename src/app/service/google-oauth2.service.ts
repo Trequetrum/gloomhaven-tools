@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 
-import { Observable, Subscription, of, from, defer, throwError } from 'rxjs';
+import { Observable, Subscription, of, from, defer, throwError, Subject } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 
 declare var gapi: any;
@@ -36,17 +36,29 @@ export class GoogleOauth2Service {
   // This flag is for both the client and auth2 api as well as client initialization
   apiLoaded = false;
 
+  // Should access this without first checking that isSignedIn === true
+  // getCurrentOauthInstance() is almost always the better idea.
+  currentOauthInstance = null;
+
   // Our OAuth flow should come with the scope we need. So we don't separate signin from
   // scope auth. If we start needing more scopes, we'll need a new way to handle that.
   // For now, if the user signs in and denies us the 'drive.file' scope, we just pass that 
   // error forward any time the user attempts to use those features
   isSignedIn = false;
+  // Observable that tracks sign in and sign out
+  isSignedIn$ = new Subject<boolean>();
 
   // currentUserName gets updated as user signs in and signs out.
   currentUserName = "";
 
-  constructor() {
+  /**
+   * ngZone Lets us re-execute in the angular zone after a google drive 
+   * client call.
+   */
+  constructor(private ngZone: NgZone) {}
 
+  listenSignIn(): Observable<boolean>{
+    return this.isSignedIn$.asObservable();
   }
 
   /***
@@ -85,9 +97,9 @@ export class GoogleOauth2Service {
               this.apiLoaded = true;
 
               // Listen for sign-in state changes.
-              gapi.auth2.getAuthInstance().isSignedIn.listen(isSignedIn => this.updateSigninStatus(isSignedIn));
+              gapi.auth2.getAuthInstance().isSignedIn.listen(isSignedIn => this.ngZone.run(()=>this.updateSigninStatus(isSignedIn)));
               // Handle the initial sign-in state.
-              this.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+              this.ngZone.run(() => this.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get()));
               // Emit completion if not supressed
               if(notify) {
                 observer.next(true);
@@ -117,10 +129,14 @@ export class GoogleOauth2Service {
     // this.isSignedIn = isSignedIn
     if (isSignedIn) {
       this.isSignedIn = true;
+      this.isSignedIn$.next(true);
       this.currentUserName = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName();
+      this.currentOauthInstance = gapi.auth2.getAuthInstance();
     } else {
       this.isSignedIn = false;
+      this.isSignedIn$.next(false);
       this.currentUserName = "";
+      this.currentOauthInstance = null;
     }
   }
 
@@ -145,8 +161,10 @@ export class GoogleOauth2Service {
           // without error we should be safe to emit an AuthInstance
           gapi.auth2.getAuthInstance().signIn().then(() => {
             if(notify){
-              observer.next(gapi.auth2.getAuthInstance());
-              observer.complete();
+              this.ngZone.run(()=>{
+                observer.next(gapi.auth2.getAuthInstance());
+                observer.complete();
+              });
             }
             },(error) => {
               if(notify) observer.error(error)

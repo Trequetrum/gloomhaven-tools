@@ -10,7 +10,8 @@ export class JsonFile {
         public id?: string,
         public name?: string,
         public canEdit?: boolean,
-        public modifiedTime?: string
+        public modifiedTime?: string,
+        public active = false
     ){}
 
     setContents(contents: any) : void{
