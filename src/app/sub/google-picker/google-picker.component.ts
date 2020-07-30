@@ -51,6 +51,8 @@ export class GooglePickerComponent implements OnInit {
     }
   };
 
+
+
   constructor(
     private oauthService: GoogleOauth2Service,
     private googlePicker: GooglePickerService, 
@@ -118,7 +120,6 @@ export class GooglePickerComponent implements OnInit {
     if(file){
       file.name = "ThisIsANewNameMEATADATA-gloomtools.json"
       file.content = this.testObj2;
-      file.active = false;
       this.googleFileLoader.saveJsonFileMetadata(file).subscribe({
         next: fileI => {
           console.log("UpdatedFile: ", fileI);
@@ -146,5 +147,11 @@ export class GooglePickerComponent implements OnInit {
 
   listLoadedFiles(){
     this.googleFileLoader.listAllLoadedFiles();
+  }
+
+  getFileManagerAppFile(){
+    this.googleFileLoader.getFileManagerAppFile().subscribe(file=>{
+      console.log("Log1 on file: ", file);
+    });
   }
 }

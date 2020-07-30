@@ -29,7 +29,8 @@ export class GoogleOauth2Service {
   readonly scopes = [
     'profile',
     'email',
-    'https://www.googleapis.com/auth/drive.file'
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/drive.appdata'
   ].join(' ');
   readonly discoveryDocs = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
 

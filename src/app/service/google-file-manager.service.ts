@@ -3,7 +3,7 @@ import { GoogleOauth2Service } from './google-oauth2.service';
 import { GooglePickerService } from './google-picker.service';
 import { JsonFile } from '../model_data/json-file';
 import { Observable, from, of, throwError, Subject } from 'rxjs';
-import { map, mergeMap, filter, take, mapTo, tap } from 'rxjs/operators';
+import { map, mergeMap, filter, take, mapTo, tap, reduce } from 'rxjs/operators';
 import { StringPair } from '../util/string-pair';
 
 declare var google: any;
@@ -13,77 +13,115 @@ declare var google: any;
 })
 export class GoogleFileManagerService {
 
-  readonly folderName = "GloomhavenToolsDocs";
-
-  documents = new Map<string, JsonFile>();
-  gloomtoolsFolderId: string;
+  /****
+   * Notes:
+   *    A file's webcontentLink = https://drive.google.com/uc?id={{file.id}}&export=download
+   *    which is a possible place to DL the file if it's publicly available, but not available via client
+   * 
+   *    A file's webviewlink = https://drive.google.com/file/d/{{file.id}}/view?usp=drivesdk
+   *
+   * gdrivecontentlink = (docID) => "https://drive.google.com/uc?id=" + docID + "&export=download";
+   * gdriveviewlink = (docID) => "https://drive.google.com/file/d/" + docID + "/view?usp=drivesdk";
+   * ------------------------------------------------------------------------------------------------------
+   * 
+   *    GoogleFileManagerService no longer uses appProperties.active to decide if files should be loaded
+   *    as this causes issues with files being shared. Instead each user stores their own list of files they
+   *    keep loaded or unloaded.
+   ****/
 
   // An observable stream of loaded files.
-  private fileLoad$ = new Subject<JsonFile>();
+  private fileLoad$ = new Subject<{load: boolean, file: JsonFile}>();
+  // Listens to the fileLoad$ stream and keeps a current record
+  readonly currentDocuments = new Map<string, JsonFile>();
 
+  // Name of the folder where we save documents created by this app
+  readonly folderName = "GloomhavenToolsDocs";
+
+  // Users can move files or rename the folder. So long as they don't
+  // create a new file, this ID will never be used or set
+  private gloomtoolsFolderId: string;
+
+  // File Manager Service remembers which files where loaded/unloaded
+  // by the user and attempts to re-create that state the next time the
+  // same user logs back in. This is stored with google drive instead of
+  // in a cookie since file loading already relies on google drive 
+  private fileManagerAppFile: JsonFile;
+
+  /****
+   * Set up our listeners.
+   *  - Load files selected by the google picker
+   *  - Track current files loaded/unloaded
+   *  - Track log in/out events, then load/unload all files
+   ****/
   constructor(
     private oauthService: GoogleOauth2Service,
     private googlePicker: GooglePickerService){
+
+    this.watchLoadedFiles().subscribe(({load, file})=>{
+      if(load){
+        this.currentDocuments.set(file.id, file);
+      }else{
+        this.currentDocuments.delete(file.id);
+      }
+    });
 
     googlePicker.listenFileLoad().subscribe((doc) => this.loadGooglePickerDocument(doc));
 
     oauthService.listenSignIn().subscribe(bool => {
       if(bool){
-        this.loadAllAccessibleFiles().subscribe((file) => this.fileLoad$.next(file));
+        this.loadAllAccessibleFiles().subscribe();
       }else{
-        this.documents.clear();
+        this.clearAllDocuments();
       }
     })
   }
 
-  watchLoadedFiles(): Observable<JsonFile>{
+  /****
+   * this.currentDocuments.clear() done via the fileLoad$ subject
+   ****/
+  clearAllDocuments(): void{
+    for( let file of this.currentDocuments.values()){
+      this.fileLoad$.next({load: false, file});
+    }
+  }
+
+  /***
+   * Multicast Observable that sends messages whenever a file is
+   * loaded loaded/unloaded
+   */
+  watchLoadedFiles(): Observable<{load: boolean, file: JsonFile}>{
     return this.fileLoad$.asObservable();
   }
 
   /****
    * Call back that reacts to files selected by the google picker
+   * 
+   * Ignores docs we already have loaded with a warning
    ****/
-  loadGooglePickerDocument(document: any): void{
+  loadGooglePickerDocument(document: any): void {
     const docID = document[google.picker.Document.ID];
     // const docURL = document[google.picker.Document.URL];
     // const docName = document[google.picker.Document.NAME];
 
     // Only load docs we don't already have
-    if(!this.documents.has(docID)){
-      this.loadById(docID).subscribe({
-        next: file => {
-          this.setNewDocument(file);
-        },
-        error: console.error
-      });
-    }
-    // If a user is loading this doc again, maybe there's an update we missed?
-    else{
-      // TODO: Doc update mechanism?????
-    }
-  }
-
-  /**
-   * As a file to documents[] and emits a new file on the subject.
-   */
-  setNewDocument(file: JsonFile): void{
-    this.documents.set(file.id, file);
-    this.fileLoad$.next(file);
+    if(!this.currentDocuments.has(docID)){
+      this.loadById(docID).subscribe();
+    }else{
+      console.warn("Document ID found in memory: ", docID);
+    }    
   }
 
   /*****
-   * Goes to the user's google drive and tries to load a
-   * file with the given ID.
-   * 
-   * Files that are loaded, will have appProperties.active=true
+   * Goes to the user's google drive and tries to retrieve a
+   * file with the given ID. Emits the file if found
    *****/
-  loadById(docID: string): Observable<JsonFile>{
+  getJsonFileFromDrive(docID: string): Observable<JsonFile>{
     return this.oauthService.getClient().pipe(
       take(1),
       mergeMap(client => 
         from(client.drive.files.get({
           fileId: docID,
-          fields: 'id, name, modifiedTime, capabilities(canRename, canDownload, canModifyContent), appProperties/active'
+          fields: 'id, name, modifiedTime, capabilities(canRename, canDownload, canModifyContent)'
         })).pipe(map(res => [client, res]))
       ),
       take(1),
@@ -92,26 +130,12 @@ export class GoogleFileManagerService {
           throw throwError("Cannot Download File (capabilities.canDownload)", res);
         }
 
-        let active = false;
-        if(res.result.appProperties 
-          && res.result.appProperties.active 
-          == "true") active = true;
-
         return [client, new JsonFile(
           res.result.id,
           res.result.name,
           res.result.capabilities.canRename && res.result.capabilities.canModifyContent,
-          res.result.modifiedTime,
-          active
+          res.result.modifiedTime
         )];
-      }),
-      mergeMap(([client, file]) => {
-        if(file.active){
-          return of([client, file]);
-        }else{
-          file.active = true;
-          return this.saveJsonFileMetadata(file).pipe(mapTo([client, file]));
-        }
       }),
       mergeMap(([client, file]) => 
         from(client.drive.files.get({
@@ -126,7 +150,86 @@ export class GoogleFileManagerService {
           return file;
         }))
       )
-    )
+    );
+  }
+
+  /*****
+   * Goes to the user's google drive and tries to load a
+   * file with the given ID. If this file already exists in currentDocuments,
+   * it will be replaced and any saved changes will be lost unless they've
+   * been kept elsewhere.
+   * 
+   * Files that are loaded, will have appProperties.active=true
+   *****/
+  loadById(docID: string): Observable<boolean>{
+    return this.getJsonFileFromDrive(docID).pipe(
+      tap(file => this.fileLoad$.next({load: true, file})),
+      mapTo(true)
+    );
+  }
+
+  /****
+   * Remove file from currentDocuments, only emits an unload
+   * if a file with that ID currently exists in memory
+   ***/
+  unloadById(docID: string): void{
+    if(this.currentDocuments.has(docID)){
+      this.fileLoad$.next({load: false, file: this.currentDocuments.get(docID)});
+    }
+  }
+
+  /****
+   * Emit a file unload event with the given file. 
+   * As a side effect, file will be removed from currentDocuments if it exists
+   ****/
+  unloadFile(file: JsonFile){
+    this.fileLoad$.next({load: false, file});
+  }
+
+  /***
+   * Emits the google drive file id where we store our file-manager properties.
+   * Performs the nessesary calls to find or create the file.
+   ***/
+  getFileManagerAppFile(): Observable<JsonFile>{
+    if(this.fileManagerAppFile && this.fileManagerAppFile.id.length > 0){
+      return of(this.fileManagerAppFile);
+    }
+
+    return this.oauthService.getClient().pipe(
+      mergeMap(client => {
+        return from(client.drive.files.list({
+          'spaces': 'appDataFolder',
+          'q': "name='file-manager-data.json'",
+          'fields': "files(id)"
+        })).pipe(
+          mergeMap((response: any) => {
+            const appfiles = response.result.files;
+
+            // Check if we already have access to a file with the right name
+            // I suppose there could be more than one such file. If so, emit the first one we find
+            if (appfiles && appfiles.length > 0) {
+              return of(appfiles[0].id);
+            }
+    
+            // If we don't have access to such a file, then create it and return the ID
+            const metadata = {
+              mimeType: 'application/json',
+              name: 'file-manager-data.json',
+              parents: 'appDataFolder',
+              fields: 'id'
+            };
+    
+            return from(client.drive.files.create({
+              resource: metadata
+            })).pipe(
+              map((resp: any) => resp.result.id)
+            );
+          })
+        );
+      }),
+      mergeMap((docID: string) => this.getJsonFileFromDrive(docID)),
+      tap(file => this.fileManagerAppFile = file)
+    );
   }
 
   /***
@@ -186,7 +289,7 @@ export class GoogleFileManagerService {
       mergeMap(client => {
         return from(client.drive.files.list({
           q: "mimeType='application/json' and trashed = false and appProperties has { key='active' and value='true' }",
-          fields: "files(name, id)"
+          fields: "*" //"files(name, id)"
         })).pipe(
           // filter out results that don't have files
           filter((response: any) => {
@@ -197,10 +300,11 @@ export class GoogleFileManagerService {
           // map array of files into stream of (id,name) tuples
           mergeMap(response => {
             const files = response.result.files;
+            //console.log("response.result.files", files);
             // responses without files will already be filtered
             return from(files.map(file => new StringPair(file.id, file.name)));
-          }
-        )) as Observable<StringPair>; // Not the right way to type this?
+          })
+        ) as Observable<StringPair>; // Not the right way to type this?
       })
     );
   }
@@ -224,12 +328,12 @@ export class GoogleFileManagerService {
    * Loads all files that this app has access to and which are are active=true.
    * This overwrites anything we have in memory currently, so use with caution.
    */
-  loadAllAccessibleFiles(): Observable<JsonFile>{
+  loadAllAccessibleFiles(): Observable<boolean>{
     return this.getAllAccessibleFiles().pipe(
       mergeMap(({id})=> {
         return this.loadById(id);
       }),
-      tap((file) => this.setNewDocument(file))
+      reduce((acc, val) => acc && val, true)
     );
   }
 
@@ -239,7 +343,7 @@ export class GoogleFileManagerService {
    */
   listAllLoadedFiles(): void{
     let count = 1;
-    this.documents.forEach((val, key) => console.log("File " + count++ + ": " + val.name));
+    this.currentDocuments.forEach((val, key) => console.log("File " + count++ + ": ", val));
   }
 
   /**
@@ -253,10 +357,7 @@ export class GoogleFileManagerService {
       mergeMap(client => {
         const metadata = {
           'name': file.name,
-          'mimeType': file.mimeType,
-          'appProperties': {
-            'active': file.active,
-          }
+          'mimeType': file.mimeType
         };
         return from(client.request({
           'path': '/drive/v3/files/' + file.id,
@@ -284,10 +385,7 @@ export class GoogleFileManagerService {
         
         const metadata = {
           'name': file.name,
-          'mimeType': file.mimeType,
-          'appProperties': {
-            'active': file.active,
-          }
+          'mimeType': file.mimeType
         };
         
         const multipartRequestBody = delimiter +  'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) 
@@ -319,7 +417,6 @@ export class GoogleFileManagerService {
     // Create a new file. New files start with an empty object 
     // that has an ID
     const newJsonFile = new JsonFile();
-    newJsonFile.active = true;
     newJsonFile.name = name + '-gloomtools.json';
     if(content){
       newJsonFile.originalContent = content;
@@ -338,10 +435,7 @@ export class GoogleFileManagerService {
       const metadata = {
           'name': newJsonFile.name,
           'parents': [parentId],
-          'mimeType': newJsonFile.mimeType,
-          'appProperties': {
-            'active': newJsonFile.active,
-          }
+          'mimeType': newJsonFile.mimeType
       };
       
       const multipartRequestBody = delimiter +  'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) 
@@ -376,7 +470,8 @@ export class GoogleFileManagerService {
         newJsonFile.id = response.result.id;
         newJsonFile.modifiedTime = response.result.modifiedTime;
         return newJsonFile;
-      })
+      }),
+      tap(file => this.fileLoad$.next({load: true, file}))
     );
   }
 }
