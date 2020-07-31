@@ -36,10 +36,15 @@ export class GoogleFileManagerService {
 
   // Name of the folder where we save documents created by this app
   readonly folderName = "GloomhavenToolsDocs";
+  // filename appended
+  readonly fileNameAffix = "-gloomtools";
+
+  // Name of the file where google-file-manager.service keeps it's settings/preferences
+  readonly fileManagerAppFileName = "file-manager-data.json";
 
   // Users can move files or rename the folder. So long as they don't
   // create a new file, this ID will never be used or set
-  private gloomtoolsFolderId: string;
+  private folderId: string;
 
   // File Manager Service remembers which files where loaded/unloaded
   // by the user and attempts to re-create that state the next time the
@@ -57,7 +62,7 @@ export class GoogleFileManagerService {
     private oauthService: GoogleOauth2Service,
     private googlePicker: GooglePickerService){
 
-    this.watchLoadedFiles().subscribe(({load, file})=>{
+    this.listenLoadedFiles().subscribe(({load, file})=>{
       if(load){
         this.currentDocuments.set(file.id, file);
       }else{
@@ -89,7 +94,7 @@ export class GoogleFileManagerService {
    * Multicast Observable that sends messages whenever a file is
    * loaded loaded/unloaded
    */
-  watchLoadedFiles(): Observable<{load: boolean, file: JsonFile}>{
+  listenLoadedFiles(): Observable<{load: boolean, file: JsonFile}>{
     return this.fileLoad$.asObservable();
   }
 
@@ -121,7 +126,7 @@ export class GoogleFileManagerService {
       mergeMap(client => 
         from(client.drive.files.get({
           fileId: docID,
-          fields: 'id, name, modifiedTime, capabilities(canRename, canDownload, canModifyContent)'
+          fields: '*'//'id, name, modifiedTime, capabilities(canRename, canDownload, canModifyContent)'
         })).pipe(map(res => [client, res]))
       ),
       take(1),
@@ -129,7 +134,6 @@ export class GoogleFileManagerService {
         if(!res.result.capabilities.canDownload){
           throw throwError("Cannot Download File (capabilities.canDownload)", res);
         }
-
         return [client, new JsonFile(
           res.result.id,
           res.result.name,
@@ -186,6 +190,8 @@ export class GoogleFileManagerService {
     this.fileLoad$.next({load: false, file});
   }
 
+  
+
   /***
    * Emits the google drive file id where we store our file-manager properties.
    * Performs the nessesary calls to find or create the file.
@@ -195,12 +201,24 @@ export class GoogleFileManagerService {
       return of(this.fileManagerAppFile);
     }
 
+    const name = this.fileManagerAppFileName;
+    return this.getAppDataByName(name).pipe(
+      tap(file => this.fileManagerAppFile = file)
+    );
+  }
+
+  /****
+   * Generic AppData is not tracked by the file manager. This will get a file
+   * from the appDataFolder or create one if it isn't there. This file can be saved
+   * like any other.
+   */
+  getAppDataByName(name: string): Observable<JsonFile>{
     return this.oauthService.getClient().pipe(
       mergeMap(client => {
         return from(client.drive.files.list({
-          'spaces': 'appDataFolder',
-          'q': "name='file-manager-data.json'",
-          'fields': "files(id)"
+          spaces: 'appDataFolder',
+          q: "name='" + name + "'",
+          fields: "files(id)"
         })).pipe(
           mergeMap((response: any) => {
             const appfiles = response.result.files;
@@ -214,11 +232,11 @@ export class GoogleFileManagerService {
             // If we don't have access to such a file, then create it and return the ID
             const metadata = {
               mimeType: 'application/json',
-              name: 'file-manager-data.json',
-              parents: 'appDataFolder',
+              name,
+              parents: ['appDataFolder'],
               fields: 'id'
             };
-    
+            
             return from(client.drive.files.create({
               resource: metadata
             })).pipe(
@@ -227,8 +245,7 @@ export class GoogleFileManagerService {
           })
         );
       }),
-      mergeMap((docID: string) => this.getJsonFileFromDrive(docID)),
-      tap(file => this.fileManagerAppFile = file)
+      mergeMap((docID: string) => this.getJsonFileFromDrive(docID))
     );
   }
 
@@ -236,10 +253,10 @@ export class GoogleFileManagerService {
    * Emits the google drive folder id where we store our files.
    * Performs the nessesary calls to find or create the folder.
    ***/
-  getGloomtoolsFolderId(): Observable<string>{
+  getFolderId(): Observable<string>{
     // If we already have an ID for the folder, this is very straight forward.
-    if(this.gloomtoolsFolderId && this.gloomtoolsFolderId.length > 0){
-      return of(this.gloomtoolsFolderId);
+    if(this.folderId && this.folderId.length > 0){
+      return of(this.folderId);
     }
 
     const folderType = "application/vnd.google-apps.folder";
@@ -288,8 +305,8 @@ export class GoogleFileManagerService {
     return this.oauthService.getClient().pipe(
       mergeMap(client => {
         return from(client.drive.files.list({
-          q: "mimeType='application/json' and trashed = false and appProperties has { key='active' and value='true' }",
-          fields: "*" //"files(name, id)"
+          q: "mimeType='application/json' and trashed = false", // and appProperties has { key='active' and value='true' }",
+          fields: "files(id, name)"
         })).pipe(
           // filter out results that don't have files
           filter((response: any) => {
@@ -300,7 +317,6 @@ export class GoogleFileManagerService {
           // map array of files into stream of (id,name) tuples
           mergeMap(response => {
             const files = response.result.files;
-            //console.log("response.result.files", files);
             // responses without files will already be filtered
             return from(files.map(file => new StringPair(file.id, file.name)));
           })
@@ -324,9 +340,18 @@ export class GoogleFileManagerService {
     });
   }
 
+  /***
+   * Mostly for debugging. 
+   * Logs all loaded files to the console.
+   */
+  listAllLoadedFiles(): void{
+    let count = 1;
+    this.currentDocuments.forEach((val, key) => console.log("File " + count++ + ": ", val));
+  }
+
   /**
-   * Loads all files that this app has access to and which are are active=true.
-   * This overwrites anything we have in memory currently, so use with caution.
+   * Loads all files that this app has access to
+   *    TODO: Don't load files users have explicitly unloaded in the past
    */
   loadAllAccessibleFiles(): Observable<boolean>{
     return this.getAllAccessibleFiles().pipe(
@@ -335,15 +360,6 @@ export class GoogleFileManagerService {
       }),
       reduce((acc, val) => acc && val, true)
     );
-  }
-
-  /***
-   * Mostly for debugging. 
-   * Logs all loaded files to the console.
-   */
-  listAllLoadedFiles(): void{
-    let count = 1;
-    this.currentDocuments.forEach((val, key) => console.log("File " + count++ + ": ", val));
   }
 
   /**
@@ -417,7 +433,7 @@ export class GoogleFileManagerService {
     // Create a new file. New files start with an empty object 
     // that has an ID
     const newJsonFile = new JsonFile();
-    newJsonFile.name = name + '-gloomtools.json';
+    newJsonFile.name = name + this.fileNameAffix +'.json';
     if(content){
       newJsonFile.originalContent = content;
     }else{
@@ -459,7 +475,7 @@ export class GoogleFileManagerService {
     }
 
     // Get our folder ID and merge it into this call.
-    return this.getGloomtoolsFolderId().pipe(
+    return this.getFolderId().pipe(
       mergeMap(folderId => genPostObs(folderId)),
       filter(response => {
         if(response.status == 200) return true;

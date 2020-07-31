@@ -3,6 +3,7 @@ import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
 import { GooglePickerService } from 'src/app/service/google-picker.service';
 import { GoogleFileManagerService } from 'src/app/service/google-file-manager.service';
 import { JsonFile } from 'src/app/model_data/json-file';
+import { mergeMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-google-picker',
@@ -134,7 +135,7 @@ export class GooglePickerComponent implements OnInit {
   }
 
   setFolder(){
-    this.googleFileLoader.getGloomtoolsFolderId().subscribe({
+    this.googleFileLoader.getFolderId().subscribe({
       next: id => console.log("getGloomtoolsFolderId(): ", id)
     });
   }
@@ -150,8 +151,19 @@ export class GooglePickerComponent implements OnInit {
   }
 
   getFileManagerAppFile(){
-    this.googleFileLoader.getFileManagerAppFile().subscribe(file=>{
-      console.log("Log1 on file: ", file);
+    this.googleFileLoader.getFileManagerAppFile().pipe(
+      mergeMap(file => {
+        console.log("file1: ", file);
+        file.setContents({You: "are", a: "guup", doncha: "know"});
+        console.log("file1 content Update: ", file);
+        return this.googleFileLoader.saveJsonFile(file)
+      }),
+      mergeMap(file => {
+        console.log("file2: ", file);
+        return this.googleFileLoader.getJsonFileFromDrive(file.id);
+      })
+    ).subscribe(val => {
+      console.log("Returned Val: ", val);
     });
   }
 }

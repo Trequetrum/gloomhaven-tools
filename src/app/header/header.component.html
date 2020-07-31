@@ -1,3 +1,8 @@
+<!--
+    Maybe header componant should be split up some more.
+    I dunno, troubles for a future day.
+-->
+
 <mat-toolbar role="heading" color="primary" class="app-toolbar">
     <button mat-icon-button class="button-icon" color="accent" aria-label="Account Actions" routerLink="/home">
         <mat-icon>home</mat-icon>
@@ -35,11 +40,10 @@
         <mat-icon>update</mat-icon>
         <span>Initiative</span>
     </button>
-    <!--
-    <button mat-menu-item [matMenuTriggerFor]="campaignSelection"> Campaign </button>
-    <button mat-menu-item [matMenuTriggerFor]="partySelection"> Party </button>
-    <button mat-menu-item [matMenuTriggerFor]="CharacterSelection"> Character </button>
-    -->
+    <button mat-menu-item routerLink="/login/picker">
+        <mat-icon>admin_panel_settings</mat-icon>
+        <span>Button Picker</span>
+    </button>
 </mat-menu>
 
 <mat-menu #actionsAndNavigationMenu="matMenu" xPosition="before">

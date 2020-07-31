@@ -7,6 +7,39 @@
 </div>
 <div *ngIf="oauthService.isSignedIn">
     <p>Hello {{oauthService.currentUserName}}, these are your files</p>
+
+    <!-- Table Showing our files -->
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="Name">
+          <th mat-header-cell *matHeaderCellDef> Name </th>
+          <td mat-cell *matCellDef="let element">Hello There {{8 + 6}}</td>
+        </ng-container>
+
+        <!-- Inferred Type Column -->
+        <ng-container matColumnDef="Inferred Type">
+            <th mat-header-cell *matHeaderCellDef> Inferred Type </th>
+            <td mat-cell *matCellDef="let file"> {{file.name}} </td>
+          </ng-container>
+
+          <!-- Can Edit Column -->
+        <ng-container matColumnDef="Can Edit">
+            <th mat-header-cell *matHeaderCellDef> Can Edit </th>
+            <td mat-cell *matCellDef="let file"> {{file.canEdit}} </td>
+          </ng-container>
+
+          <!-- Load/Unload Column -->
+        <ng-container matColumnDef="Load/Unload">
+            <th mat-header-cell *matHeaderCellDef> Load/Unload </th>
+            <td mat-cell *matCellDef="let file"> {{file.modifiedTime}} </td>
+          </ng-container>
+      
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      
 </div>
 
 <button (click)="loadGooglePicker()">Load Google Drive</button><br><br>
