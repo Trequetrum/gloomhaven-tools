@@ -366,7 +366,6 @@ export class GoogleFileManagerService {
    * Update this file's metadata only.
    * This updates the file's 
    *      - name 
-   *      - appProperties.active status
    */
   saveJsonFileMetadata(file: JsonFile): Observable<boolean>{
     return this.oauthService.getClient().pipe(

@@ -9,37 +9,48 @@
     <p>Hello {{oauthService.currentUserName}}, these are your files</p>
 
     <!-- Table Showing our files -->
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <table style="width: 100%;" mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
-        <!-- Name Column -->
-        <ng-container matColumnDef="Name">
-          <th mat-header-cell *matHeaderCellDef> Name </th>
-          <td mat-cell *matCellDef="let element">Hello There {{8 + 6}}</td>
-        </ng-container>
+      <!--- Note that these columns can be defined in any order.
+            The actual rendered columns are set as a property on the row definition" -->
+    
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> File Name </th>
+        <td mat-cell *matCellDef="let file"> {{file.name}} </td>
+      </ng-container>
 
-        <!-- Inferred Type Column -->
-        <ng-container matColumnDef="Inferred Type">
-            <th mat-header-cell *matHeaderCellDef> Inferred Type </th>
-            <td mat-cell *matCellDef="let file"> {{file.name}} </td>
-          </ng-container>
-
-          <!-- Can Edit Column -->
-        <ng-container matColumnDef="Can Edit">
-            <th mat-header-cell *matHeaderCellDef> Can Edit </th>
-            <td mat-cell *matCellDef="let file"> {{file.canEdit}} </td>
-          </ng-container>
-
-          <!-- Load/Unload Column -->
-        <ng-container matColumnDef="Load/Unload">
-            <th mat-header-cell *matHeaderCellDef> Load/Unload </th>
-            <td mat-cell *matCellDef="let file"> {{file.modifiedTime}} </td>
-          </ng-container>
-      
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
+      <!-- Permission to edit -->
+      <ng-container matColumnDef="edit">
+        <th mat-header-cell *matHeaderCellDef> Edit </th>
+        <td mat-cell *matCellDef="let file"> <mat-icon *ngIf="file.canEdit">check</mat-icon><mat-icon *ngIf="!(file.canEdit)">close</mat-icon> </td>
+      </ng-container>
+    
+      <!-- File Type Column (Character, Campaign, ect) -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef> File Type </th>
+        <td mat-cell *matCellDef="let file"> {{inferType(file)}} </td>
+      </ng-container>
+    
+      <!-- Symbol Column -->
+      <ng-container matColumnDef="loaded">
+        <th mat-header-cell *matHeaderCellDef> Loaded </th>
+        <td mat-cell *matCellDef="let element"> 
+          <button mat-icon-button color="accent" (click)="boop()">
+            <mat-icon>check</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+    
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>    
 
       
 </div>
 
 <button (click)="loadGooglePicker()">Load Google Drive</button><br><br>
+<button (click)="updateDataSource()">Update DataSource</button><br><br>
+
+
+
