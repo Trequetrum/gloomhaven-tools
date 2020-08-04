@@ -17,7 +17,8 @@ import { MatInputModule }           from '@angular/material/input';
 import { MatChipsModule }           from '@angular/material/chips';
 import { MatExpansionModule }       from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTableModule }           from '@angular/material/table'  
+import { MatTableModule }           from '@angular/material/table';
+import { MatSortModule }            from '@angular/material/sort';
 
 import { AppRoutingModule }         from './app-routing.module';
 import { AppComponent }             from './app.component';
@@ -71,7 +72,8 @@ import { ManageFilesComponent } from './page/manage-files/manage-files.component
     MatChipsModule,
     MatExpansionModule,
     MatProgressSpinnerModule,
-    MatTableModule
+    MatTableModule,
+    MatSortModule
     
   ],
   providers: [],

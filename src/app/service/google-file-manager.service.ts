@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { GoogleOauth2Service } from './google-oauth2.service';
 import { GooglePickerService } from './google-picker.service';
 import { JsonFile } from '../model_data/json-file';
@@ -60,7 +60,8 @@ export class GoogleFileManagerService {
    ****/
   constructor(
     private oauthService: GoogleOauth2Service,
-    private googlePicker: GooglePickerService){
+    private googlePicker: GooglePickerService,
+    private ngZone: NgZone){
 
     this.listenLoadedFiles().subscribe(({load, file})=>{
       if(load){
@@ -72,13 +73,27 @@ export class GoogleFileManagerService {
 
     googlePicker.listenFileLoad().subscribe((doc) => this.loadGooglePickerDocument(doc));
 
-    oauthService.listenSignIn().subscribe(bool => {
-      if(bool){
+    oauthService.listenSignIn().subscribe(signin => {
+      if(signin){
         this.loadAllAccessibleFiles().subscribe();
       }else{
         this.clearAllDocuments();
       }
     })
+  }
+
+  /*****
+   * If an observable makes a call to GAPI, we can use this to transform
+   * it into an observabel that makes reenters the angular zone
+   */
+  ngZoneObservable<T>(obs: Observable<T>): Observable<T>{
+    return new Observable<T>(observer => {
+      obs.subscribe({
+        next: val => this.ngZone.run(()=>observer.next(val)),
+        error: err => this.ngZone.run(()=>observer.error(err)),
+        complete: () => this.ngZone.run(()=>observer.complete),
+      });
+    }); 
   }
 
   /****
@@ -121,7 +136,7 @@ export class GoogleFileManagerService {
    * file with the given ID. Emits the file if found
    *****/
   getJsonFileFromDrive(docID: string): Observable<JsonFile>{
-    return this.oauthService.getClient().pipe(
+    let rtnObs = this.oauthService.getClient().pipe(
       take(1),
       mergeMap(client => 
         from(client.drive.files.get({
@@ -155,6 +170,8 @@ export class GoogleFileManagerService {
         }))
       )
     );
+
+    return this.ngZoneObservable(rtnObs);
   }
 
   /*****
@@ -213,7 +230,7 @@ export class GoogleFileManagerService {
    * like any other.
    */
   getAppDataByName(name: string): Observable<JsonFile>{
-    return this.oauthService.getClient().pipe(
+    const rtn = this.oauthService.getClient().pipe(
       mergeMap(client => {
         return from(client.drive.files.list({
           spaces: 'appDataFolder',
@@ -247,6 +264,8 @@ export class GoogleFileManagerService {
       }),
       mergeMap((docID: string) => this.getJsonFileFromDrive(docID))
     );
+
+    return this.ngZoneObservable(rtn);
   }
 
   /***
@@ -262,7 +281,7 @@ export class GoogleFileManagerService {
     const folderType = "application/vnd.google-apps.folder";
     const folderName = this.folderName;
 
-    return this.oauthService.getClient().pipe(
+    const rtn = this.oauthService.getClient().pipe(
       take(1),
       mergeMap((client: any) => {
         return from(client.drive.files.list({
@@ -294,6 +313,8 @@ export class GoogleFileManagerService {
         );
       })
     ) as Observable<string>;
+
+    return this.ngZoneObservable(rtn);
   }
 
   /***
@@ -301,8 +322,7 @@ export class GoogleFileManagerService {
    * access to. Doesn't verify contents or anything.
    ***/
   getAllAccessibleFiles(): Observable<StringPair>{
-
-    return this.oauthService.getClient().pipe(
+    const rtn = this.oauthService.getClient().pipe(
       mergeMap(client => {
         return from(client.drive.files.list({
           q: "mimeType='application/json' and trashed = false", // and appProperties has { key='active' and value='true' }",
@@ -323,6 +343,8 @@ export class GoogleFileManagerService {
         ) as Observable<StringPair>; // Not the right way to type this?
       })
     );
+
+    return this.ngZoneObservable(rtn);
   }
 
   /***
@@ -368,7 +390,7 @@ export class GoogleFileManagerService {
    *      - name 
    */
   saveJsonFileMetadata(file: JsonFile): Observable<boolean>{
-    return this.oauthService.getClient().pipe(
+    const rtn = this.oauthService.getClient().pipe(
       mergeMap(client => {
         const metadata = {
           'name': file.name,
@@ -382,6 +404,8 @@ export class GoogleFileManagerService {
       }),
       mapTo(true)
     );
+
+    return this.ngZoneObservable(rtn);
   }
 
   /***
@@ -395,7 +419,7 @@ export class GoogleFileManagerService {
     const delimiter = "\r\n--" + boundary + "\r\n";
     const close_delim = "\r\n--" + boundary + "--";
 
-    return this.oauthService.getClient().pipe(
+    const rtn = this.oauthService.getClient().pipe(
       mergeMap(client => {
         
         const metadata = {
@@ -420,6 +444,8 @@ export class GoogleFileManagerService {
       }),
       mapTo(file)
     );
+
+    return this.ngZoneObservable(rtn);
   }
 
   /***
@@ -456,7 +482,7 @@ export class GoogleFileManagerService {
       const multipartRequestBody = delimiter +  'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) 
         + delimiter + 'Content-Type: ' + newJsonFile.mimeType + '\r\n\r\n' + newJsonFile.contentAsString(false, true) + close_delim;
 
-      return this.oauthService.getClient().pipe(
+      const rtn = this.oauthService.getClient().pipe(
         mergeMap(client => {
           return from(client.request({
             'path': '/upload/drive/v3/files',
@@ -471,6 +497,8 @@ export class GoogleFileManagerService {
           }));
         })
       ) as Observable<any>;
+
+      return this.ngZoneObservable(rtn);
     }
 
     // Get our folder ID and merge it into this call.

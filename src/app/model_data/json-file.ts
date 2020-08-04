@@ -1,5 +1,3 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
-
 export class JsonFile {
 
     readonly mimeType = "application/json";

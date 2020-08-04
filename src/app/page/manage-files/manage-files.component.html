@@ -5,40 +5,51 @@
         <span>Log in</span>
     </button>
 </div>
-<div *ngIf="oauthService.isSignedIn">
+<div [hidden]="!(oauthService.isSignedIn)">
     <p>Hello {{oauthService.currentUserName}}, these are your files</p>
 
     <!-- Table Showing our files -->
-    <table style="width: 100%;" mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <table style="width: 100%;" mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
 
       <!--- Note that these columns can be defined in any order.
             The actual rendered columns are set as a property on the row definition" -->
     
       <!-- Name Column -->
       <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef> File Name </th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> File Name </th>
         <td mat-cell *matCellDef="let file"> {{file.name}} </td>
       </ng-container>
 
       <!-- Permission to edit -->
       <ng-container matColumnDef="edit">
-        <th mat-header-cell *matHeaderCellDef> Edit </th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Edit </th>
         <td mat-cell *matCellDef="let file"> <mat-icon *ngIf="file.canEdit">check</mat-icon><mat-icon *ngIf="!(file.canEdit)">close</mat-icon> </td>
       </ng-container>
     
       <!-- File Type Column (Character, Campaign, ect) -->
       <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef> File Type </th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> File Type </th>
         <td mat-cell *matCellDef="let file"> {{inferType(file)}} </td>
       </ng-container>
     
-      <!-- Symbol Column -->
+      <!-- loaded Column -->
       <ng-container matColumnDef="loaded">
-        <th mat-header-cell *matHeaderCellDef> Loaded </th>
-        <td mat-cell *matCellDef="let element"> 
-          <button mat-icon-button color="accent" (click)="boop()">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Loaded </th>
+        <td mat-cell *matCellDef="let file"> 
+          <button mat-icon-button color="accent" (click)="load(false, file)">
             <mat-icon>check</mat-icon>
           </button>
+        </td>
+      </ng-container>
+
+      <!-- Synchronize Column -->
+      <ng-container matColumnDef="sync">
+        <th mat-header-cell *matHeaderCellDef> Sync </th>
+        <td mat-cell *matCellDef="let file"> 
+          <button mat-icon-button color="primary" (click)="load(false, file)">
+            <mat-icon>update</mat-icon>
+          </button>
+          {{file.modifiedTime}}
         </td>
       </ng-container>
     
@@ -49,8 +60,11 @@
       
 </div>
 
+<button (click)="updateDataSourcetst()">updateDataSourcetst</button><br><br>
+
+<button (click)="logDate()">Log Date</button><br><br>
+<button (click)="renderTableRows()">Render Rows</button><br><br>
 <button (click)="loadGooglePicker()">Load Google Drive</button><br><br>
-<button (click)="updateDataSource()">Update DataSource</button><br><br>
 
 
 
