@@ -58,6 +58,7 @@ export class ManageFilesComponent implements OnInit, AfterViewInit {
   }
 
   load(load: boolean, file: JsonFile){
+    console.log(file.getContent())
     if(load)
       console.log("Load " + file.name);
     else
@@ -92,9 +93,10 @@ export class ManageFilesComponent implements OnInit, AfterViewInit {
   }
 
   inferType(file: JsonFile): string{
-    if(!file.content) return "Empty";
-    if(file.content.Campaign) return "Campaign";
-    if(file.content.Character) return "Character";
+    if(!file.getContent()) return "Empty";
+    if(file.getContent().Campaign) return "Campaign";
+    if(file.getContent().Character) return "Character";
+    if(file.getContent().Error) return "Parsing Error";
     return "Unknown";
   }
 

@@ -162,9 +162,9 @@ export class GoogleFileManagerService {
           alt: 'media'
         })).pipe(map((res:any) => {
           try{
-            file.setContents(JSON.parse(res.body));
+            file.setContent(JSON.parse(res.body));
           }catch(err){
-            file.setContents({Error: err});
+            file.setContent({Error: err.message});
           }
           return file;
         }))
@@ -428,7 +428,7 @@ export class GoogleFileManagerService {
         };
         
         const multipartRequestBody = delimiter +  'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) 
-          + delimiter + 'Content-Type: ' + file.mimeType + '\r\n\r\n' + file.contentAsString(false, true) + close_delim;
+          + delimiter + 'Content-Type: ' + file.mimeType + '\r\n\r\n' + file.contentAsString(true) + close_delim;
 
         return from(client.request({
           'path': '/upload/drive/v3/files/' + file.id,
@@ -460,11 +460,11 @@ export class GoogleFileManagerService {
     const newJsonFile = new JsonFile();
     newJsonFile.name = name + this.fileNameAffix +'.json';
     if(content){
-      newJsonFile.originalContent = content;
+      newJsonFile.setContent(content);
     }else{
-      newJsonFile.originalContent = {
-        id: newJsonFile.generateNewObjectId()
-      };
+      newJsonFile.setContent({
+        empty: "file ;)"
+      });
     }
     
     const genPostObs = (parentId) => {
@@ -480,7 +480,7 @@ export class GoogleFileManagerService {
       };
       
       const multipartRequestBody = delimiter +  'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) 
-        + delimiter + 'Content-Type: ' + newJsonFile.mimeType + '\r\n\r\n' + newJsonFile.contentAsString(false, true) + close_delim;
+        + delimiter + 'Content-Type: ' + newJsonFile.mimeType + '\r\n\r\n' + newJsonFile.contentAsString(true) + close_delim;
 
       const rtn = this.oauthService.getClient().pipe(
         mergeMap(client => {
