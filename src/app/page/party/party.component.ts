@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
-import { DataMemoryService } from 'src/app/service/data-memory.service';
 import { Campaign } from 'src/app/model_data/campaign';
 import { Party } from 'src/app/model_data/party';
 
@@ -27,8 +26,7 @@ export class PartyComponent implements OnInit {
   globalAchievements: GlobalAchievement[];
 
   constructor(
-    private route: ActivatedRoute, 
-    private data: DataMemoryService,
+    private route: ActivatedRoute,
     private dataAchieve: AchievementsService,
     public dialog: MatDialog){}
 
@@ -52,44 +50,11 @@ export class PartyComponent implements OnInit {
     let campaignLoaded = false;
     let achievementsLoaded = false;
 
-    const checkIfLoaded = () => {
-      if(partyLoaded && campaignLoaded && achievementsLoaded){
-        this.dataLoaded = true;
-      }
-    }
-
     if(params.id){
       if(params.id < 0){
         this.newParty = true;
       }else{
         this.newParty = false;
-
-        this.data.getPartyById(params.id).subscribe({
-          next: prty => {
-            this.party = prty;
-            partyLoaded = true;
-          },
-          complete: checkIfLoaded
-        });
-
-        const achievementsObserver = {
-          next: (globList: GlobalAchievement[]) => {
-            this.globalAchievements = globList;
-            this.globalAchievementsModel = this.wrapGlobalAchievements(globList);
-            achievementsLoaded = true;
-          },
-          complete: checkIfLoaded
-        }
-
-        this.data.getCampaignByPartyId(params.id).subscribe({
-          next: campg => {
-            this.campaign = campg;
-            campaignLoaded = true;
-            this.dataAchieve.getAndFillAchievementsByCampaignId(campg.id)
-              .subscribe(achievementsObserver);
-          },
-          complete: checkIfLoaded
-        });
       }
     }else{
       this.paramError = true;
@@ -146,11 +111,11 @@ export class PartyComponent implements OnInit {
       if(result){
         if(result instanceof GlobalAchievement){
           result.earned = true;
-          this.data.setAchievementsByCampaignId(this.campaign.id, this.globalAchievements);
+          //this.data.setAchievementsByCampaignId(this.campaign.id, this.globalAchievements);
         }else if(result.achievement instanceof GlobalAchievement){
           result.achievement.earned = true;
           result.achievement.selectedOption = result.selected;
-          this.data.setAchievementsByCampaignId(this.campaign.id, this.globalAchievements);
+          //this.data.setAchievementsByCampaignId(this.campaign.id, this.globalAchievements);
         }else{
           // If there's a result, it shouldn't make it here.
           const error = "Unrecognised result from dialogRef.afterClosed() in PartyComponent.onAddGlobalAchievements()";
@@ -183,7 +148,7 @@ export class PartyComponent implements OnInit {
     if(subItem.data){
       if(subItem.data.selected){
         subItem.data.achievement.selectedOption = subItem.data.selected;
-        this.data.setAchievementsByCampaignId(this.campaign.id, this.globalAchievements);
+        //this.data.setAchievementsByCampaignId(this.campaign.id, this.globalAchievements);
       }
     }
   }

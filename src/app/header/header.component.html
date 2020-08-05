@@ -71,14 +71,14 @@
     <ng-template ngFor let-camp [ngForOf]="campaignMinis">
         <div class="appGlm-menu-title" (click)="$event.stopPropagation();">{{camp.name}}</div>
         <ng-template ngFor let-prty [ngForOf]="camp.parties">
-            <button mat-menu-item routerLink="/party" [queryParams]="{id: prty.id}">
+            <button mat-menu-item routerLink="/party" [queryParams]="{name: prty, doc: camp.docId}">
                 <mat-icon>group</mat-icon>
-                <span>{{prty.name}}</span>
+                <span>{{prty}}</span>
             </button>
         </ng-template>
         <hr (click)="$event.stopPropagation();">
     </ng-template>
-    <button mat-menu-item routerLink="/party" [queryParams]="{id: -1}">
+    <button mat-menu-item routerLink="/party" [queryParams]="{name: 'new'}">
         <mat-icon>group_add</mat-icon>
         <span>New Party</span>
     </button>

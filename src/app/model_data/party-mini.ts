@@ -1,5 +1,5 @@
 export class PartyMini {
     constructor(
-        public id: number, 
-        public name:string){ }
+        public id: string, 
+        public name: string){ }
 }

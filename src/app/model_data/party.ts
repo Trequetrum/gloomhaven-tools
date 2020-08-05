@@ -15,6 +15,6 @@ export class Party {
         );
     }
     dev_returnMini(): PartyMini{
-        return new PartyMini(this.id, this.name);
+        return new PartyMini(""+this.id, this.name);
     }
 }

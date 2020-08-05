@@ -17,26 +17,26 @@
       <!-- Name Column -->
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> File Name </th>
-        <td mat-cell *matCellDef="let file"> {{file.name}} </td>
+        <td mat-cell *matCellDef="let info"> {{info.file.name}} </td>
       </ng-container>
 
       <!-- Permission to edit -->
       <ng-container matColumnDef="edit">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Edit </th>
-        <td mat-cell *matCellDef="let file"> <mat-icon *ngIf="file.canEdit">check</mat-icon><mat-icon *ngIf="!(file.canEdit)">close</mat-icon> </td>
+        <td mat-cell *matCellDef="let info"> <mat-icon *ngIf="info.file.canEdit">check</mat-icon><mat-icon *ngIf="!(info.file.canEdit)">close</mat-icon> </td>
       </ng-container>
     
       <!-- File Type Column (Character, Campaign, ect) -->
       <ng-container matColumnDef="type">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> File Type </th>
-        <td mat-cell *matCellDef="let file"> {{inferType(file)}} </td>
+        <td mat-cell *matCellDef="let info"> {{info.type}} </td>
       </ng-container>
     
       <!-- loaded Column -->
       <ng-container matColumnDef="loaded">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Loaded </th>
-        <td mat-cell *matCellDef="let file"> 
-          <button mat-icon-button color="accent" (click)="load(false, file)">
+        <td mat-cell *matCellDef="let info"> 
+          <button mat-icon-button color="accent" (click)="load(false, info)">
             <mat-icon>check</mat-icon>
           </button>
         </td>
@@ -45,11 +45,11 @@
       <!-- Synchronize Column -->
       <ng-container matColumnDef="sync">
         <th mat-header-cell *matHeaderCellDef> Sync </th>
-        <td mat-cell *matCellDef="let file"> 
-          <button mat-icon-button color="primary" (click)="load(false, file)">
+        <td mat-cell *matCellDef="let info"> 
+          <button mat-icon-button color="primary" (click)="load(false, info)">
             <mat-icon>update</mat-icon>
           </button>
-          {{file.modifiedTime}}
+          {{info.file.modifiedTime}}
         </td>
       </ng-container>
     

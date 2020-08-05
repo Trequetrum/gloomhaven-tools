@@ -2,11 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { InputInitiativeComponent } from '../dialog/input-initiative/input-initiative.component';
 import { MenuDisplayItem } from '../model_ui/menu-display-item';
-import { DataMemoryService } from '../service/data-memory.service';
 import { CampaignMini } from '../model_data/campaign-mini';
 import { PartyMini } from '../model_data/party-mini';
 import { GoogleOauth2Service } from '../service/google-oauth2.service';
-import { GoogleFileManagerService } from '../service/google-file-manager.service';
+import { DataService } from '../service/data.service';
 
 
 @Component({
@@ -22,10 +21,8 @@ export class HeaderComponent implements OnInit {
   constructor(
     public dialog: MatDialog, 
     public authService: GoogleOauth2Service,
-    private dataService: DataMemoryService,
+    private data: DataService
   ) {
-    this.campaignMinis = dataService.campaignWithCharMinis;
-
     this.charDisplayList = new Array();
     this.charDisplayList.push(new MenuDisplayItem("Character1", false));
     this.charDisplayList.push(new MenuDisplayItem("Character2", false));
@@ -33,6 +30,7 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.data.listenCampaignMinis().subscribe(minis => this.campaignMinis = minis);
   }
 
   login(): void {

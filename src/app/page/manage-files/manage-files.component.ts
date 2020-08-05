@@ -7,6 +7,8 @@ import { MatTableDataSource, MatTable } from '@angular/material/table';
 import { interval } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { JsonFile } from 'src/app/model_data/json-file';
+import { DataService } from 'src/app/service/data.service';
+import { GloomFile } from 'src/app/model_data/gloom-file';
 
 @Component({
   selector: 'app-manage-files',
@@ -23,30 +25,29 @@ export class ManageFilesComponent implements OnInit, AfterViewInit {
 
   constructor(
     public oauthService: GoogleOauth2Service,
-    private googlePicker: GooglePickerService, 
+    private googlePicker: GooglePickerService,
+    private data: DataService,
     private googleFileLoader: GoogleFileManagerService){}
 
   ngOnInit() {
-    // Set initial files
-    this.dataSource.data = Array.from(this.googleFileLoader.currentDocuments.values());
+    // Listen for file changes
+    this.data.listenForFiles().subscribe(files => this.dataSource.data = files);
   }
 
   ngAfterViewInit(){
     // Set Sort
     this.dataSource.sort = this.sort;
 
-    this.dataSource.sortingDataAccessor = (file: JsonFile, columnDef: string) => {
+    this.dataSource.sortingDataAccessor = (info: GloomFile, columnDef: string) => {
       switch (columnDef) {
-        case 'name': return file.name.toLowerCase();
-        case 'edit': return file.canEdit? 0 : 1;
-        case 'type': return this.inferType(file).toLowerCase();
+        case 'name': return info.file.name.toLowerCase();
+        case 'edit': return info.file.canEdit? 0 : 1;
+        case 'type': return info.type.toLowerCase();
         case 'sync': return 0;
         case 'loaded': return 0;
-        default: return file[columnDef];
+        default: return info[columnDef];
       }
     };
-    // Listen for updates to files
-    this.googleFileLoader.listenLoadedFiles().subscribe(val => this.updateDataSource(val));
   }
 
   renderTableRows(){
@@ -57,30 +58,16 @@ export class ManageFilesComponent implements OnInit, AfterViewInit {
     this.dataSource.data = this.dataSource.data.slice();
   }
 
-  load(load: boolean, file: JsonFile){
-    console.log(file.getContent())
+  load(load: boolean, info: GloomFile){
+    console.log(info.file.getContent())
     if(load)
-      console.log("Load " + file.name);
+      console.log("Load " + info.file.name);
     else
-      console.log("unload " + file.name);
-  }
-
-  updateDataSource({load, file}) {
-
-    if(load){
-      this.dataSource.data.push(file);
-    }else{
-      const i = this.dataSource.data.indexOf(file);
-      if(i >= 0){
-        this.dataSource.data = this.dataSource.data.splice(i, 1);
-      }
-    }
-
-    this.renderTableRows()
+      console.log("unload " + info.file.name);
   }
   
   updateDataSourcetst(){
-    this.dataSource.data.push(new JsonFile("ID", "Tahomas", false, "Bleh"));
+    this.dataSource.data.push(new GloomFile(new JsonFile("ID", "Tahomas", false, "Bleh")));
     this.renderTableRows();
   }
 
@@ -90,14 +77,6 @@ export class ManageFilesComponent implements OnInit, AfterViewInit {
 
   loadGooglePicker(){
     this.googlePicker.showGloomtoolsGooglePicker();
-  }
-
-  inferType(file: JsonFile): string{
-    if(!file.getContent()) return "Empty";
-    if(file.getContent().Campaign) return "Campaign";
-    if(file.getContent().Character) return "Character";
-    if(file.getContent().Error) return "Parsing Error";
-    return "Unknown";
   }
 
   logDate(){

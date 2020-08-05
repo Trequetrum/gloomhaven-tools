@@ -32,7 +32,7 @@ export class GoogleFileManagerService {
   // An observable stream of loaded files.
   private fileLoad$ = new Subject<{load: boolean, file: JsonFile}>();
   // Listens to the fileLoad$ stream and keeps a current record
-  readonly currentDocuments = new Map<string, JsonFile>();
+  currentDocuments = new Map<string, JsonFile>();
 
   // Name of the folder where we save documents created by this app
   readonly folderName = "GloomhavenToolsDocs";
@@ -55,7 +55,6 @@ export class GoogleFileManagerService {
   /****
    * Set up our listeners.
    *  - Load files selected by the google picker
-   *  - Track current files loaded/unloaded
    *  - Track log in/out events, then load/unload all files
    ****/
   constructor(
@@ -63,13 +62,6 @@ export class GoogleFileManagerService {
     private googlePicker: GooglePickerService,
     private ngZone: NgZone){
 
-    this.listenLoadedFiles().subscribe(({load, file})=>{
-      if(load){
-        this.currentDocuments.set(file.id, file);
-      }else{
-        this.currentDocuments.delete(file.id);
-      }
-    });
 
     googlePicker.listenFileLoad().subscribe((doc) => this.loadGooglePickerDocument(doc));
 
@@ -100,7 +92,9 @@ export class GoogleFileManagerService {
    * this.currentDocuments.clear() done via the fileLoad$ subject
    ****/
   clearAllDocuments(): void{
-    for( let file of this.currentDocuments.values()){
+    const docs = this.currentDocuments;
+    this.currentDocuments = new Map<string, JsonFile>();
+    for(const [key, file] of docs){
       this.fileLoad$.next({load: false, file});
     }
   }
@@ -184,7 +178,10 @@ export class GoogleFileManagerService {
    *****/
   loadById(docID: string): Observable<boolean>{
     return this.getJsonFileFromDrive(docID).pipe(
-      tap(file => this.fileLoad$.next({load: true, file})),
+      tap(file => {
+        this.currentDocuments.set(file.id, file);
+        this.fileLoad$.next({load: true, file});
+      }),
       mapTo(true)
     );
   }
@@ -195,7 +192,9 @@ export class GoogleFileManagerService {
    ***/
   unloadById(docID: string): void{
     if(this.currentDocuments.has(docID)){
-      this.fileLoad$.next({load: false, file: this.currentDocuments.get(docID)});
+      const file = this.currentDocuments.get(docID);
+      this.currentDocuments.delete(docID);
+      this.fileLoad$.next({load: false, file});
     }
   }
 
@@ -204,7 +203,11 @@ export class GoogleFileManagerService {
    * As a side effect, file will be removed from currentDocuments if it exists
    ****/
   unloadFile(file: JsonFile){
-    this.fileLoad$.next({load: false, file});
+    if(this.currentDocuments.has(file.id)){
+      this.currentDocuments.delete(file.id);
+    }
+
+    this.fileLoad$.next({load: false, file}); 
   }
 
   
@@ -514,7 +517,10 @@ export class GoogleFileManagerService {
         newJsonFile.modifiedTime = response.result.modifiedTime;
         return newJsonFile;
       }),
-      tap(file => this.fileLoad$.next({load: true, file}))
+      tap(file => {
+        this.currentDocuments.set(file.id, file);
+        this.fileLoad$.next({load: true, file});
+      })
     );
   }
 }
