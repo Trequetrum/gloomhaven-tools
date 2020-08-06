@@ -7,6 +7,7 @@ import { CharScenarioComponent } from './page/char-scenario/char-scenario.compon
 import { PartyComponent } from './page/party/party.component';
 import { GooglePickerComponent } from './sub/google-picker/google-picker.component';
 import { ManageFilesComponent } from './page/manage-files/manage-files.component';
+import { CharacterComponent } from './page/character/character.component';
 
 
 const routes: Routes = [
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'playerref', component : PlayerRefComponent },
   { path: 'player/scenario', component : CharScenarioComponent},
   { path: 'party', component : PartyComponent},
+  { path: 'character', component : CharacterComponent},
   { path: 'login/picker', component: GooglePickerComponent},
   { path: 'login/managefiles', component: ManageFilesComponent},
   // Unkown URLs go to out page not found component at /404

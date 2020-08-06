@@ -11,7 +11,7 @@
     <h1 class="mat-headline">Gloomhaven Tools</h1>
     <span class="appGlm-flex-item-fill-remaining-space"> </span>
 
-    <sup>{{authService.currentUserName}}</sup>
+    <sup>{{authService.listenUsername() | async}}</sup>
     <button mat-icon-button class="button-icon" color="accent" aria-label="Account Actions"
         [matMenuTriggerFor]="accountActionsMenu">
         <mat-icon>account_circle</mat-icon>
@@ -68,7 +68,7 @@
 </mat-menu>
 
 <mat-menu #partySelection="matMenu">
-    <ng-template ngFor let-camp [ngForOf]="campaignMinis">
+    <ng-template ngFor let-camp [ngForOf]="campaignMinis$ | async">
         <div class="appGlm-menu-title" (click)="$event.stopPropagation();">{{camp.name}}</div>
         <ng-template ngFor let-prty [ngForOf]="camp.parties">
             <button mat-menu-item routerLink="/party" [queryParams]="{name: prty, doc: camp.docId}">
@@ -85,12 +85,12 @@
 </mat-menu>
 
 <mat-menu #CharacterSelection="matMenu">
-    <button mat-menu-item [disabled]="disp.disabled" *ngFor="let disp of charDisplayList;" routerLink="/character" [queryParams]="{id: -1}">
-        <mat-icon *ngIf="!(disp.disabled)">person</mat-icon>
-        <span>{{disp.text}}</span>
+    <button mat-menu-item *ngFor="let chara of characterMinis$ | async;" routerLink="/character" [queryParams]="{doc: chara.docId}">
+        <mat-icon>person</mat-icon>
+        <span>{{chara.name}}</span>
     </button>
     <hr (click)="$event.stopPropagation();">
-    <button mat-menu-item routerLink="/character" [queryParams]="{id: -1}">
+    <button mat-menu-item routerLink="/character" [queryParams]="{doc: 'new'}">
         <mat-icon>person_add</mat-icon>
         <span>New Character</span>
     </button>

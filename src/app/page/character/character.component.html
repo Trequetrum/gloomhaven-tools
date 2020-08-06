@@ -1,1 +1,13 @@
 <p>character works!</p>
+
+<div *ngIf="newCharacter"><p>You're making a new character</p></div>
+
+<div *ngIf="!newCharacter && !character"><p>Woops, you don't have access to a google drive doc with ID: {{docId}}</p></div>
+
+<div *ngIf="!newCharacter && character">
+    <p>This is info about {{getCharacter().name}}</p>
+    <p>{{getCharacter().name}}'s class is {{getCharacter().class}}</p>
+</div>
+
+
+<br><br><button (click)="reresolveDocId()">re-resolve</button><br><br>

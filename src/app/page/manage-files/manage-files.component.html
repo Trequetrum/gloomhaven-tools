@@ -1,12 +1,12 @@
-<div *ngIf="!(oauthService.isSignedIn)">
+<div *ngIf="!(oauthService.listenSignIn() | async)">
     <p>You're not signed in, so I can't access your data/files</p>
     <button (click)="logIn()">
         <mat-icon>login</mat-icon>
         <span>Log in</span>
     </button>
 </div>
-<div [hidden]="!(oauthService.isSignedIn)">
-    <p>Hello {{oauthService.currentUserName}}, these are your files</p>
+<div [hidden]="!(oauthService.listenSignIn() | async)">
+    <p>Hello {{oauthService.listenUsername() | async}}, these are your files</p>
 
     <!-- Table Showing our files -->
     <table style="width: 100%;" mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">

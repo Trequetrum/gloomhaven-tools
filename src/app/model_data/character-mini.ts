@@ -1,7 +1,5 @@
 export class CharacterMini {
-
-    uriPath: string;
-    name: string;
-    class: string;
-
+    constructor(
+        public docId: string,
+        public name: string){}
 }

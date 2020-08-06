@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import { Observable, Subscription, of, from, defer, throwError, Subject } from 'rxjs';
+import { Observable, Subscription, of, from, defer, throwError, Subject, BehaviorSubject } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 
 declare var gapi: any;
@@ -45,12 +45,13 @@ export class GoogleOauth2Service {
   // scope auth. If we start needing more scopes, we'll need a new way to handle that.
   // For now, if the user signs in and denies us the 'drive.file' scope, we just pass that 
   // error forward any time the user attempts to use those features
-  isSignedIn = false;
+  
   // Observable that tracks sign in and sign out
-  isSignedIn$ = new Subject<boolean>();
-
-  // currentUserName gets updated as user signs in and signs out.
-  currentUserName = "";
+  private isSignedIn$ = new BehaviorSubject<boolean>(false);
+  // Observable that tracks the username. An empty string
+  // means there is no user signed in (though tracking that
+  // through isSignedIn$ is better)
+  username$ = new BehaviorSubject<string>("");
 
   /**
    * ngZone Lets us re-execute in the angular zone after a google drive 
@@ -60,6 +61,9 @@ export class GoogleOauth2Service {
 
   listenSignIn(): Observable<boolean>{
     return this.isSignedIn$.asObservable();
+  }
+  listenUsername(): Observable<string>{
+    return this.username$.asObservable();
   }
 
   /***
@@ -129,14 +133,12 @@ export class GoogleOauth2Service {
   updateSigninStatus(isSignedIn) {
     // this.isSignedIn = isSignedIn
     if (isSignedIn) {
-      this.isSignedIn = true;
       this.isSignedIn$.next(true);
-      this.currentUserName = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName();
+      this.username$.next(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName());
       this.currentOauthInstance = gapi.auth2.getAuthInstance();
     } else {
-      this.isSignedIn = false;
       this.isSignedIn$.next(false);
-      this.currentUserName = "";
+      this.username$.next("");
       this.currentOauthInstance = null;
     }
   }
@@ -151,7 +153,7 @@ export class GoogleOauth2Service {
       let clientInitSubscription: Subscription;
 
       if(this.apiLoaded){
-        if(this.isSignedIn){
+        if(this.isSignedIn$.getValue()){
           // Easiest Scenario. We're ready to go, so just emit an AuthInstance
           if(notify){
             observer.next(gapi.auth2.getAuthInstance());
@@ -230,7 +232,7 @@ export class GoogleOauth2Service {
    */ 
   signOut(): void{
     // oauthInstance.signOut();
-    if(this.isSignedIn){
+    if(this.isSignedIn$.getValue()){
       this.getOauthInstance().subscribe({
         next: oauthInstance => oauthInstance.signOut(),
         error: console.error
@@ -248,7 +250,7 @@ export class GoogleOauth2Service {
    */ 
   revokeAccess(): void {
     // oauthInstance.disconnect();
-    if(this.isSignedIn){
+    if(this.isSignedIn$.getValue()){
       this.getOauthInstance().subscribe({
         next: oauthInstance => oauthInstance.disconnect(),
         error: console.error
