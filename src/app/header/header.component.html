@@ -24,19 +24,23 @@
 </mat-toolbar>
 
 <mat-menu #accountActionsMenu="matMenu" xPosition="before">
-    <button mat-menu-item (click)="login()">
+    <button *ngIf="!(authService.listenSignIn() | async)" mat-menu-item (click)="signIn()">
         <mat-icon>login</mat-icon>
-        <span>Log in</span>
+        <span>Log In</span>
     </button>
-    <button mat-menu-item routerLink="/login/managefiles">
+    <button *ngIf="authService.listenSignIn() | async" mat-menu-item (click)="signOut()">
+        <mat-icon>power_settings_new</mat-icon>
+        <span>Log Out</span>
+    </button>
+    <button *ngIf="authService.listenSignIn() | async" mat-menu-item routerLink="/login/managefiles">
         <mat-icon>folder_special</mat-icon>
         <span>Manage Files</span>
     </button>
-    <button mat-menu-item routerLink="/player/scenario">
+    <button *ngIf="authService.listenSignIn() | async" mat-menu-item routerLink="/player/scenario">
         <mat-icon>folder_shared</mat-icon>
         <span>Scenario</span>
     </button>
-    <button mat-menu-item (click)="openInitiativeDialog()">
+    <button *ngIf="authService.listenSignIn() | async" mat-menu-item (click)="openInitiativeDialog()">
         <mat-icon>update</mat-icon>
         <span>Initiative</span>
     </button>
@@ -47,8 +51,8 @@
 </mat-menu>
 
 <mat-menu #actionsAndNavigationMenu="matMenu" xPosition="before">
-    <button mat-menu-item [matMenuTriggerFor]="partySelection"> Party </button>
-    <button mat-menu-item [matMenuTriggerFor]="CharacterSelection"> Character </button>
+    <button *ngIf="authService.listenSignIn() | async" mat-menu-item [matMenuTriggerFor]="partySelection"> Party </button>
+    <button *ngIf="authService.listenSignIn() | async" mat-menu-item [matMenuTriggerFor]="CharacterSelection"> Character </button>
     <button mat-menu-item routerLink="/playerref"> 
         <mat-icon>school</mat-icon>
         <span>Player Reference</span>
@@ -57,7 +61,7 @@
         <mat-icon>store</mat-icon>
         <span>Item Shop</span>
     </button>
-    <button mat-menu-item>
+    <button *ngIf="authService.listenSignIn() | async" mat-menu-item>
         <mat-icon fontSet="material-icons-outlined">group</mat-icon>
         <span>Initiative Tracker</span>
     </button>

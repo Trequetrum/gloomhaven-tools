@@ -166,4 +166,8 @@ export class GooglePickerComponent implements OnInit {
       console.log("Returned Val: ", val);
     });
   }
+
+  initClient(){
+    this.oauthService.initClient().subscribe(()=>console.log("HHEHEHE"));
+  }
 }

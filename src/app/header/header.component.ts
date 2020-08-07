@@ -28,14 +28,21 @@ export class HeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Try to authenticate the user they have a currently active google session and it's signed into this app
+    this.authService.initClient().subscribe();
+
     // Get campaign minis. Filter out results that don't have any parties. We don't need to show those in the header.
     this.campaignMinis$ = this.data.listenCampaignMinis().pipe(map(minis=>minis.filter(mini=>mini.parties.length > 0)));
     // get charater minis. If we want to limit which characters are displayed in the header, this is the place to do it
     this.characterMinis$ = this.data.listenCharacterMinis();
   }
 
-  login(): void {
+  signIn(): void {
     this.authService.getUserName().subscribe();
+  }
+
+  signOut(): void {
+    this.authService.signOut();
   }
 
   openInitiativeDialog(): void {

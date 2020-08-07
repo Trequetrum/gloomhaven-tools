@@ -1,70 +1,77 @@
-<div *ngIf="!(oauthService.listenSignIn() | async)">
+<div class="div-md-centered-text appGlm-flex-column" *ngIf="!(oauthService.listenSignIn() | async)">
+  <div class="appGlm-flex-column appGlm-div-rcorners">
     <p>You're not signed in, so I can't access your data/files</p>
-    <button (click)="logIn()">
+    <button mat-raised-button (click)="logIn()">
         <mat-icon>login</mat-icon>
-        <span>Log in</span>
+        <span> Log in</span>
     </button>
+    <br>
+  </div>
 </div>
+
 <div [hidden]="!(oauthService.listenSignIn() | async)">
-    <p>Hello {{oauthService.listenUsername() | async}}, these are your files</p>
+  <div class="div-md-centered-text appGlm-flex-column">
+    <div class="appGlm-flex-column appGlm-div-rcorners">
+      <button mat-raised-button (click)="loadGooglePicker()" style="width:fit-content; text-align:left; margin-bottom: 1em;">
+        <img style="max-width: 25%; max-height: 25%; width: fit-content;" 
+          src="https://firebasestorage.googleapis.com/v0/b/drive-assets.google.com.a.appspot.com/o/Asset%20-%20Google%20Drive%20Lockup.svg?alt=media" 
+          alt="google Drive Logo">
+      </button>
 
-    <!-- Table Showing our files -->
-    <table style="width: 100%;" mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+      <!-- Table Showing our files -->
+      <table style="width: 100%;" mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
 
-      <!--- Note that these columns can be defined in any order.
-            The actual rendered columns are set as a property on the row definition" -->
-    
-      <!-- Name Column -->
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> File Name </th>
-        <td mat-cell *matCellDef="let info"> {{info.file.name}} </td>
-      </ng-container>
-
-      <!-- Permission to edit -->
-      <ng-container matColumnDef="edit">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Edit </th>
-        <td mat-cell *matCellDef="let info"> <mat-icon *ngIf="info.file.canEdit">check</mat-icon><mat-icon *ngIf="!(info.file.canEdit)">close</mat-icon> </td>
-      </ng-container>
-    
-      <!-- File Type Column (Character, Campaign, ect) -->
-      <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> File Type </th>
-        <td mat-cell *matCellDef="let info"> {{info.type}} </td>
-      </ng-container>
-    
-      <!-- loaded Column -->
-      <ng-container matColumnDef="loaded">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Loaded </th>
-        <td mat-cell *matCellDef="let info"> 
-          <button mat-icon-button color="accent" (click)="load(false, info)">
-            <mat-icon>check</mat-icon>
-          </button>
-        </td>
-      </ng-container>
-
-      <!-- Synchronize Column -->
-      <ng-container matColumnDef="sync">
-        <th mat-header-cell *matHeaderCellDef> Sync </th>
-        <td mat-cell *matCellDef="let info"> 
-          <button mat-icon-button color="primary" (click)="load(false, info)">
-            <mat-icon>update</mat-icon>
-          </button>
-          {{info.file.modifiedTime}}
-        </td>
-      </ng-container>
-    
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>    
-
+        <!--- Note that these columns can be defined in any order.
+              The actual rendered columns are set as a property on the row definition" -->
       
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> File Name </th>
+          <td mat-cell *matCellDef="let info"> {{info.file.name}} </td>
+        </ng-container>
+
+        <!-- Permission to edit -->
+        <ng-container matColumnDef="edit">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Edit </th>
+          <td mat-cell *matCellDef="let info"> <mat-icon *ngIf="info.file.canEdit">check</mat-icon><mat-icon *ngIf="!(info.file.canEdit)">close</mat-icon> </td>
+        </ng-container>
+      
+        <!-- File Type Column (Character, Campaign, ect) -->
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> File Type </th>
+          <td mat-cell *matCellDef="let info"> {{info.type}} </td>
+        </ng-container>
+      
+        <!-- loaded Column -->
+        <ng-container matColumnDef="loaded">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Loaded </th>
+          <td mat-cell *matCellDef="let info"> 
+            <button mat-icon-button color="accent" (click)="load(false, info)">
+              <mat-icon>check</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Synchronize Column -->
+        <ng-container matColumnDef="sync">
+          <th mat-header-cell *matHeaderCellDef> Sync </th>
+          <td mat-cell *matCellDef="let info"> 
+            <button mat-icon-button color="primary" (click)="load(false, info)">
+              <mat-icon>update</mat-icon>
+            </button>
+            {{info.file.modifiedTime}}
+          </td>
+        </ng-container>
+      
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>    
+
+
+    </div>
+  </div>
 </div>
 
-<button (click)="updateDataSourcetst()">updateDataSourcetst</button><br><br>
-
-<button (click)="logDate()">Log Date</button><br><br>
-<button (click)="renderTableRows()">Render Rows</button><br><br>
-<button (click)="loadGooglePicker()">Load Google Drive</button><br><br>
 
 
 

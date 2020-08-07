@@ -26,26 +26,30 @@ export class CharacterComponent implements OnInit {
     }
 
   ngOnInit(): void {
+    // Listen to query parameters to know which character to load
     this.route.queryParams.pipe(filter(params => params.doc))
       .subscribe(params => this.resolveDocId(params.doc));
 
+    // Track sign-in state. 
     this.signIn$ = this.authService.listenSignIn();
-    this.authService.listenSignIn().pipe(filter(val=>val))
-      .subscribe(() => this.resolveDocId(this.docId? this.docId : "none"));
+    
+    // If our character isn't loaded yet, we can look to new files
+    // as a possible source
+    this.data.listenForFiles().subscribe(()=>{
+      if(!this.character && !this.newCharacter){
+        this.resolveDocId(this.docId);
+      }
+    });
   }
 
   resolveDocId(docId: string){
-    console.log("resolve ", docId);
     this.docId = docId;
     this.newCharacter = false;
-
     if(docId === "new"){
       this.newCharacter = true;
-    }else if(docId === "none"){
     }else{
       this.character = this.data.getCharacterByDocId(docId);
     }
-
     console.log("character: ", this.getCharacter(), this.character);
   }
 
