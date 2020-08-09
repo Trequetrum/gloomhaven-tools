@@ -13,6 +13,7 @@ import { MatIconModule }            from '@angular/material/icon';
 import { MatListModule }            from '@angular/material/list';
 import { MatDialogModule }          from '@angular/material/dialog';
 import { MatFormFieldModule }       from '@angular/material/form-field';
+import { MatSelectModule }          from '@angular/material/select';
 import { MatInputModule }           from '@angular/material/input';
 import { MatChipsModule }           from '@angular/material/chips';
 import { MatExpansionModule }       from '@angular/material/expansion';
@@ -68,6 +69,7 @@ import { ManageFilesComponent } from './page/manage-files/manage-files.component
     MatMenuModule,
     MatDialogModule,
     MatFormFieldModule,
+    MatSelectModule,
     MatInputModule,
     MatChipsModule,
     MatExpansionModule,
