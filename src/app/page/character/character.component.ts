@@ -5,7 +5,6 @@ import { GloomFile } from 'src/app/model_data/gloom-file';
 import { DataService } from 'src/app/service/data.service';
 import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
 import { Observable } from 'rxjs';
-import { nullSafeIsEquivalent } from '@angular/compiler/src/output/output_ast';
 
 @Component({
   selector: 'app-character',
@@ -16,7 +15,7 @@ export class CharacterComponent implements OnInit {
 
   newCharacter = true;
   docId: string;
-  character: GloomFile;
+  characterFile: GloomFile;
   signIn$: Observable<boolean>;
 
   constructor(private route: ActivatedRoute,
@@ -24,6 +23,12 @@ export class CharacterComponent implements OnInit {
     public data: DataService) { 
       this.docId = "none";
     }
+
+  get character(): any {
+    if(this.characterFile)
+      return this.characterFile.file.getContent().Character;
+    return null;
+  }
 
   ngOnInit(): void {
     // Listen to query parameters to know which character to load
@@ -36,7 +41,7 @@ export class CharacterComponent implements OnInit {
     // If our character isn't loaded yet, we can look to new files
     // as a possible source
     this.data.listenForFiles().subscribe(()=>{
-      if(!this.character && !this.newCharacter){
+      if(!this.characterFile && !this.newCharacter){
         this.resolveDocId(this.docId);
       }
     });
@@ -48,26 +53,13 @@ export class CharacterComponent implements OnInit {
     if(docId === "new"){
       this.newCharacter = true;
     }else{
-      this.character = this.data.getCharacterByDocId(docId);
+      this.characterFile = this.data.getCharacterByDocId(docId);
     }
-    console.log("character: ", this.getCharacter(), this.character);
+    console.log("character: ", this.character, this.characterFile);
   }
 
   reresolveDocId(){
     this.resolveDocId(this.docId);
-  }
-
-  getCharacter(): any {
-    if(this.character)
-      return this.character.file.getContent().Character;
-
-    return null;
-  }
-
-  hello(): string {
-    if(this.character)
-      return this.character.file.getContent().Character;
-    return "No Character";
   }
 
 }

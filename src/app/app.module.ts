@@ -35,6 +35,7 @@ import { CharacterComponent } from './page/character/character.component';
 import { SelectChiplistDialogComponent } from './dialog/select-chiplist-dialog/select-chiplist-dialog.component';
 import { GooglePickerComponent } from './sub/google-picker/google-picker.component';
 import { ManageFilesComponent } from './page/manage-files/manage-files.component';
+import { CreateCharacterFormComponent } from './form/create-character-form/create-character-form.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import { ManageFilesComponent } from './page/manage-files/manage-files.component
     CharacterComponent,
     SelectChiplistDialogComponent,
     GooglePickerComponent,
-    ManageFilesComponent
+    ManageFilesComponent,
+    CreateCharacterFormComponent
   ],
   imports: [
     FormsModule,

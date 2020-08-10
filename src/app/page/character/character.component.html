@@ -1,30 +1,15 @@
 <p>character works!</p>
 
-<div *ngIf="newCharacter"><p>You're making a new character</p>
-    <form>
-        <mat-form-field appearance="fill" color="accent">
-            <mat-label>Name</mat-label>
-            <input matInput>
-        </mat-form-field>
-        <br>
-        <mat-form-field appearance="fill" color="accent">
-            <mat-label>Class</mat-label>
-            <mat-select>
-              <mat-option value="Class1">Class1</mat-option>
-              <mat-option value="Class2">Class2</mat-option>
-              <mat-option value="Class3">Class3</mat-option>
-              <mat-option value="Class4">Class4</mat-option>
-            </mat-select>
-          </mat-form-field>
-    </form>
-
+<div *ngIf="newCharacter">
+    <p>You're making a new character</p>
+    <app-create-character-form></app-create-character-form>
 </div>
 
 <div *ngIf="!newCharacter && !character"><p>Woops, you don't have access to a google drive doc with ID: {{docId}}</p></div>
 
 <div *ngIf="!newCharacter && character">
-    <p>This is info about {{getCharacter().name}}</p>
-    <p>{{getCharacter().name}}'s class is {{getCharacter().class}}</p>
+    <p>This is info about {{character.name}}</p>
+    <p>{{character.name}}'s class is {{character.class}}</p>
 </div>
 
 <br><br><button mat-raised-button (click)="reresolveDocId()">re-resolve</button><br><br>
