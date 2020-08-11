@@ -9,9 +9,9 @@ reasonably well documented state in the master branch. Usage details/documentati
 is a must-have for once the first features are implemented and friends are 
 checking it out and giving feedback.
 
-The most recent production build can be found at: 
-https://trequetrum.github.io/GloomhavenTools/. 
-    - The last build was Tue August 11th 2020. It has basic Google Drive 
+The most recent production build can be found here ([Gloomhaven Tools](https://trequetrum.github.io/GloomhavenTools/)) at: 
+https://trequetrum.github.io/GloomhavenTools/
+* The last build was Tue August 11th 2020. It has basic Google Drive 
       Sign in implemented with some very basic document management. 
 
 ## Features for this project:
@@ -23,24 +23,24 @@ https://trequetrum.github.io/GloomhavenTools/.
     * Keep track of an active scenario as a group
 
 ## Learning goals for this project:
-    * Consume Google Drive V3 REST API to read and save user data
-    * Patch semantics and automatic merge conflict resolution for updates
-    * Change detection via Polling (Time cleverly if possible.) 
-    * Push notifications would be nice but Github is a static page, 
-      so it doesn't support a webhook callback.
-    * TypeScript/Javascript is multiparadigm: Prefer functional 
-      over imperative
- 	    * Map data as streams from API calls to displayed values via 
-          Observables & Angular Pipes 
-    * Follow Angular’s framework: 
-        * Keep code modular
-        * Testing!
-        * Package size quotas to keep app loading fast(er)/reasonable
-    * [ . . . ]
+* Consume Google Drive V3 REST API to read and save user data
+* Patch semantics and automatic merge conflict resolution for updates
+* Change detection via Polling (Time cleverly if possible.) 
+* Push notifications would be nice but Github is a static page, 
+    so it doesn't support a webhook callback.
+* TypeScript/Javascript is multiparadigm: Prefer functional 
+    over imperative
+    * Map data as streams from API calls to displayed values via 
+        Observables & Angular Pipes 
+* Follow Angular’s framework: 
+    * Keep code modular
+    * Testing!
+    * Package size quotas to keep app loading fast(er)/reasonable
+* [ . . . ]
 
 ## Notes
-    1. Command to build for GitHub Pages :)
-        * ng build --prod --output-path docs --base-href /GloomhavenTools/
+1. Command to build for GitHub Pages :)
+    * ng build --prod --output-path docs --base-href /GloomhavenTools/
 
 # Angular Development
 
