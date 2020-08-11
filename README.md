@@ -10,8 +10,8 @@ is a must-have for once the first features are implemented and friends are
 checking it out and giving feedback.
 
 The most recent production build can be found here ([Gloomhaven Tools](https://trequetrum.github.io/GloomhavenTools/)) at: 
-https://trequetrum.github.io/GloomhavenTools/
-* The last build was Tue August 11th 2020. It has basic Google Drive 
+* https://trequetrum.github.io/GloomhavenTools/
+* The last build was **Tue August 11th 2020**. It has basic Google Drive 
       Sign in implemented with some very basic document management. 
 
 ## Features for this project:
