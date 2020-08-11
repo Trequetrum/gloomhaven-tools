@@ -1,8 +1,32 @@
 # GloomhavenTools
 
-This project is just a few days (DAYS, I tell ya!) old and may eventually become a full-fledged front-end for RestfulGloom. Right now, it's being designed to help test the RestfulGloom API. It's also giving its author(s) a run at learning a font-end web-dev framework. Beats tinkering with Postman all day long.
+Learning Angular and building a Gloomhaven app at the same time :)
 
-What does this all mean? The 'font-end' doesn't look like much, but run the thing with a web-app scanner like OWASP zed attack proxy (ZAP) and you're gonna learn a thing or two right quick! 
+## Documentation:
+
+There’s no official documentation yet. The code should be written/maintained in a reasonably well documented state in the master branch. Usage details/documentation is a must-have for once the first features are implemented and friends are checking it out and giving feedback.
+The most recent production build (ng build --prod --output-path docs --base-href /GloomhavenTools/) can be found at https://trequetrum.github.io/GloomhavenTools/. The last build was Tue August 11th 2020. It has basic Google Drive Sign in implemented with some very basic document management. 
+
+## Features for this project:
+    - Glorified Gloomhaven document editor with built-in collaboration
+    - Share info with friends by sharing Google Drive documents (Read/Write permissions handled via GDrive).
+    - Keep track of your Gloomhaven character
+    - Keep track of your Campaign and Parties as a group
+	    - Keep track of an active scenario as a group
+
+## Learning goals for this project:
+    - Consume Google Drive V3 REST API to read and save user data
+    - Patch semantics and automatic merge conflict resolution for updates
+    - Change detection via Polling (Time cleverly if possible.) 
+    - Push notifications would be nice but Github is a static page, so it doesn't support a webhook callback.
+    - TypeScript/Javascript is multiparadigm: Prefer functional over imperative
+ 	    - Map data as streams from API calls to displayed values via Observables & Angular Pipes 
+    - Follow Angular’s framework: 
+        - Keep code modular
+        - Testing!
+        - Package size quotas to keep app loading fast(er)/reasonable
+    - [ . . . ]
+
 
 # Angular Development
 
