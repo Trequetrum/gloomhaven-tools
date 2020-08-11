@@ -20,7 +20,7 @@ The most recent production build can be found here ([Gloomhaven Tools](https://t
     (In this way, Read/Write permissions are handled via GDrive)
 * Keep track of your Gloomhaven character
 * Keep track of your Campaign and Parties as a group
-    * Keep track of an active scenario as a group
+* Keep track of an active scenario as a group
 
 ## Learning goals for this project:
 * Consume Google Drive V3 REST API to read and save user data
