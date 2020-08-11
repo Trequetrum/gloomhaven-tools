@@ -16,10 +16,11 @@
         <img style="max-width: 25%; max-height: 25%; width: fit-content;" 
           src="https://firebasestorage.googleapis.com/v0/b/drive-assets.google.com.a.appspot.com/o/Asset%20-%20Google%20Drive%20Lockup.svg?alt=media" 
           alt="google Drive Logo">
+        <mat-icon>arrow_right</mat-icon>
       </button>
 
       <!-- Table Showing our files -->
-      <table style="width: 100%;" mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+      <table *ngIf="this.dataSource.data.length > 0" style="width: 100%;" mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
 
         <!--- Note that these columns can be defined in any order.
               The actual rendered columns are set as a property on the row definition" -->

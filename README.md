@@ -26,7 +26,7 @@ The most recent production build can be found here ([Gloomhaven Tools](https://t
 * Consume Google Drive V3 REST API to read and save user data
 * Patch semantics and automatic merge conflict resolution for updates
 * Change detection via Polling (Time cleverly if possible.) 
-* Push notifications would be nice but Github is a static page, 
+    * Push notifications would be nice but Github is a static page, 
     so it doesn't support a webhook callback.
 * TypeScript/Javascript is multiparadigm: Prefer functional 
     over imperative
