@@ -15,29 +15,32 @@ https://trequetrum.github.io/GloomhavenTools/.
       Sign in implemented with some very basic document management. 
 
 ## Features for this project:
-    - Glorified Gloomhaven document editor with built-in collaboration
-        - Share info with friends by sharing Google Drive documents. 
-        (In this way, Read/Write permissions are handled via GDrive)
-    - Keep track of your Gloomhaven character
-    - Keep track of your Campaign and Parties as a group
-	    - Keep track of an active scenario as a group
+* Glorified Gloomhaven document editor with built-in collaboration
+    * Share info with friends by sharing Google Drive documents. 
+    (In this way, Read/Write permissions are handled via GDrive)
+* Keep track of your Gloomhaven character
+* Keep track of your Campaign and Parties as a group
+    * Keep track of an active scenario as a group
 
 ## Learning goals for this project:
-    - Consume Google Drive V3 REST API to read and save user data
-    - Patch semantics and automatic merge conflict resolution for updates
-    - Change detection via Polling (Time cleverly if possible.) 
-    - Push notifications would be nice but Github is a static page, 
+    * Consume Google Drive V3 REST API to read and save user data
+    * Patch semantics and automatic merge conflict resolution for updates
+    * Change detection via Polling (Time cleverly if possible.) 
+    * Push notifications would be nice but Github is a static page, 
       so it doesn't support a webhook callback.
-    - TypeScript/Javascript is multiparadigm: Prefer functional 
+    * TypeScript/Javascript is multiparadigm: Prefer functional 
       over imperative
- 	    - Map data as streams from API calls to displayed values via 
+ 	    * Map data as streams from API calls to displayed values via 
           Observables & Angular Pipes 
-    - Follow Angular’s framework: 
-        - Keep code modular
-        - Testing!
-        - Package size quotas to keep app loading fast(er)/reasonable
-    - [ . . . ]
+    * Follow Angular’s framework: 
+        * Keep code modular
+        * Testing!
+        * Package size quotas to keep app loading fast(er)/reasonable
+    * [ . . . ]
 
+## Notes
+    1. Command to build for GitHub Pages :)
+        * ng build --prod --output-path docs --base-href /GloomhavenTools/
 
 # Angular Development
 
