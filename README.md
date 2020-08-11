@@ -39,8 +39,9 @@ The most recent production build can be found here ([Gloomhaven Tools](https://t
 * [ . . . ]
 
 ## Notes
-1. Command to build for GitHub Pages :)
-    * ng build --prod --output-path docs --base-href /GloomhavenTools/
+1. How to build for GitHub Pages :)
+    * > ng build --prod --output-path docs --base-href /GloomhavenTools/
+    * Make copy of index.html and rename to 404.html
 
 # Angular Development
 
