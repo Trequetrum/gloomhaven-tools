@@ -31,7 +31,7 @@ export class ManageFilesComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     // Listen for file changes
-    this.data.listenForFiles().subscribe(files => this.dataSource.data = files);
+    this.data.listenGloomFiles().subscribe(files => this.dataSource.data = files);
   }
 
   ngAfterViewInit(){

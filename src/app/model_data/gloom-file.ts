@@ -22,9 +22,11 @@ export class GloomFile {
             file.getContent().Campaign.name.length > 0) 
             return "Campaign";
 
-        if( file.getContent().Character &&
-            file.getContent().Character.name &&
-            file.getContent().Character.name.length > 0) 
+        if( file.getContent().Character
+            && file.getContent().Character.name 
+            && typeof file.getContent().Character.name === 'string' 
+            && file.getContent().Character.class 
+            && typeof file.getContent().Character.class === 'string') 
             return "Character";
 
         if(file.getContent().Error) return "Parsing Error";

@@ -2,14 +2,12 @@
 
 <div *ngIf="newCharacter">
     <p>You're making a new character</p>
-    <app-create-character-form></app-create-character-form>
+    <app-create-character-form ></app-create-character-form>
 </div>
 
-<div *ngIf="!newCharacter && !character"><p>Woops, you don't have access to a google drive doc with ID: {{docId}}</p></div>
+<div *ngIf="!newCharacter && !characterFile"><p>Woops, you don't have access to a google drive doc with ID: {{docId}}</p></div>
 
-<div *ngIf="!newCharacter && character">
-    <p>This is info about {{character.name}}</p>
-    <p>{{character.name}}'s class is {{character.class}}</p>
+<div *ngIf="!newCharacter && characterFile">
+    <p>This is info about {{characterFile.character.name}}</p>
+    <p>{{characterFile.character.name}}'s class is {{characterFile.character.class}}</p>
 </div>
-
-<br><br><button mat-raised-button (click)="reresolveDocId()">re-resolve</button><br><br>

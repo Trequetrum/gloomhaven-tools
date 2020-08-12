@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
+import { DataService } from 'src/app/service/data.service';
 
 @Component({
   selector: 'app-create-character-form',
@@ -8,17 +9,20 @@ import { FormGroup, FormControl } from '@angular/forms';
 })
 export class CreateCharacterFormComponent implements OnInit {
 
+  @Output() newDocId: EventEmitter<string> = new EventEmitter<string>();
+
   newCharacterForm = new FormGroup({
     newCharacterName: new FormControl(''),
     newCharacterClass: new FormControl('')
   });
   
-  constructor() { }
+  constructor(private data: DataService) { }
 
   ngOnInit(): void {
   }
 
   createNewCharacter(): void{
+    
     console.log(this.newCharacterForm.value);
   }
 

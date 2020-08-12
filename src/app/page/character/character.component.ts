@@ -5,6 +5,7 @@ import { GloomFile } from 'src/app/model_data/gloom-file';
 import { DataService } from 'src/app/service/data.service';
 import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
 import { Observable } from 'rxjs';
+import { CharacterFile } from 'src/app/model_data/character-file';
 
 @Component({
   selector: 'app-character',
@@ -15,7 +16,7 @@ export class CharacterComponent implements OnInit {
 
   newCharacter = true;
   docId: string;
-  characterFile: GloomFile;
+  characterFile: CharacterFile;
   signIn$: Observable<boolean>;
 
   constructor(private route: ActivatedRoute,
@@ -23,12 +24,6 @@ export class CharacterComponent implements OnInit {
     public data: DataService) { 
       this.docId = "none";
     }
-
-  get character(): any {
-    if(this.characterFile)
-      return this.characterFile.file.getContent().Character;
-    return null;
-  }
 
   ngOnInit(): void {
     // Listen to query parameters to know which character to load
@@ -40,9 +35,11 @@ export class CharacterComponent implements OnInit {
     
     // If our character isn't loaded yet, we can look to new files
     // as a possible source
-    this.data.listenForFiles().subscribe(()=>{
+    const sub = this.data.listenCharactersFiles().subscribe(()=>{
       if(!this.characterFile && !this.newCharacter){
         this.resolveDocId(this.docId);
+      }else{
+        sub.unsubscribe();
       }
     });
   }
@@ -53,13 +50,8 @@ export class CharacterComponent implements OnInit {
     if(docId === "new"){
       this.newCharacter = true;
     }else{
-      this.characterFile = this.data.getCharacterByDocId(docId);
+      this.characterFile = this.data.getCharacterFileByDocId(docId);
     }
-    console.log("character: ", this.character, this.characterFile);
+    console.log("character: ", this.characterFile);
   }
-
-  reresolveDocId(){
-    this.resolveDocId(this.docId);
-  }
-
 }
