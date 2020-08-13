@@ -39,7 +39,7 @@ export class JsonFile {
         // If we're setting content, then we can't have any updates.
         this._updatableContent = null;
 
-        // what's bing passed in has _gDocObjID, we assume it's ready to go and
+        // what's being passed in has _gDocObjID, we assume it's ready to go and
         // do not mutate it.
         if (content && !content._gDocObjID)
             JsonFile.mutateAddIds()(content);
