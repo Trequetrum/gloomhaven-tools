@@ -1,82 +1,110 @@
 import { isArray } from 'util';
 
+/*****
+ * File that tracks changes to it's content. 
+ * Really the content should only be set once.
+ * Afterwards, it can be patched with a patchfile as a way to ensure changes are kept
+ */
 export class JsonFile {
 
     readonly mimeType = "application/json";
-    private content: any;
-    private currGDocID = 0;
+    private _content: any;
+    private _updatableContent: any;
 
     constructor(
         public id?: string,
         public name?: string,
         public canEdit?: boolean,
         public modifiedTime?: string
-    ){}
+    ) { }
 
+    /***
+     * Returns a deep clone of this file that has tracked all the same changes
+     */
     clone(): JsonFile {
-        const file = new JsonFile(this.id, this.name, this.canEdit, this.modifiedTime)
-        file.setContent(JSON.parse(JSON.stringify(this.content)), false);
+        const file = new JsonFile(this.id, this.name, this.canEdit, this.modifiedTime);
+        file["_content"] = JSON.parse(JSON.stringify(this._content));
+        file["_updatableContent"] = JSON.parse(JSON.stringify(this._updatableContent));
         return file;
     }
 
-    isObject(tst){ 
+    get content(): any {
+        if (!this._updatableContent && this._content)
+            this._updatableContent = JSON.parse(JSON.stringify(this._content))
+
+        return this._updatableContent;
+    }
+
+    set content(content: any) {
+        // If we're setting content, then we can't have any updates.
+        this._updatableContent = null;
+
+        // what's bing passed in has _gDocObjID, we assume it's ready to go and
+        // do not mutate it.
+        if (content && !content._gDocObjID)
+            JsonFile.mutateAddIds()(content);
+        this._content = content;
+    }
+
+    contentAsString(pretty: boolean): string {
+        JsonFile.mutateRemoveIds(this._content);
+
+        let stringify = "";
+
+        if (this._content && pretty)
+            stringify = JSON.stringify(this._content, null, 2);
+        if (this._content)
+            stringify = JSON.stringify(this._content);
+
+        JsonFile.mutateRemoveIds(this._content)
+
+        return stringify;
+    }
+
+
+    static isObject(tst) {
         return Object.prototype.toString.call(tst) === '[object Object]';
     }
 
-    getContent(): any {
-        return this.content;
-    }
+    static mutateAddIds(): (any) => void {
+        let currGDocID = 0;
 
-    setContent(content: any, genIds = true){
-        if(genIds){
-            this.currGDocID = 0;
-            this.mutateAddIds(content);
-        }
-        this.content = content;
-    }
+        const mutateIds = (anything) => {
+            if (Array.isArray(anything)) {
 
-    mutateAddIds(anything){
-        if(Array.isArray(anything)){
+                anything.forEach(mutateIds);
 
-            anything.forEach((val) => this.mutateAddIds(val));
+            } else if (JsonFile.isObject(anything)) {
 
-        }else if(this.isObject(anything)){
-
-            anything._gDocID = this.currGDocID++;
-            for (let key in anything) {
-                if (anything.hasOwnProperty(key)){
-                    this.mutateAddIds(anything[key]);
+                anything._gDocObjID = currGDocID++;
+                for (let key in anything) {
+                    if (anything.hasOwnProperty(key)) {
+                        mutateIds(anything[key]);
+                    }
                 }
-            }
 
+            }
         }
+
+        return mutateIds;
     }
 
-    mutateRemoveIds(anything){
-        if(Array.isArray(anything)){
+    static mutateRemoveIds(anything) {
+        if (Array.isArray(anything)) {
 
-            anything.forEach((val) => this.mutateRemoveIds(val));
+            anything.forEach((val) => JsonFile.mutateRemoveIds(val));
 
-        }else if(this.isObject(anything)){
+        } else if (JsonFile.isObject(anything)) {
 
-            delete anything._gDocID;
+            delete anything._gDocObjID;
             for (let key in anything) {
-                if (anything.hasOwnProperty(key)){
-                    this.mutateRemoveIds(anything[key]);
+                if (anything.hasOwnProperty(key)) {
+                    JsonFile.mutateRemoveIds(anything[key]);
                 }
             }
         }
     }
 
-    contentAsString(pretty: boolean): string{
-        this.mutateRemoveIds(this.content);
 
-        if(this.content && pretty)
-            return JSON.stringify(this.content, null, 2);
-        if(this.content)
-            return JSON.stringify(this.content);
-
-        return "";
-    }
 
 }

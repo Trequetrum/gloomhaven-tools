@@ -104,7 +104,7 @@ export class GooglePickerComponent implements OnInit {
     const file = this.testFile;
     if(file){
       file.name = "ThisIsANewName-gloomtools.json"
-      file.setContent(this.testObj2);
+      file.content = this.testObj2;
       this.googleFileLoader.saveJsonFile(file).subscribe({
         next: fileI => console.log("UpdatedFile: ", fileI),
         error: console.error,
@@ -120,7 +120,7 @@ export class GooglePickerComponent implements OnInit {
     const file = this.testFile;
     if(file){
       file.name = "ThisIsANewNameMEATADATA-gloomtools.json"
-      file.setContent(this.testObj2);
+      file.content = this.testObj2;
       this.googleFileLoader.saveJsonFileMetadata(file).subscribe({
         next: fileI => {
           console.log("UpdatedFile: ", fileI);
@@ -154,7 +154,7 @@ export class GooglePickerComponent implements OnInit {
     this.googleFileLoader.getFileManagerAppFile().pipe(
       mergeMap(file => {
         console.log("file1: ", file);
-        file.setContent({You: "are", a: "guup", doncha: "know"});
+        file.content = {You: "are", a: "guup", doncha: "know"};
         console.log("file1 content Update: ", file);
         return this.googleFileLoader.saveJsonFile(file)
       }),

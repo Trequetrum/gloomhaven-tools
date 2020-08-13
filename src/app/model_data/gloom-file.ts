@@ -7,30 +7,39 @@ export class GloomFile {
     readonly isCampaign: boolean;
     readonly isCharacter: boolean;
 
-    constructor(public file: JsonFile){
+    constructor(public file: JsonFile) {
+
         this.type = this.inferType(file);
         this.isCampaign = this.type === "Campaign";
         this.isCharacter = this.type === "Character";
         this.isGloomy = this.isCampaign || this.isCharacter;
     }
 
-    inferType(file: JsonFile): string{
-        if(!file.getContent()) return "Empty";
-        
-        if( file.getContent().Campaign && 
-            file.getContent().Campaign.name &&
-            file.getContent().Campaign.name.length > 0) 
-            return "Campaign";
+    inferType(file: JsonFile): string {
+        if (!file.content) return "Empty";
 
-        if( file.getContent().Character
-            && file.getContent().Character.name 
-            && typeof file.getContent().Character.name === 'string' 
-            && file.getContent().Character.class 
-            && typeof file.getContent().Character.class === 'string') 
-            return "Character";
+        if (file.content.Campaign) {
+            if (file.content.Campaign.name
+                && typeof file.content.Campaign.name.length === 'string') {
+                return "Campaign";
+            } else {
+                return "Campaign Format Error";
+            }
+        }
 
-        if(file.getContent().Error) return "Parsing Error";
-        
+        if (file.content.Character) {
+            if (file.content.Character.name
+                && typeof file.content.Character.name === 'string'
+                && file.content.Character.class
+                && typeof file.content.Character.class === 'string') {
+                return "Character";
+            } else {
+                return "Character Format Error";
+            }
+        }
+
+        if (file.content.Error) return "General Parsing Error";
+
         return "Unknown";
     }
 

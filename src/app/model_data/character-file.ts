@@ -1,7 +1,15 @@
 import { Character } from '../json_interfaces/character';
+import { JsonFile } from './json-file';
+import { fileURLToPath } from 'url';
+import { GloomFile } from './gloom-file';
 
 export class CharacterFile {
-    constructor(
-        public docId: string, 
-        public character: Character){}
+
+    constructor(public file: JsonFile, check = true) {
+        if (check && !new GloomFile(file).isCharacter) throw new Error("Given JsonFile does not contain a Gloomhaven Character");
+    }
+
+    get character(): Character {
+        return this.file.content.Character;
+    }
 }

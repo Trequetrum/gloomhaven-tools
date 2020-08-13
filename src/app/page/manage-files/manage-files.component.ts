@@ -2,13 +2,12 @@ import { Component, OnInit, AfterViewInit, ViewChild, NgZone } from '@angular/co
 import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
 import { GooglePickerService } from 'src/app/service/google-picker.service';
 import { GoogleFileManagerService } from 'src/app/service/google-file-manager.service';
-import { MatSort, Sort } from '@angular/material/sort';
+import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource, MatTable } from '@angular/material/table';
-import { interval } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { map, tap, take, mergeMap } from 'rxjs/operators';
 import { JsonFile } from 'src/app/model_data/json-file';
-import { DataService } from 'src/app/service/data.service';
 import { GloomFile } from 'src/app/model_data/gloom-file';
+import { interval } from 'rxjs';
 
 @Component({
   selector: 'app-manage-files',
@@ -26,12 +25,29 @@ export class ManageFilesComponent implements OnInit, AfterViewInit {
   constructor(
     public oauthService: GoogleOauth2Service,
     private googlePicker: GooglePickerService,
-    private data: DataService,
-    private googleFileLoader: GoogleFileManagerService){}
+    private fileManager: GoogleFileManagerService){}
 
   ngOnInit() {
-    // Listen for file changes
-    this.data.listenGloomFiles().subscribe(files => this.dataSource.data = files);
+
+    // We get our files from the filemanager because the data service throws away any files 
+    // it doesn't need. Files that don't parse or don't contain gloomhaven data are quietly 
+    // ignored. Here, however, we want access to all the files. If only as a way to 
+    // show/explain parsing errors to the user.
+    interval(5000).pipe(
+        take(1),
+        mergeMap(()=> this.fileManager.listenDocuments().pipe(
+            map(files => files.map(file => new GloomFile(file)))
+        ))
+    ).subscribe(gloomfiles => {
+        console.log("gloomfiles: ", gloomfiles);
+        this.dataSource.data = gloomfiles;
+    });
+
+    // this.fileManager.listenDocuments().pipe(
+    //     map(files => files.map(file => new GloomFile(file)))
+    // ).subscribe(gloomfiles => {
+    //     this.dataSource.data = gloomfiles;
+    // });
   }
 
   ngAfterViewInit(){
@@ -59,7 +75,7 @@ export class ManageFilesComponent implements OnInit, AfterViewInit {
   }
 
   load(load: boolean, info: GloomFile){
-    console.log(info.file.getContent())
+    console.log(info.file.content)
     if(load)
       console.log("Load " + info.file.name);
     else
