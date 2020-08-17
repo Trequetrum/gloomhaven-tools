@@ -89,6 +89,7 @@ export class GooglePickerComponent implements OnInit {
   }
 
   createFile(){
+    console.log("Trying to create a file");
     this.googleFileLoader.createNewJsonFile("HeyThere2", this.testObj).subscribe({
       next: file => {
         console.log("createNewJsonFile: ", file);
@@ -97,7 +98,7 @@ export class GooglePickerComponent implements OnInit {
       error: err => console.log("Error!", err),
       complete: () => console.log("Completed createNewJsonFile()")
     });
-
+    console.log("Creating...");
   }
 
   updateFile(){
@@ -168,6 +169,6 @@ export class GooglePickerComponent implements OnInit {
   }
 
   initClient(){
-    this.oauthService.initClient().subscribe(()=>console.log("HHEHEHE"));
+    this.oauthService.initGapiClient().subscribe(()=>console.log("HHEHEHE"));
   }
 }

@@ -33,35 +33,25 @@ export class ManageFilesComponent implements OnInit, AfterViewInit {
     // it doesn't need. Files that don't parse or don't contain gloomhaven data are quietly 
     // ignored. Here, however, we want access to all the files. If only as a way to 
     // show/explain parsing errors to the user.
-    interval(5000).pipe(
-        take(1),
-        mergeMap(()=> this.fileManager.listenDocuments().pipe(
-            map(files => files.map(file => new GloomFile(file)))
-        ))
+    this.fileManager.listenDocuments().pipe(
+        map(files => files.map(file => new GloomFile(file)))
     ).subscribe(gloomfiles => {
-        console.log("gloomfiles: ", gloomfiles);
         this.dataSource.data = gloomfiles;
     });
-
-    // this.fileManager.listenDocuments().pipe(
-    //     map(files => files.map(file => new GloomFile(file)))
-    // ).subscribe(gloomfiles => {
-    //     this.dataSource.data = gloomfiles;
-    // });
   }
 
   ngAfterViewInit(){
     // Set Sort
     this.dataSource.sort = this.sort;
 
-    this.dataSource.sortingDataAccessor = (info: GloomFile, columnDef: string) => {
+    this.dataSource.sortingDataAccessor = (file: GloomFile, columnDef: string) => {
       switch (columnDef) {
-        case 'name': return info.file.name.toLowerCase();
-        case 'edit': return info.file.canEdit? 0 : 1;
-        case 'type': return info.type.toLowerCase();
+        case 'name': return file.name.toLowerCase();
+        case 'edit': return file.canEdit? 0 : 1;
+        case 'type': return file.type.toLowerCase();
         case 'sync': return 0;
         case 'loaded': return 0;
-        default: return info[columnDef];
+        default: return file[columnDef];
       }
     };
   }
@@ -74,12 +64,12 @@ export class ManageFilesComponent implements OnInit, AfterViewInit {
     this.dataSource.data = this.dataSource.data.slice();
   }
 
-  load(load: boolean, info: GloomFile){
-    console.log(info.file.content)
+  load(load: boolean, file: GloomFile){
+    console.log(file.content)
     if(load)
-      console.log("Load " + info.file.name);
+      console.log("Load " + file.name);
     else
-      console.log("unload " + info.file.name);
+      console.log("unload " + file.name);
   }
   
   updateDataSourcetst(){

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GoogleFileManagerService } from './google-file-manager.service';
-import { Observable, merge, Subject, of } from 'rxjs';
+import { Observable, merge, Subject, of, defer } from 'rxjs';
 import { GloomFile } from '../model_data/gloom-file';
 import { map, filter } from 'rxjs/operators';
 import { CampaignMini } from '../model_data/campaign-mini';
@@ -24,14 +24,14 @@ export class DataService {
         this.gloomFiles = Array.from(this.fileManager.currentDocuments.values()).map(val => new GloomFile(val)).filter(file => file.isGloomy);
 
         fileManager.listenDocumentLoad().pipe(
-            map(({ load, file }) => ({ load, gloomFile: new GloomFile(file) })),
+            map(({ action, file }) => ({ action, gloomFile: new GloomFile(file) })),
             filter(({ gloomFile }) => gloomFile.isGloomy)
-        ).subscribe(({ load, gloomFile }) => {
+        ).subscribe(({ action, gloomFile }) => {
             // We've subscribed to see loaded files where gloomFile.isGloomy is true.
-            if (load) {
+            if (action === "load") {
                 this.gloomFiles.push(gloomFile);
-            } else {
-                const i = this.gloomFiles.findIndex(gf => gf.file.id === gloomFile.file.id);
+            } else if (action === "unload"){
+                const i = this.gloomFiles.findIndex(gf => gf.id === gloomFile.id);
                 if (i >= 0) {
                     this.gloomFiles = this.gloomFiles.splice(i, 1);
                 } else {
@@ -40,15 +40,19 @@ export class DataService {
                     this.gloomFiles = Array.from(this.fileManager.currentDocuments.values()).map(val => new GloomFile(val));
                 }
             }
-
-            this.gloomFileAlert$.next(load);
-            if (gloomFile.isCampaign) this.campaignFileAlert$.next(load);
-            if (gloomFile.isCharacter) this.characterFileAlert$.next(load);
+            if(action === "load" || action === "unload"){
+                const load = action === "load";
+                this.gloomFileAlert$.next(load);
+                if (gloomFile.isCampaign) this.campaignFileAlert$.next(load);
+                if (gloomFile.isCharacter) this.characterFileAlert$.next(load);
+            }
         });
     }
 
     listenGloomFiles(): Observable<GloomFile[]> {
-        return merge(of(this.getGloomFiles()), this.gloomFileAlert$.pipe(map(()=>this.getGloomFiles())));
+        const currVal$ = defer(()=>of(this.getGloomFiles()));
+        const newVal$ = this.gloomFileAlert$.pipe(map(()=>this.getGloomFiles()));
+        return merge(currVal$, newVal$);
     }
 
     getGloomFiles(): GloomFile[] {
@@ -56,25 +60,29 @@ export class DataService {
     }
 
     listenCharactersFiles(): Observable<CharacterFile[]> {
-        return merge(of(this.getCharacterFiles()), this.characterFileAlert$.pipe(map(()=>this.getCharacterFiles())));
+        const currVal$ = defer(()=>of(this.getCharacterFiles()));
+        const newVal$ = this.characterFileAlert$.pipe(map(()=>this.getCharacterFiles()));
+        return merge(currVal$, newVal$);
     }
 
     getCharacterFiles(): CharacterFile[] {
         return this.gloomFiles
-            .filter(info => info.isCharacter)
-            .map(infoChar => new CharacterFile(infoChar.file, false))
+            .filter(file => file.isCharacter)
+            .map(charFile => new CharacterFile(charFile, false))
     }
 
     listenCampaignMinis(): Observable<CampaignMini[]> {
-        return merge(of(this.getCampaignMinis()), this.campaignFileAlert$.pipe(map(()=>this.getCampaignMinis())));
+        const currVal$ = defer(()=>of(this.getCampaignMinis()));
+        const newVal$ = this.campaignFileAlert$.pipe(map(()=>this.getCampaignMinis()));
+        return merge(currVal$, newVal$);
     }
 
     getCampaignMinis(): CampaignMini[] {
         return this.gloomFiles
-            .filter(info => info.isCampaign)
-            .map(campInfo => {
-                const campaign = campInfo.file.content.Campaign;
-                const rtn = new CampaignMini(campInfo.file.id, campaign.name);
+            .filter(file => file.isCampaign)
+            .map(campFile => {
+                const campaign = campFile.content.Campaign;
+                const rtn = new CampaignMini(campFile.id, campaign.name);
                 if (campaign.parties) {
                     rtn.parties = campaign.parties.filter(prty => prty.name && prty.name.length > 0).map(prty => prty.name);
                 }
@@ -83,19 +91,21 @@ export class DataService {
     }
 
     listenCharacterMinis(): Observable<CharacterMini[]> {
-        return merge(of(this.getCharacterMinis()), this.characterFileAlert$.pipe(map(() => this.getCharacterMinis())));
+        const currVal$ = defer(()=>of(this.getCharacterMinis()));
+        const newVal$ = this.characterFileAlert$.pipe(map(() => this.getCharacterMinis()));
+        return merge(currVal$, newVal$);
     }
 
     getCharacterMinis(): CharacterMini[] {
         return this.gloomFiles
-            .filter(info => info.isCharacter)
-            .map(charInfo => new CharacterMini(charInfo.file.id, charInfo.file.content.Character.name));
+            .filter(file => file.isCharacter)
+            .map(charFile => new CharacterMini(charFile.id, charFile.content.Character.name));
     }
 
     getCharacterFileByDocId(docId: string): CharacterFile {
-        const i = this.gloomFiles.findIndex(info => info.file.id === docId);
+        const i = this.gloomFiles.findIndex(info => info.id === docId);
         if (i >= 0 && this.gloomFiles[i].isCharacter) {
-            return new CharacterFile(this.gloomFiles[i].file, false);
+            return new CharacterFile(this.gloomFiles[i], false);
         }
         return null;
     }
@@ -103,7 +113,8 @@ export class DataService {
     createNewCharacter(name: string, gclass: string): Observable<CharacterFile> {
         const char: Character = { name, class: gclass };
         return this.fileManager.createNewJsonFile(name, { Character: char }).pipe(
-            map(jsonFile => new CharacterFile(jsonFile))
+            map(jsonFile => new GloomFile(jsonFile)),
+            map(gloomFile => new CharacterFile(gloomFile))
         );
     }
 }

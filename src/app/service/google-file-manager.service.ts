@@ -2,11 +2,13 @@ import { Injectable, NgZone } from '@angular/core';
 import { GoogleOauth2Service } from './google-oauth2.service';
 import { GooglePickerService } from './google-picker.service';
 import { JsonFile } from '../model_data/json-file';
-import { Observable, from, of, throwError, Subject, BehaviorSubject, merge, defer } from 'rxjs';
-import { map, mergeMap, filter, take, mapTo, tap, reduce, debounceTime } from 'rxjs/operators';
+import { Observable, from, of, throwError, Subject, BehaviorSubject, merge, defer, forkJoin } from 'rxjs';
+import { map, mergeMap, filter, take, mapTo, tap, reduce, debounceTime, switchMap, finalize } from 'rxjs/operators';
 import { StringPair } from '../util/string-pair';
 
 declare var google: any;
+
+export type fileAlertAction = "load" | "unload" | "error" | "update";
 
 @Injectable({
     providedIn: 'root'
@@ -29,8 +31,8 @@ export class GoogleFileManagerService {
      *    keep loaded or unloaded.
      ****/
 
-    // An observable stream of loaded files.
-    private _fileLoad$ = new Subject<{ load: boolean, file: JsonFile }>();
+    // An observable stream of files changes (Load/ Save/ Drop, ect).
+    private _fileAlert$ = new Subject<{ action: fileAlertAction, file: JsonFile }>();
 
     // Listens to the fileLoad$ stream and keeps a current record
     currentDocuments = new Map<string, JsonFile>();
@@ -84,7 +86,7 @@ export class GoogleFileManagerService {
             obs.subscribe({
                 next: val => this.ngZone.run(() => observer.next(val)),
                 error: err => this.ngZone.run(() => observer.error(err)),
-                complete: () => this.ngZone.run(() => observer.complete),
+                complete: () => this.ngZone.run(() => observer.complete()),
             });
         });
     }
@@ -96,7 +98,7 @@ export class GoogleFileManagerService {
         const docs = this.currentDocuments;
         this.currentDocuments = new Map<string, JsonFile>();
         for (const [key, file] of docs) {
-            this._fileLoad$.next({ load: false, file });
+            this._fileAlert$.next({ action: "unload", file });
         }
     }
 
@@ -104,8 +106,8 @@ export class GoogleFileManagerService {
      * Multicast Observable that sends messages whenever a file is
      * loaded loaded/unloaded
      */
-    listenDocumentLoad(): Observable<{ load: boolean, file: JsonFile }> {
-        return this._fileLoad$.asObservable();
+    listenDocumentLoad(): Observable<{ action: fileAlertAction, file: JsonFile }> {
+        return this._fileAlert$.asObservable();
     }
 
     /***
@@ -114,12 +116,10 @@ export class GoogleFileManagerService {
      */
     listenDocuments(): Observable<JsonFile[]> {
         const getCurrentDocuments = () => Array.from(this.currentDocuments.values());
-
-        const currendDocs$ = of(getCurrentDocuments()).pipe(tap(()=>console.log("Tapping getCurrentDocuments")));
-
-        const listenFile$ = this._fileLoad$.pipe(
-            debounceTime(500),
-            map(()=>getCurrentDocuments())
+        const currendDocs$ = defer(() => of(getCurrentDocuments()));
+        const listenFile$ = this._fileAlert$.pipe(
+            debounceTime(250),
+            map(getCurrentDocuments)
         );
 
         return merge(currendDocs$, listenFile$);
@@ -198,7 +198,7 @@ export class GoogleFileManagerService {
         return this.getJsonFileFromDrive(docID).pipe(
             tap(file => {
                 this.currentDocuments.set(file.id, file);
-                this._fileLoad$.next({ load: true, file });
+                this._fileAlert$.next({ action: "load", file });
             }),
             mapTo(true)
         );
@@ -212,7 +212,7 @@ export class GoogleFileManagerService {
         if (this.currentDocuments.has(docID)) {
             const file = this.currentDocuments.get(docID);
             this.currentDocuments.delete(docID);
-            this._fileLoad$.next({ load: false, file });
+            this._fileAlert$.next({ action: "unload", file });
         }
     }
 
@@ -225,7 +225,7 @@ export class GoogleFileManagerService {
             this.currentDocuments.delete(file.id);
         }
 
-        this._fileLoad$.next({ load: false, file });
+        this._fileAlert$.next({ action: "unload", file });
     }
 
 
@@ -303,37 +303,35 @@ export class GoogleFileManagerService {
         const folderName = this.folderName;
 
         const rtn = this.oauthService.getClient().pipe(
-            take(1),
-            mergeMap((client: any) => {
-                return from(client.drive.files.list({
+            mergeMap(client =>
+                from(client.drive.files.list({
                     q: "mimeType='" + folderType + "' and name='" + folderName + "' and trashed = false",
                     fields: "files(id)"
+                })).pipe(map((response: any) => ({ client, response })))
+            ),
+            mergeMap(({ client, response }) => {
+                const folders = response.result.files;
+
+                // Check if we already have access to a folder with the right name
+                // I suppose there could be more than one folder. If so, emit the first one we find
+                if (folders && folders.length > 0) {
+                    return of(folders[0].id);
+                }
+
+                // If we don't have access to such a folder, then create it and return the ID
+                const metadata = {
+                    mimeType: folderType,
+                    name: folderName,
+                    fields: 'id'
+                };
+
+                return from(client.drive.files.create({
+                    resource: metadata
                 })).pipe(
-                    mergeMap((response: any) => {
-                        const folders = response.result.files;
-
-                        // Check if we already have access to a folder with the right name
-                        // I suppose there could be more than one folder. If so, emit the first one we find
-                        if (folders && folders.length > 0) {
-                            return of(folders[0].id);
-                        }
-
-                        // If we don't have access to such a folder, then create it and return the ID
-                        const metadata = {
-                            mimeType: folderType,
-                            name: folderName,
-                            fields: 'id'
-                        };
-
-                        return from(client.drive.files.create({
-                            resource: metadata
-                        })).pipe(
-                            map((resp: any) => resp.result.id)
-                        );
-                    })
+                    map((resp: any) => resp.result.id)
                 );
             })
-        ) as Observable<string>;
+        );
 
         return this.ngZoneObservable(rtn);
     }
@@ -474,7 +472,7 @@ export class GoogleFileManagerService {
      * 
      * Will get parent folder ID, or create parent folder if one isn't present
      ***/
-    createNewJsonFile(name: string, content?: any): Observable<JsonFile> {
+    createNewJsonFile_old(name: string, content?: any): Observable<JsonFile> {
 
         // Create a new file. New files start with an empty object 
         // that has an ID
@@ -537,8 +535,66 @@ export class GoogleFileManagerService {
             }),
             tap(file => {
                 this.currentDocuments.set(file.id, file);
-                this._fileLoad$.next({ load: true, file });
+                this._fileAlert$.next({ action: "load", file });
             })
         );
+    }
+
+    createNewJsonFile(name: string, content?: any): Observable<JsonFile> {
+
+        // If we havn't been given content then give it some cheeky content ;)
+        if (!content) content = { empty: "file ;)" };
+
+        const rtn$ = forkJoin({
+            folder: this.getFolderId(),
+            client: this.oauthService.getClient()
+        }).pipe(
+            switchMap(({ folder, client }) => {
+                // Create a new file. 
+                const newJsonFile = new JsonFile();
+                newJsonFile.name = name + this.fileNameAffix + '.json';
+                newJsonFile.content = content;
+
+                // Ready a call to create this file on the user's Google drive
+                const boundary = '-------314159265358979323846';
+                const delimiter = "\r\n--" + boundary + "\r\n";
+                const close_delim = "\r\n--" + boundary + "--";
+
+                const metadata = {
+                    'name': newJsonFile.name,
+                    'parents': [folder],
+                    'mimeType': newJsonFile.mimeType
+                };
+
+                const multipartRequestBody = delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata)
+                    + delimiter + 'Content-Type: ' + newJsonFile.mimeType + '\r\n\r\n' + newJsonFile.contentAsString(true) + close_delim;
+
+                const request$ = from(client.request({
+                    'path': '/upload/drive/v3/files',
+                    'method': 'POST',
+                    'params': {
+                        'uploadType': 'multipart'
+                    },
+                    'headers': {
+                        'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+                    },
+                    'body': multipartRequestBody
+                })) as Observable<{ result: { id: string, modifiedTime: string } }>;
+
+                return request$.pipe(
+                    map(response => ({ file: newJsonFile, response }))
+                );
+            }),
+            map(({ file, response }) => {
+                file.id = response.result.id;
+                file.modifiedTime = response.result.modifiedTime;
+                return file;
+            }),
+            tap(file => {
+                this.currentDocuments.set(file.id, file);
+                this._fileAlert$.next({ action: "load", file });
+            })
+        );
+        return this.ngZoneObservable(rtn$);
     }
 }

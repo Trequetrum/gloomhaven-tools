@@ -29,7 +29,7 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     // Try to authenticate the user they have a currently active google session and it's signed into this app
-    this.authService.initClient().subscribe();
+    this.authService.initGapiClient().subscribe();
 
     // Get campaign minis. Filter out results that don't have any parties. We don't need to show those in the header.
     this.campaignMinis$ = this.data.listenCampaignMinis().pipe(map(minis=>minis.filter(mini=>mini.parties.length > 0)));

@@ -1,14 +1,15 @@
 import { JsonFile } from './json-file';
 
-export class GloomFile {
+export class GloomFile extends JsonFile {
 
     readonly type: string;
     readonly isGloomy: boolean;
     readonly isCampaign: boolean;
     readonly isCharacter: boolean;
 
-    constructor(public file: JsonFile) {
-
+    constructor(file: JsonFile) {
+        super();
+        Object.assign(this, file);
         this.type = this.inferType(file);
         this.isCampaign = this.type === "Campaign";
         this.isCharacter = this.type === "Character";
@@ -20,7 +21,7 @@ export class GloomFile {
 
         if (file.content.Campaign) {
             if (file.content.Campaign.name
-                && typeof file.content.Campaign.name.length === 'string') {
+                && typeof file.content.Campaign.name === 'string') {
                 return "Campaign";
             } else {
                 return "Campaign Format Error";
