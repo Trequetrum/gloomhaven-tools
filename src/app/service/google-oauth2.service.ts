@@ -1,8 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 
-import { Observable, Subscription, of, from, defer, throwError, Subject, BehaviorSubject, bindCallback, bindNodeCallback } from 'rxjs';
-import { map, mergeMap, tap, mapTo } from 'rxjs/operators';
-import { nextTick } from 'process';
+import { Observable, of, from, defer, throwError, Subject, BehaviorSubject, bindCallback } from 'rxjs';
+import { map, mergeMap, tap, mapTo, timeout } from 'rxjs/operators';
 
 declare var gapi: any;
 
@@ -11,13 +10,6 @@ declare var gapi: any;
  * Handle user authentication with google drive. Also handle gapi.client loading and initialisation.
  * We push these two conserns together since we already really care about authentication in order 
  * to get access to gapi.client (and some minimal user info).
- * 
- * Not super happy with my use of Observables here. Was just messing around with them at the time.
- * Idealy, we shouldn't be subscribing if it's possible to reply on data transformation instead.
- * This class subscribes early, which isn't as ideal.
- * 
- * I really should re-write this, but it's an estetic rather than performance issue (as far as I can
- * tell), so it stays as is for now
  ***/
 @Injectable({
     providedIn: 'root'
@@ -68,44 +60,24 @@ export class GoogleOauth2Service {
         return this.username$.asObservable();
     }
 
-    private _loadGapiClientAuth2_bind(): Observable<boolean> {
-        return bindCallback(gapi.load).call(gapi, 'client:auth2').pipe(mapTo(true));
-    }
 
     /****
-     * Emit's true once gapi.load('client:auth2') completes
-     * fails if the load takes over 10 seconds
+     * Emits true once gapi.load('client:auth2') completes
+     * This fails if the load takes over 5 seconds because I'm
+     * not sure of any other way to check if the load fails.
      ****/
     private _loadGapiClientAuth2(): Observable<boolean> {
-
-        // I'd love to do this with bindNodeCallback(gapi.load)('client:auth2'), but it didn't work
-        // and I don't feel like trouble shooting it right now. Making a custom observable will work 
-        return new Observable<boolean>(observer => {
-            let timer: any;
-
-            if(this._apiLoaded){
-                observer.next(true);
-                observer.complete();
-            }else{
-                // Is there any way to check for failure?
-                // Error out if this doesn't load after 10 seconds.
-                timer = setTimeout(() => observer.error("gapi.load failure (timed out after 10 seconds)"), 10000);
-
-                gapi.load('client:auth2', () => {
-                    this._apiLoaded = true;
-                    // We've loaded, no need for our timeout now
-                    clearTimeout(timer);
-                    observer.next(true);
-                    observer.complete();
-                });
-            }
-
-            return {
-                unsubscribe() {
-                   if(timer) clearTimeout(timer);
-                }
-            };
-        });
+        return defer(() => of(this._apiLoaded)).pipe(
+            mergeMap(apiLoaded => {
+                if(apiLoaded) return of(true);
+                
+                return bindCallback(gapi.load).call(gapi, 'client:auth2').pipe(
+                    timeout(5000),
+                    tap(() => this._apiLoaded = true),
+                    mapTo(true)
+                ) as Observable<boolean>;
+            })
+        );
     }
 
     /***
@@ -118,13 +90,12 @@ export class GoogleOauth2Service {
      */
     initGapiClient(): Observable<boolean> {
         return defer(() => of(this._clientInit)).pipe(
-            mergeMap(apiLoaded => {
+            mergeMap(clientInit => {
 
-                if (apiLoaded) return of(true);
+                if (clientInit) return of(true);
                 if (!gapi) throw new Error("GAPI isn't loaded");
 
-                //return this._loadGapiClientAuth2().pipe(
-                return this._loadGapiClientAuth2_bind().pipe(
+                return this._loadGapiClientAuth2().pipe(
                     mergeMap(() => from(gapi.client.init({
                         'apiKey': this.developerKey,
                         'clientId': this.clientId,
@@ -172,11 +143,11 @@ export class GoogleOauth2Service {
         // When somebody subscribes, grab the most recent value of this.apiLoaded
         return defer(() => of(this._clientInit)).pipe(
             // Map to an auth Instance based on whether API is loaded.
-            mergeMap(apiLoaded => {
-                if (apiLoaded && this.isSignedIn$.getValue()) {
+            mergeMap(clientInit => {
+                if (clientInit && this.isSignedIn$.getValue()) {
                     // Easiest Scenario. We're ready to go, just return an AuthInstance
                     return of(gapi.auth2.getAuthInstance());
-                } else if (apiLoaded) {
+                } else if (clientInit) {
                     // We're not authorized, let's try to sign in and then return 
                     // an AuthInstance
                     return from(gapi.auth2.getAuthInstance().signIn()).pipe(
@@ -256,9 +227,9 @@ export class GoogleOauth2Service {
      ***/
     getClient(): Observable<any> {
         return defer(() => of(this._clientInit)).pipe(
-            mergeMap(isLoaded => {
+            mergeMap(clientInit => {
                 // Pass the client through if it's truthy
-                if (isLoaded) {
+                if (clientInit) {
                     return of(gapi.client);
                 } else {
                     return from(this.initGapiClient()).pipe(
