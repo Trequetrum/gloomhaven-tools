@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { GoogleFileManagerService } from './google-file-manager.service';
+import { GoogleFileManagerService, FileAlertAction } from './google-file-manager.service';
 import { Observable, merge, Subject, of, defer } from 'rxjs';
 import { GloomFile } from '../model_data/gloom-file';
-import { map, filter } from 'rxjs/operators';
+import { map, filter, catchError } from 'rxjs/operators';
 import { CampaignMini } from '../model_data/campaign-mini';
 import { CharacterMini } from '../model_data/character-mini';
 import { Character } from '../json_interfaces/character';
@@ -108,6 +108,17 @@ export class DataService {
             return new CharacterFile(this.gloomFiles[i], false);
         }
         return null;
+    }
+    
+    listenCharacterFileByDocId(docId: string): Observable<{action: FileAlertAction, file: CharacterFile}> {
+        return this.fileManager.listenDocumentById(docId).pipe(
+            map(({action, file: jsonFile}) => ({action, file: new GloomFile(jsonFile)})),
+            map(({action, file: GloomFile}) => ({action, file: new CharacterFile(GloomFile)})),
+            catchError(err => {
+                console.log(">>>> Error listenCharacterFileByDocId:", err);
+                return of({action: "error", file: null}) as Observable<{action: FileAlertAction, file: CharacterFile}>;
+            })
+        );
     }
 
     createNewCharacter(name: string, gclass: string): Observable<CharacterFile> {

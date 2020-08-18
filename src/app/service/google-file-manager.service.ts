@@ -8,7 +8,7 @@ import { StringPair } from '../util/string-pair';
 
 declare var google: any;
 
-export type fileAlertAction = "load" | "unload" | "error" | "update";
+export type FileAlertAction = "load" | "unload" | "error" | "update";
 
 @Injectable({
     providedIn: 'root'
@@ -32,7 +32,7 @@ export class GoogleFileManagerService {
      ****/
 
     // An observable stream of files changes (Load/ Save/ Drop, ect).
-    private _fileAlert$ = new Subject<{ action: fileAlertAction, file: JsonFile }>();
+    private _fileAlert$ = new Subject<{ action: FileAlertAction, file: JsonFile }>();
 
     // Listens to the fileLoad$ stream and keeps a current record
     currentDocuments = new Map<string, JsonFile>();
@@ -65,7 +65,6 @@ export class GoogleFileManagerService {
         private googlePicker: GooglePickerService,
         private ngZone: NgZone) {
 
-
         googlePicker.listenFileLoad().subscribe((doc) => this.loadGooglePickerDocument(doc));
 
         oauthService.listenSignIn().subscribe(signin => {
@@ -83,12 +82,37 @@ export class GoogleFileManagerService {
      *****/
     ngZoneObservable<T>(obs: Observable<T>): Observable<T> {
         return new Observable<T>(observer => {
-            obs.subscribe({
+            const sub = obs.subscribe({
                 next: val => this.ngZone.run(() => observer.next(val)),
                 error: err => this.ngZone.run(() => observer.error(err)),
                 complete: () => this.ngZone.run(() => observer.complete()),
             });
+            return { unsubscribe: () => sub.unsubscribe() }
         });
+    }
+
+    /***********
+     * Always emmit a value right away. If no such document exists, it will
+     * emit a FileAlert with an error and no file.
+     *      > { action: "error", file: null }
+     * 
+     * Then, it emits any time some FileAlert action is performed on the given
+     * file.
+     ***********/
+    listenDocumentById(docId: string): Observable<{action: FileAlertAction, file: JsonFile}> {
+
+        const streamCurrentDoc = () => {
+            let currentDoc;
+            if (this.currentDocuments.has(docId)) {
+                currentDoc = { action: "load", file: this.currentDocuments.get(docId) };
+            } else {
+                currentDoc = { action: "error", file: null };
+            }
+            return of(currentDoc);
+        }
+        const alertFilter$ = this._fileAlert$.pipe(filter(({ file }) => file.id === docId));
+
+        return merge(defer(streamCurrentDoc), alertFilter$);
     }
 
     /****
@@ -106,7 +130,7 @@ export class GoogleFileManagerService {
      * Multicast Observable that sends messages whenever a file is
      * loaded loaded/unloaded
      */
-    listenDocumentLoad(): Observable<{ action: fileAlertAction, file: JsonFile }> {
+    listenDocumentLoad(): Observable<{ action: FileAlertAction, file: JsonFile }> {
         return this._fileAlert$.asObservable();
     }
 
@@ -191,8 +215,6 @@ export class GoogleFileManagerService {
      * file with the given ID. If this file already exists in currentDocuments,
      * it will be replaced and any saved changes will be lost unless they've
      * been kept elsewhere.
-     * 
-     * Files that are loaded, will have appProperties.active=true
      *****/
     loadById(docID: string): Observable<boolean> {
         return this.getJsonFileFromDrive(docID).pipe(

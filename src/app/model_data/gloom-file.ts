@@ -17,7 +17,7 @@ export class GloomFile extends JsonFile {
     }
 
     inferType(file: JsonFile): string {
-        if (!file.content) return "Empty";
+        if (!file || !file.content) return "Empty";
 
         if (file.content.Campaign) {
             if (file.content.Campaign.name
