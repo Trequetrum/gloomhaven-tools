@@ -4,9 +4,16 @@ import { GloomFile } from './gloom-file';
 
 export class CharacterFile extends GloomFile {
 
-    constructor(file: GloomFile, check = true) {
+    constructor(file: GloomFile) {
         super(file);
-        if (check && !(file.isCharacter)) throw new Error("Given JsonFile does not contain a Gloomhaven Character");
+        if (!this.isCharacter){
+            this.content.Character = { 
+                Error: {
+                    type: "Casting",
+                    message: "Drive document " + file.id + " does not contain a Gloomhaven Character",
+                }
+            };
+        }
     }
 
     get character(): Character {

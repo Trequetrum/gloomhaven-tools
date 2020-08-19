@@ -90,7 +90,7 @@ export class GooglePickerComponent implements OnInit {
 
   createFile(){
     console.log("Trying to create a file");
-    this.googleFileLoader.createNewJsonFile("HeyThere2", this.testObj).subscribe({
+    this.googleFileLoader.createAndSaveNewJsonFile("HeyThere2", this.testObj).subscribe({
       next: file => {
         console.log("createNewJsonFile: ", file);
         this.testFile = file;

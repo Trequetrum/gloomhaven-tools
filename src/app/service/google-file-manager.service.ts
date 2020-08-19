@@ -99,19 +99,27 @@ export class GoogleFileManagerService {
      * Then, it emits any time some FileAlert action is performed on the given
      * file.
      ***********/
-    listenDocumentById(docId: string): Observable<{action: FileAlertAction, file: JsonFile}> {
+    listenDocumentById(docId: string): Observable<{ action: FileAlertAction, file: JsonFile }> {
 
         const streamCurrentDoc = () => {
             let currentDoc;
             if (this.currentDocuments.has(docId)) {
                 currentDoc = { action: "load", file: this.currentDocuments.get(docId) };
             } else {
-                currentDoc = { action: "error", file: null };
+                const errFile = new JsonFile(docId);
+                errFile.content = { 
+                    Error: {
+                        type: "File Not Found", 
+                        message: "Document with id='" + docId + "' not found" 
+                    }
+                };
+                currentDoc = { action: "error", file: errFile };
             }
             return of(currentDoc);
         }
-        const alertFilter$ = this._fileAlert$.pipe(filter(({ file }) => file.id === docId));
-
+        const alertFilter$ = this._fileAlert$.pipe(
+            filter(({ file }) => file.id === docId)
+        );
         return merge(defer(streamCurrentDoc), alertFilter$);
     }
 
@@ -183,7 +191,7 @@ export class GoogleFileManagerService {
             take(1),
             map(([client, res]) => {
                 if (!res.result.capabilities.canDownload) {
-                    throw throwError("Cannot Download File (capabilities.canDownload)", res);
+                    throw Error("Cannot Download File (capabilities.canDownload) - " + res.toString());
                 }
                 return [client, new JsonFile(
                     res.result.id,
@@ -200,7 +208,12 @@ export class GoogleFileManagerService {
                     try {
                         file.content = JSON.parse(res.body);
                     } catch (err) {
-                        file.content = { Error: err.message };
+                        file.content = { 
+                            Error: {
+                                type: "Parsing",
+                                message: err.message 
+                            }
+                        };
                     }
                     return file;
                 }))
@@ -437,11 +450,11 @@ export class GoogleFileManagerService {
                     'name': file.name,
                     'mimeType': file.mimeType
                 };
-                return from(client.request({
+                return client.request({
                     'path': '/drive/v3/files/' + file.id,
                     'method': 'PATCH',
                     'body': metadata
-                }));
+                });
             }),
             mapTo(true)
         );
@@ -471,7 +484,7 @@ export class GoogleFileManagerService {
                 const multipartRequestBody = delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata)
                     + delimiter + 'Content-Type: ' + file.mimeType + '\r\n\r\n' + file.contentAsString(true) + close_delim;
 
-                return from(client.request({
+                return client.request({
                     'path': '/upload/drive/v3/files/' + file.id,
                     'method': 'PATCH',
                     'params': {
@@ -481,7 +494,7 @@ export class GoogleFileManagerService {
                         'Content-Type': 'multipart/related; boundary="' + boundary + '"'
                     },
                     'body': multipartRequestBody
-                }));
+                });
             }),
             mapTo(file)
         );
@@ -489,89 +502,16 @@ export class GoogleFileManagerService {
         return this.ngZoneObservable(rtn);
     }
 
-    /***
-     * Creates a new JsonFile with $'name'-gloomtools.json as its name
-     * 
-     * Will get parent folder ID, or create parent folder if one isn't present
-     ***/
-    createNewJsonFile_old(name: string, content?: any): Observable<JsonFile> {
-
-        // Create a new file. New files start with an empty object 
-        // that has an ID
-        const newJsonFile = new JsonFile();
-        newJsonFile.name = name + this.fileNameAffix + '.json';
-        if (content) {
-            newJsonFile.content = content;
-        } else {
-            newJsonFile.content = {
-                empty: "file ;)"
-            };
-        }
-
-        const genPostObs = (parentId) => {
-            // Ready a call to create this file on the user's Google drive
-            const boundary = '-------314159265358979323846';
-            const delimiter = "\r\n--" + boundary + "\r\n";
-            const close_delim = "\r\n--" + boundary + "--";
-
-            const metadata = {
-                'name': newJsonFile.name,
-                'parents': [parentId],
-                'mimeType': newJsonFile.mimeType
-            };
-
-            const multipartRequestBody = delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata)
-                + delimiter + 'Content-Type: ' + newJsonFile.mimeType + '\r\n\r\n' + newJsonFile.contentAsString(true) + close_delim;
-
-            const rtn = this.oauthService.getClient().pipe(
-                mergeMap(client => {
-                    return from(client.request({
-                        'path': '/upload/drive/v3/files',
-                        'method': 'POST',
-                        'params': {
-                            'uploadType': 'multipart'
-                        },
-                        'headers': {
-                            'Content-Type': 'multipart/related; boundary="' + boundary + '"'
-                        },
-                        'body': multipartRequestBody
-                    }));
-                })
-            ) as Observable<any>;
-
-            return this.ngZoneObservable(rtn);
-        }
-
-        // Get our folder ID and merge it into this call.
-        return this.getFolderId().pipe(
-            mergeMap(folderId => genPostObs(folderId)),
-            filter(response => {
-                if (response.status == 200) return true;
-                console.error("createNewJsonFile: ", response);
-                return false;
-            }),
-            map(response => {
-                newJsonFile.id = response.result.id;
-                newJsonFile.modifiedTime = response.result.modifiedTime;
-                return newJsonFile;
-            }),
-            tap(file => {
-                this.currentDocuments.set(file.id, file);
-                this._fileAlert$.next({ action: "load", file });
-            })
-        );
-    }
-
-    createNewJsonFile(name: string, content?: any): Observable<JsonFile> {
-
-        // If we havn't been given content then give it some cheeky content ;)
-        if (!content) content = { empty: "file ;)" };
+    createAndSaveNewJsonFile(name: string, content?: any): Observable<JsonFile> {
 
         const rtn$ = forkJoin({
             folder: this.getFolderId(),
             client: this.oauthService.getClient()
         }).pipe(
             switchMap(({ folder, client }) => {
+                // If we havn't been given content then give it some cheeky content ;)
+                if (!content) content = { empty: "file ;)" };
+
                 // Create a new file. 
                 const newJsonFile = new JsonFile();
                 newJsonFile.name = name + this.fileNameAffix + '.json';

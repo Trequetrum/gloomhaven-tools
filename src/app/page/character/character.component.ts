@@ -14,11 +14,11 @@ import { FileAlertAction } from 'src/app/service/google-file-manager.service';
 })
 export class CharacterComponent implements OnInit {
 
+    errorMessage = "";
     newCharacter = true;
     docId: string;
     characterFile: CharacterFile;
-    CharacterFile$: Observable<{ action: FileAlertAction, file: CharacterFile }>;
-    CharacterFile$Sub: Subscription;
+    characterSubscription: Subscription;
     signIn$: Observable<boolean>;
 
     constructor(private route: ActivatedRoute,
@@ -49,25 +49,35 @@ export class CharacterComponent implements OnInit {
     }
 
     resolveDocId(docId: string) {
+        console.log("Resolving: ", docId);
         this.docId = docId;
         this.newCharacter = false;
         if (docId === "new") {
             this.newCharacter = true;
         } else {
             // this.characterFile = this.data.getCharacterFileByDocId(docId);
-            if (this.CharacterFile$Sub) this.CharacterFile$Sub.unsubscribe();
-            
-            this.CharacterFile$ = this.data.listenCharacterFileByDocId(docId);
+            if (this.characterSubscription) this.characterSubscription.unsubscribe();
 
-            this.CharacterFile$Sub = this.CharacterFile$.subscribe(({ action, file }) => {
-                console.log("Checking out subscription logic: ", { action, file });
-                if(action === "update" || action === "load"){
-                    this.characterFile = file;
-                }else{
-                    this.characterFile = null;
-                }
+            this.characterSubscription = this.data.listenCharacterFileByDocId(docId)
+                .subscribe(({ action, file }) => {
 
-            });
+                    console.log("Checking out subscription logic: ", { action, file });
+
+                    if(file.isCharacter){
+                        if (action === "update" || action === "load") {
+                            this.characterFile = file;
+                        }else if(action === "unload"){
+                            this.errorMessage = file.character.name + " was just unloaded and is no longer in memory";
+                            this.characterFile = null;
+                        }else if(action === "error"){
+                            
+                        }
+                    }
+                     else {
+                        
+                    }
+
+                });
         }
         console.log("character: ", this.characterFile);
     }

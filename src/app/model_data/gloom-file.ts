@@ -39,7 +39,10 @@ export class GloomFile extends JsonFile {
             }
         }
 
-        if (file.content.Error) return "General Parsing Error";
+        if (file.content.Error){
+            if(file.content.Error.type) return file.content.Error.type + " Error";
+            else return "Error";
+        }
 
         return "Unknown";
     }
