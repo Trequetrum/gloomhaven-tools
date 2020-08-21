@@ -8,7 +8,7 @@ export class CharacterFile extends GloomFile {
         super(file);
         if (!this.isCharacter){
             this.content.Character = { 
-                Error: {
+                error: {
                     type: "Casting",
                     message: "Drive document " + file.id + " does not contain a Gloomhaven Character",
                 }

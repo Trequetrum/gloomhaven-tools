@@ -118,12 +118,6 @@ export class DataService {
         );
     }
 
-    createErrorGloomfile(err: string): GloomFile {
-        const namelessFile = new JsonFile();
-        namelessFile.content = { Error: err };
-        return new GloomFile(namelessFile);
-    }
-
     createNewCharacter(name: string, gclass: string): Observable<CharacterFile> {
         const char: Character = { name, class: gclass };
         return this.fileManager.createAndSaveNewJsonFile(name, { Character: char }).pipe(

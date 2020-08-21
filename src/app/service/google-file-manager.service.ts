@@ -108,7 +108,7 @@ export class GoogleFileManagerService {
             } else {
                 const errFile = new JsonFile(docId);
                 errFile.content = { 
-                    Error: {
+                    error: {
                         type: "File Not Found", 
                         message: "Document with id='" + docId + "' not found" 
                     }
@@ -209,7 +209,7 @@ export class GoogleFileManagerService {
                         file.content = JSON.parse(res.body);
                     } catch (err) {
                         file.content = { 
-                            Error: {
+                            error: {
                                 type: "Parsing",
                                 message: err.message 
                             }

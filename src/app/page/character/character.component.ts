@@ -34,18 +34,6 @@ export class CharacterComponent implements OnInit {
 
         // Track sign-in state. 
         this.signIn$ = this.authService.listenSignIn();
-
-        // If our character isn't loaded yet, we can look to new files
-        // as a possible source
-        /*
-        const sub = this.data.listenCharactersFiles().subscribe(()=>{
-          if(!this.characterFile && !this.newCharacter){
-            this.resolveDocId(this.docId);
-          }else{
-            sub.unsubscribe();
-          }
-        });
-        */
     }
 
     resolveDocId(docId: string) {
@@ -55,30 +43,30 @@ export class CharacterComponent implements OnInit {
         if (docId === "new") {
             this.newCharacter = true;
         } else {
-            // this.characterFile = this.data.getCharacterFileByDocId(docId);
             if (this.characterSubscription) this.characterSubscription.unsubscribe();
 
             this.characterSubscription = this.data.listenCharacterFileByDocId(docId)
-                .subscribe(({ action, file }) => {
-
-                    console.log("Checking out subscription logic: ", { action, file });
-
-                    if(file.isCharacter){
-                        if (action === "update" || action === "load") {
-                            this.characterFile = file;
-                        }else if(action === "unload"){
-                            this.errorMessage = file.character.name + " was just unloaded and is no longer in memory";
-                            this.characterFile = null;
-                        }else if(action === "error"){
-                            
-                        }
-                    }
-                     else {
-                        
-                    }
-
-                });
+                .subscribe(({ action, file }) => this.characterFileAction(action, file));
         }
-        console.log("character: ", this.characterFile);
+    }
+
+    characterFileAction(action: FileAlertAction, file: CharacterFile) {
+        console.log("Checking out subscription logic: ", { action, file });
+
+        if (file.isCharacter) {
+            if (action === "update" || action === "load") {
+                this.errorMessage = "";
+                this.characterFile = file;
+            } else if (action === "unload") {
+                this.errorMessage = file.character.name + " was just unloaded and is no longer in memory";
+                this.characterFile = null;
+            } else if (action === "error") {
+                this.errorMessage = file.character.error.message;
+            }
+        }else if(file.content?.error) {
+            this.errorMessage = file.content?.error?.message;
+        }else{
+            this.errorMessage = "Unrecognised Error during character load";
+        }
     }
 }

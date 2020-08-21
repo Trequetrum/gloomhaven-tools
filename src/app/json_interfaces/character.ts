@@ -1,3 +1,5 @@
+import { FiledError } from './filed-error';
+
 export interface Character {
     name: string;
     class: string;
@@ -18,4 +20,5 @@ export interface Character {
     sanctuaryDonations?: number;
     legacyCharacterName?: string;
     legacyCharacterDocId?: string;
+    error?: FiledError;
 }

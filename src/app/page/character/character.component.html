@@ -5,9 +5,11 @@
     <app-create-character-form ></app-create-character-form>
 </div>
 
-<div *ngIf="!newCharacter && !characterFile"><p>Woops, you don't have access to a google drive doc with ID: {{docId}}</p></div>
+<div *ngIf="errorMessage">
+    <p>{{errorMessage}}</p>
+</div>
 
 <div *ngIf="!newCharacter && characterFile">
-    <p>This is info about {{characterFile.character.name}}</p>
+    <h1>{{characterFile.character.name}}</h1>
     <p>{{characterFile.character.name}}'s class is {{characterFile.character.class}}</p>
 </div>
