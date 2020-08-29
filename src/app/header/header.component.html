@@ -4,98 +4,105 @@
 -->
 
 <mat-toolbar role="heading" color="primary" class="app-toolbar">
-    <button mat-icon-button class="button-icon" color="accent" aria-label="Account Actions" routerLink="/home">
-        <mat-icon>home</mat-icon>
-    </button>
-    <span class="appGlm-flex-item-fill-remaining-space"> </span>
-    <h1 class="mat-headline">Gloomhaven Tools</h1>
-    <span class="appGlm-flex-item-fill-remaining-space"> </span>
+  <button mat-icon-button class="button-icon" color="accent" aria-label="Account Actions" routerLink="/home">
+    <mat-icon>home</mat-icon>
+  </button>
+  <span class="appGlm-flex-item-fill-remaining-space"> </span>
+  <h1 class="mat-headline">Gloomhaven Tools</h1>
+  <span class="appGlm-flex-item-fill-remaining-space"> </span>
 
-    <sup>{{authService.listenUsername() | async}}</sup>
-    <button mat-icon-button class="button-icon" color="accent" aria-label="Account Actions"
-        [matMenuTriggerFor]="accountActionsMenu">
-        <mat-icon>account_circle</mat-icon>
-    </button>
+  <sup>{{ authService.listenUsername() | async }}</sup>
+  <button mat-icon-button class="button-icon" color="accent" aria-label="Account Actions"
+    [matMenuTriggerFor]="accountActionsMenu">
+    <mat-icon>account_circle</mat-icon>
+  </button>
 
-    <button mat-icon-button class="button-icon" color="accent" aria-label="Menu Actions and Navigation"
-        [matMenuTriggerFor]="actionsAndNavigationMenu">
-        <mat-icon>menu</mat-icon>
-    </button>
+  <button mat-icon-button class="button-icon" color="accent" aria-label="Menu Actions and Navigation"
+    [matMenuTriggerFor]="actionsAndNavigationMenu">
+    <mat-icon>menu</mat-icon>
+  </button>
 </mat-toolbar>
 
 <mat-menu #accountActionsMenu="matMenu" xPosition="before">
-    <button *ngIf="!(authService.listenSignIn() | async)" mat-menu-item (click)="signIn()">
-        <mat-icon>login</mat-icon>
-        <span>Log In</span>
-    </button>
-    <button *ngIf="authService.listenSignIn() | async" mat-menu-item (click)="signOut()">
-        <mat-icon>power_settings_new</mat-icon>
-        <span>Log Out</span>
-    </button>
-    <button *ngIf="authService.listenSignIn() | async" mat-menu-item routerLink="/login/managefiles">
-        <mat-icon>folder_special</mat-icon>
-        <span>Manage Files</span>
-    </button>
-    <button *ngIf="authService.listenSignIn() | async" mat-menu-item routerLink="/player/scenario">
-        <mat-icon>folder_shared</mat-icon>
-        <span>Scenario</span>
-    </button>
-    <button *ngIf="authService.listenSignIn() | async" mat-menu-item (click)="openInitiativeDialog()">
-        <mat-icon>update</mat-icon>
-        <span>Initiative</span>
-    </button>
-    <button mat-menu-item routerLink="/login/picker">
-        <mat-icon>admin_panel_settings</mat-icon>
-        <span>Button Picker</span>
-    </button>
+  <button *ngIf="!(authService.listenSignIn() | async)" mat-menu-item (click)="signIn()">
+    <mat-icon>login</mat-icon>
+    <span>Log In</span>
+  </button>
+  <button *ngIf="authService.listenSignIn() | async" mat-menu-item (click)="signOut()">
+    <mat-icon>power_settings_new</mat-icon>
+    <span>Log Out</span>
+  </button>
+  <button *ngIf="authService.listenSignIn() | async" mat-menu-item routerLink="/login/managefiles">
+    <mat-icon>folder_special</mat-icon>
+    <span>Manage Files</span>
+  </button>
+  <button *ngIf="authService.listenSignIn() | async" mat-menu-item routerLink="/player/scenario">
+    <mat-icon>folder_shared</mat-icon>
+    <span>Scenario</span>
+  </button>
+  <button *ngIf="authService.listenSignIn() | async" mat-menu-item (click)="openInitiativeDialog()">
+    <mat-icon>update</mat-icon>
+    <span>Initiative</span>
+  </button>
+  <button mat-menu-item routerLink="/login/picker">
+    <mat-icon>admin_panel_settings</mat-icon>
+    <span>Button Picker</span>
+  </button>
 </mat-menu>
 
 <mat-menu #actionsAndNavigationMenu="matMenu" xPosition="before">
-    <button *ngIf="authService.listenSignIn() | async" mat-menu-item [matMenuTriggerFor]="partySelection"> Party </button>
-    <button *ngIf="authService.listenSignIn() | async" mat-menu-item [matMenuTriggerFor]="CharacterSelection"> Character </button>
-    <button mat-menu-item routerLink="/playerref"> 
-        <mat-icon>school</mat-icon>
-        <span>Player Reference</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon>store</mat-icon>
-        <span>Item Shop</span>
-    </button>
-    <button *ngIf="authService.listenSignIn() | async" mat-menu-item>
-        <mat-icon fontSet="material-icons-outlined">group</mat-icon>
-        <span>Initiative Tracker</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon fontSet="material-icons-outlined">group</mat-icon>
-        <span>Scenario Tree</span>
-    </button>
+  <button *ngIf="authService.listenSignIn() | async" mat-menu-item [matMenuTriggerFor]="partySelection">
+    Party
+  </button>
+  <button *ngIf="authService.listenSignIn() | async" mat-menu-item [matMenuTriggerFor]="CharacterSelection">
+    Character
+  </button>
+  <button mat-menu-item routerLink="/playerref">
+    <mat-icon>school</mat-icon>
+    <span>Player Reference</span>
+  </button>
+  <button mat-menu-item>
+    <mat-icon>store</mat-icon>
+    <span>Item Shop</span>
+  </button>
+  <button *ngIf="authService.listenSignIn() | async" mat-menu-item>
+    <mat-icon fontSet="material-icons-outlined">group</mat-icon>
+    <span>Initiative Tracker</span>
+  </button>
+  <button mat-menu-item>
+    <mat-icon fontSet="material-icons-outlined">group</mat-icon>
+    <span>Scenario Tree</span>
+  </button>
 </mat-menu>
 
 <mat-menu #partySelection="matMenu">
-    <ng-template ngFor let-camp [ngForOf]="campaignMinis$ | async">
-        <div class="appGlm-menu-title" (click)="$event.stopPropagation();">{{camp.name}}</div>
-        <ng-template ngFor let-prty [ngForOf]="camp.parties">
-            <button mat-menu-item routerLink="/party" [queryParams]="{name: prty, doc: camp.docId}">
-                <mat-icon>group</mat-icon>
-                <span>{{prty}}</span>
-            </button>
-        </ng-template>
-        <hr (click)="$event.stopPropagation();">
+  <ng-template ngFor let-camp [ngForOf]="campaignMinis$ | async">
+    <div class="appGlm-menu-title" (click)="$event.stopPropagation()">
+      {{ camp.name }}
+    </div>
+    <ng-template ngFor let-prty [ngForOf]="camp.parties">
+      <button mat-menu-item routerLink="/party" [queryParams]="{ name: prty, doc: camp.docId }">
+        <mat-icon>group</mat-icon>
+        <span>{{ prty }}</span>
+      </button>
     </ng-template>
-    <button mat-menu-item routerLink="/party" [queryParams]="{name: 'new'}">
-        <mat-icon>group_add</mat-icon>
-        <span>New Party</span>
-    </button>
+    <hr (click)="$event.stopPropagation()" />
+  </ng-template>
+  <button mat-menu-item routerLink="/party" [queryParams]="{ name: 'new' }">
+    <mat-icon>group_add</mat-icon>
+    <span>New Party</span>
+  </button>
 </mat-menu>
 
 <mat-menu #CharacterSelection="matMenu">
-    <button mat-menu-item *ngFor="let chara of characterMinis$ | async;" routerLink="/character" [queryParams]="{doc: chara.docId}">
-        <mat-icon>person</mat-icon>
-        <span>{{chara.name}}</span>
-    </button>
-    <hr (click)="$event.stopPropagation();">
-    <button mat-menu-item routerLink="/character" [queryParams]="{doc: 'new'}">
-        <mat-icon>person_add</mat-icon>
-        <span>New Character</span>
-    </button>
+  <button mat-menu-item *ngFor="let chara of characterMinis$ | async" routerLink="/character"
+    [queryParams]="{ doc: chara.docId }">
+    <mat-icon>person</mat-icon>
+    <span>{{ chara.name }}</span>
+  </button>
+  <hr (click)="$event.stopPropagation()" />
+  <button mat-menu-item routerLink="/character" [queryParams]="{ doc: 'new' }">
+    <mat-icon>person_add</mat-icon>
+    <span>New Character</span>
+  </button>
 </mat-menu>

@@ -7,13 +7,12 @@ import { Observable } from 'rxjs';
 /********************
  * Achievments given by the API are only those which are earned. This service parses
  * a JSON file to make our app aware of all possible achievements. It can connect to
- * the backend to return a list of earned AND unearned achievements. 
+ * the backend to return a list of earned AND unearned achievements.
  ********************/
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class AchievementsService{
-
+export class AchievementsService {
   private globalAchievements = new Array<GlobalAchievement>();
   private partyAchievements = new Array<PartyAchievement>();
 
@@ -22,12 +21,12 @@ export class AchievementsService{
     this.parsePartyAchievements();
   }
 
-  private parseGlobalAchievements(){
-    for(let achievement of AchievementJson.GlobalAchievements){
+  private parseGlobalAchievements() {
+    for (let achievement of AchievementJson.GlobalAchievements) {
       let glob = new GlobalAchievement(achievement.name);
-      if(achievement.options){
+      if (achievement.options) {
         glob.options = new Array<string>();
-        for (let option of achievement.options){
+        for (let option of achievement.options) {
           glob.options.push(option);
         }
       }
@@ -37,10 +36,9 @@ export class AchievementsService{
     console.log(this.globalAchievements);
   }
 
-  private parsePartyAchievements(){
-    for(let achievement of AchievementJson.PartyAchievements){
-      this.partyAchievements.push(new PartyAchievement(achievement))
+  private parsePartyAchievements() {
+    for (let achievement of AchievementJson.PartyAchievements) {
+      this.partyAchievements.push(new PartyAchievement(achievement));
     }
   }
-  
 }

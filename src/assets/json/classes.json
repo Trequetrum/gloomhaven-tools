@@ -1,122 +1,104 @@
 {
-    "classes": [
+  "classes": [
+    {
+      "title": "Brute",
+      "race": "Inox",
+      "handSize": 10,
+      "healthType": "high",
+      "description": "There is a class of Inox, however, who have abando...",
+      "abilitiesrange": [1, 29],
+      "perks": [
         {
-            "title": "Brute",
-            "race": "Inox",
-            "handSize": 10,
-            "healthType": "high",
-            "description": "There is a class of Inox, however, who have abando...",
-            "abilitiesrange": [
-                1,
-                29
-            ],
-            "perks": [
-                {
-                    "description": "Remove two -1 cards"
-                },
-                {
-                    "description": "Replace one -1 card with one +1 card"
-                },
-                {
-                    "description": "Add two +1 cards",
-                    "count": 2
-                }
-            ]
+          "description": "Remove two -1 cards"
         },
         {
-            "title": "Tinkerer",
-            "race": "Quatryl",
-            "handSize": 12,
-            "healthType": "mid",
-            "description": "The Tinkerer is a fairly common class of Quatryl to be...",
-            "abilitiesRange": [
-                30,
-                60
-            ]
+          "description": "Replace one -1 card with one +1 card"
         },
         {
-            "title": "Spellweaver",
-            "race": "Orchid",
-            "handSize": 8,
-            "healthType": "low",
-            "description": "Through deep meditation, some Orchids arrive at the...",
-            "abilitiesRange": [
-                61,
-                87
-            ]
-        },
-        {
-            "title": "Scoundrel",
-            "race": "Human",
-            "handSize": 9,
-            "healthType": "mid",
-            "description": "It is natural, then, that while many humans work to build...",
-            "abilitiesRange": [
-                88,
-                115
-            ]
-        },
-        {
-            "title": "Cragheart",
-            "race": "Saavas",
-            "handSize": 11,
-            "healthType": "high",
-            "description": "There are many saavas, however, who never attain the...",
-            "abilitiesRange": [
-                116,
-                145
-            ]
-        },
-        {
-            "title": "Mindthief",
-            "race": "Vermling",
-            "handSize": 10,
-            "healthType": "low",
-            "description": "There are many saavas, however, who never attain the...",
-            "abilitiesRange": [
-                146,
-                174
-            ]
+          "description": "Add two +1 cards",
+          "count": 2
         }
-    ],
-    "races": [
-        {
-            "name": "Inox",
-            "description": "The Inox are a primitive and barbaric race, prefer..."
-        },
-        {
-            "name": "Quatryl",
-            "description": "Because of their diminutive size, the Quatryl feel..."
-        },
-        {
-            "name": "Orchid",
-            "description": "The Orchids are an ancient meditative race from..."
-        },
-        {
-            "name": "Human",
-            "description": "Humans are by far the most dominant of the races..."
-        },
-        {
-            "name": "Saavas",
-            "description": "The Saavas value power above all else. This severe and..."
-        },
-        {
-            "name": "Vermling",
-            "description": "Vermlings are a scavengin animalistic race. They..."
-        }
-    ],
-    "healthTypes": [
-        {
-            "name": "high",
-            "value": "(lvl * 2) + 8"
-        },
-        {
-            "name": "mid",
-            "value": "ceiling((lvl * 1.5) + 6)"
-        },
-        {
-            "name": "low",
-            "value": "lvl + 5"
-        }
-    ]
+      ]
+    },
+    {
+      "title": "Tinkerer",
+      "race": "Quatryl",
+      "handSize": 12,
+      "healthType": "mid",
+      "description": "The Tinkerer is a fairly common class of Quatryl to be...",
+      "abilitiesRange": [30, 60]
+    },
+    {
+      "title": "Spellweaver",
+      "race": "Orchid",
+      "handSize": 8,
+      "healthType": "low",
+      "description": "Through deep meditation, some Orchids arrive at the...",
+      "abilitiesRange": [61, 87]
+    },
+    {
+      "title": "Scoundrel",
+      "race": "Human",
+      "handSize": 9,
+      "healthType": "mid",
+      "description": "It is natural, then, that while many humans work to build...",
+      "abilitiesRange": [88, 115]
+    },
+    {
+      "title": "Cragheart",
+      "race": "Saavas",
+      "handSize": 11,
+      "healthType": "high",
+      "description": "There are many saavas, however, who never attain the...",
+      "abilitiesRange": [116, 145]
+    },
+    {
+      "title": "Mindthief",
+      "race": "Vermling",
+      "handSize": 10,
+      "healthType": "low",
+      "description": "There are many saavas, however, who never attain the...",
+      "abilitiesRange": [146, 174]
+    }
+  ],
+  "races": [
+    {
+      "name": "Inox",
+      "description": "The Inox are a primitive and barbaric race, prefer..."
+    },
+    {
+      "name": "Quatryl",
+      "description": "Because of their diminutive size, the Quatryl feel..."
+    },
+    {
+      "name": "Orchid",
+      "description": "The Orchids are an ancient meditative race from..."
+    },
+    {
+      "name": "Human",
+      "description": "Humans are by far the most dominant of the races..."
+    },
+    {
+      "name": "Saavas",
+      "description": "The Saavas value power above all else. This severe and..."
+    },
+    {
+      "name": "Vermling",
+      "description": "Vermlings are a scavengin animalistic race. They..."
+    }
+  ],
+  "healthTypes": [
+    {
+      "name": "high",
+      "value": "(lvl * 2) + 8"
+    },
+    {
+      "name": "mid",
+      "value": "ceiling((lvl * 1.5) + 6)"
+    },
+    {
+      "name": "low",
+      "value": "lvl + 5"
+    }
+  ]
 }
