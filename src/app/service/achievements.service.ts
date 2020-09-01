@@ -2,13 +2,7 @@ import { Injectable } from '@angular/core';
 
 import AchievementJson from 'src/assets/json/achievements.json';
 import { GlobalAchievement, PartyAchievement } from '../model_data/achievement';
-import { Observable } from 'rxjs';
 
-/********************
- * Achievments given by the API are only those which are earned. This service parses
- * a JSON file to make our app aware of all possible achievements. It can connect to
- * the backend to return a list of earned AND unearned achievements.
- ********************/
 @Injectable({
   providedIn: 'root',
 })
