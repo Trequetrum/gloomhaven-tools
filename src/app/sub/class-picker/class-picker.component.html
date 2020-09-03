@@ -1,0 +1,9 @@
+<div>
+	<ng-template ngFor let-icon [ngForOf]="classIcons" let-i="index">
+		<button class="classButton48px" mat-icon-button
+			attr.aria-label="Icon button with icon class' name: '{{ icon.name }}'" (click)="clickClass(icon.name)">
+			<img [src]="icon.img.px48" [alt]="icon.name" [title]="icon.name" id="{{icon.name}}-ClassPicker" />
+		</button>
+		<br *ngIf="(i+1)%4 === 0">
+	</ng-template>
+</div>

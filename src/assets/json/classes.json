@@ -1,262 +1,296 @@
 {
-  "classes": [
-    {
-      "title": "Brute",
-      "race": "Inox",
-      "handSize": 10,
-      "healthType": "high",
-      "description": "There is a class of Inox, however, who have abando...",
-      "abilitiesrange": [1, 29],
-      "perks": [
-        {
-          "description": "Remove two -1 cards"
-        },
-        {
-          "description": "Replace one -1 card with one +1 card"
-        },
-        {
-          "description": "Add two +1 cards",
-          "count": 2
-        }
-      ],
-      "icon": {
-        "name": "Brute",
-        "img": {
-          "px48": "assets/img/icons/class/brute48.png"
-        }
-      }
-    },
-    {
-      "title": "Tinkerer",
-      "race": "Quatryl",
-      "handSize": 12,
-      "healthType": "mid",
-      "description": "The Tinkerer is a fairly common class of Quatryl to be...",
-      "abilitiesRange": [30, 60],
-      "icon": {
-        "name": "Tinkerer",
-        "img": {
-          "px48": "assets/img/icons/class/tinkerer48.png"
-        }
-      }
-    },
-    {
-      "title": "Spellweaver",
-      "race": "Orchid",
-      "handSize": 8,
-      "healthType": "low",
-      "description": "Through deep meditation, some Orchids arrive at the...",
-      "abilitiesRange": [61, 87],
-      "icon": {
-        "name": "Spellweaver",
-        "img": {
-          "px48": "assets/img/icons/class/spellweaver48.png"
-        }
-      }
-    },
-    {
-      "title": "Scoundrel",
-      "race": "Human",
-      "handSize": 9,
-      "healthType": "mid",
-      "description": "It is natural, then, that while many humans work to build...",
-      "abilitiesRange": [88, 115],
-      "icon": {
-        "name": "Scoundrel",
-        "img": {
-          "px48": "assets/img/icons/class/scoundrel48.png"
-        }
-      }
-    },
-    {
-      "title": "Cragheart",
-      "race": "Savvas",
-      "handSize": 11,
-      "healthType": "high",
-      "description": "There are many savvas, however, who never attain the...",
-      "abilitiesRange": [116, 145],
-      "icon": {
-        "name": "Cragheart",
-        "img": {
-          "px48": "assets/img/icons/class/cragheart48.png"
-        }
-      }
-    },
-    {
-      "title": "Mindthief",
-      "race": "Vermling",
-      "handSize": 10,
-      "healthType": "low",
-      "description": "There are many, however, who never attain the...",
-      "abilitiesRange": [146, 174],
-      "icon": {
-        "name": "Mindthief",
-        "img": {
-          "px48": "assets/img/icons/class/mindthief48.png"
-        }
-      }
-    },
-    {
-      "title": "Beast Tyrant",
-      "race": "Vermling",
-      "icon": {
-        "name": "Beast",
-        "img": {
-          "px48": "assets/img/icons/class/twominis48.png"
-        }
-      }
-    },
-    {
-      "title": "Berserker",
-      "race": "Inox",
-      "icon": {
-        "name": "Lightning",
-        "img": {
-          "px48": "assets/img/icons/class/lightning48.png"
-        }
-      }
-    },
-    {
-      "title": "Doomstalker",
-      "race": "Orchid",
-      "icon": {
-        "name": "Angry Face",
-        "img": {
-          "px48": "assets/img/icons/class/angryface48.png"
-        }
-      }
-    },
-    {
-      "title": "Elementalist ",
-      "race": "Savvas",
-      "icon": {
-        "name": "Triangles",
-        "img": {
-          "px48": "assets/img/icons/class/triangles48.png"
-        }
-      }
-    },
-    {
-      "title": "Nightshroud",
-      "race": "Aesther",
-      "icon": {
-        "name": "Eclipse",
-        "img": {
-          "px48": "assets/img/icons/class/eclipse48.png"
-        }
-      }
-    },
-    {
-      "title": "Plagueherald",
-      "race": "Harrower",
-      "icon": {
-        "name": "Cthulhu",
-        "img": {
-          "px48": "assets/img/icons/class/cthulhu48.png"
-        }
-      }
-    },
-    {
-      "title": "Quartermaster",
-      "race": "Valrath",
-      "icon": {
-        "name": "Three Spears",
-        "img": {
-          "px48": "assets/img/icons/class/threespears48.png"
-        }
-      }
-    },
-    {
-      "title": "Sawbones",
-      "race": "Human",
-      "icon": {
-        "name": "Saw",
-        "img": {
-          "px48": "assets/img/icons/class/saw48.png"
-        }
-      }
-    },
-    {
-      "title": "Soothsinger",
-      "race": "Quatryl",
-      "icon": {
-        "name": "Music Note",
-        "img": {
-          "px48": "assets/img/icons/class/musicnote48.png"
-        }
-      }
-    },
-    {
-      "title": "Summoner",
-      "race": "Aesther",
-      "icon": {
-        "name": "Circles",
-        "img": {
-          "px48": "assets/img/icons/class/circles48.png"
-        }
-      }
-    },
-    {
-      "title": "Sunkeeper",
-      "race": "Valrath",
-      "icon": {
-        "name": "Sun",
-        "img": {
-          "px48": "assets/img/icons/class/sun48.png"
-        }
-      }
-    }
-  ],
-  "races": [
-    {
-      "name": "Inox",
-      "description": "The Inox are a primitive and barbaric race, prefer..."
-    },
-    {
-      "name": "Quatryl",
-      "description": "Because of their diminutive size, the Quatryl feel..."
-    },
-    {
-      "name": "Orchid",
-      "description": "The Orchids are an ancient meditative race from..."
-    },
-    {
-      "name": "Human",
-      "description": "Humans are by far the most dominant of the races..."
-    },
-    {
-      "name": "Savvas",
-      "description": "The Savvas value power above all else. This severe and..."
-    },
-    {
-      "name": "Vermling",
-      "description": "Vermlings are a scavengin animalistic race. They..."
-    },
-    {
-      "name": "Aesther",
-      "description": "Thought to once be human, Aesthers were an..."
-    },
-    {
-      "name": "Harrower",
-      "description": "\"Harrower\" is only the name given to this race in the..."
-    },
-    {
-      "name": "Valrath",
-      "description": "Though their demon-like qualities make them feared by..."
-    }
-  ],
-  "healthTypes": [
-    {
-      "name": "high",
-      "value": "(lvl * 2) + 8"
-    },
-    {
-      "name": "mid",
-      "value": "ceiling((lvl * 1.5) + 6)"
-    },
-    {
-      "name": "low",
-      "value": "lvl + 5"
-    }
-  ]
+	"classes": [
+		{
+			"title": "Brute",
+			"race": "Inox",
+			"handSize": 10,
+			"healthType": "high",
+			"description": "There is a class of Inox, however, who have abando...",
+			"abilitiesrange": [1, 29],
+			"perks": [
+				{
+					"description": "Remove two -1 cards"
+				},
+				{
+					"description": "Replace one -1 card with one +1 card"
+				},
+				{
+					"description": "Add two +1 cards",
+					"count": 2
+				}
+			],
+			"icon": {
+				"name": "Brute",
+				"img": {
+					"px32": "assets/img/icons/class/brute32.png",
+					"px48": "assets/img/icons/class/brute48.png",
+					"px48inv": "assets/img/icons/class/brute48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Tinkerer",
+			"race": "Quatryl",
+			"handSize": 12,
+			"healthType": "mid",
+			"description": "The Tinkerer is a fairly common class of Quatryl to be...",
+			"abilitiesRange": [30, 60],
+			"icon": {
+				"name": "Tinkerer",
+				"img": {
+					"px32": "assets/img/icons/class/tinkerer32.png",
+					"px48": "assets/img/icons/class/tinkerer48.png",
+					"px48inv": "assets/img/icons/class/tinkerer48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Spellweaver",
+			"race": "Orchid",
+			"handSize": 8,
+			"healthType": "low",
+			"description": "Through deep meditation, some Orchids arrive at the...",
+			"abilitiesRange": [61, 87],
+			"icon": {
+				"name": "Spellweaver",
+				"img": {
+					"px32": "assets/img/icons/class/spellweaver32.png",
+					"px48": "assets/img/icons/class/spellweaver48.png",
+					"px48inv": "assets/img/icons/class/spellweaver48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Scoundrel",
+			"race": "Human",
+			"handSize": 9,
+			"healthType": "mid",
+			"description": "It is natural, then, that while many humans work to build...",
+			"abilitiesRange": [88, 115],
+			"icon": {
+				"name": "Scoundrel",
+				"img": {
+					"px32": "assets/img/icons/class/scoundrel32.png",
+					"px48": "assets/img/icons/class/scoundrel48.png",
+					"px48inv": "assets/img/icons/class/scoundrel48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Cragheart",
+			"race": "Savvas",
+			"handSize": 11,
+			"healthType": "high",
+			"description": "There are many savvas, however, who never attain the...",
+			"abilitiesRange": [116, 145],
+			"icon": {
+				"name": "Cragheart",
+				"img": {
+					"px32": "assets/img/icons/class/cragheart32.png",
+					"px48": "assets/img/icons/class/cragheart48.png",
+					"px48inv": "assets/img/icons/class/cragheart48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Mindthief",
+			"race": "Vermling",
+			"handSize": 10,
+			"healthType": "low",
+			"description": "There are many, however, who never attain the...",
+			"abilitiesRange": [146, 174],
+			"icon": {
+				"name": "Mindthief",
+				"img": {
+					"px32": "assets/img/icons/class/mindthief32.png",
+					"px48": "assets/img/icons/class/mindthief48.png",
+					"px48inv": "assets/img/icons/class/mindthief48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Beast Tyrant",
+			"race": "Vermling",
+			"icon": {
+				"name": "Beast",
+				"img": {
+					"px32": "assets/img/icons/class/twominis32.png",
+					"px48": "assets/img/icons/class/twominis48.png",
+					"px48inv": "assets/img/icons/class/twominis48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Berserker",
+			"race": "Inox",
+			"icon": {
+				"name": "Lightning",
+				"img": {
+					"px32": "assets/img/icons/class/lightning32.png",
+					"px48": "assets/img/icons/class/lightning48.png",
+					"px48inv": "assets/img/icons/class/lightning48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Doomstalker",
+			"race": "Orchid",
+			"icon": {
+				"name": "Angry Face",
+				"img": {
+					"px32": "assets/img/icons/class/angryface32.png",
+					"px48": "assets/img/icons/class/angryface48.png",
+					"px48inv": "assets/img/icons/class/angryface48.png"
+				}
+			}
+		},
+		{
+			"title": "Elementalist ",
+			"race": "Savvas",
+			"icon": {
+				"name": "Triangles",
+				"img": {
+					"px32": "assets/img/icons/class/triangles32.png",
+					"px48": "assets/img/icons/class/triangles48.png",
+					"px48inv": "assets/img/icons/class/triangles48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Nightshroud",
+			"race": "Aesther",
+			"icon": {
+				"name": "Eclipse",
+				"img": {
+					"px32": "assets/img/icons/class/eclipse32.png",
+					"px48": "assets/img/icons/class/eclipse48.png",
+					"px48inv": "assets/img/icons/class/eclipse48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Plagueherald",
+			"race": "Harrower",
+			"icon": {
+				"name": "Cthulhu",
+				"img": {
+					"px32": "assets/img/icons/class/cthulhu32.png",
+					"px48": "assets/img/icons/class/cthulhu48.png",
+					"px48inv": "assets/img/icons/class/cthulhu48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Quartermaster",
+			"race": "Valrath",
+			"icon": {
+				"name": "Three Spears",
+				"img": {
+					"px32": "assets/img/icons/class/threespears32.png",
+					"px48": "assets/img/icons/class/threespears48.png",
+					"px48inv": "assets/img/icons/class/threespears48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Sawbones",
+			"race": "Human",
+			"icon": {
+				"name": "Saw",
+				"img": {
+					"px32": "assets/img/icons/class/saw32.png",
+					"px48": "assets/img/icons/class/saw48.png",
+					"px48inv": "assets/img/icons/class/saw48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Soothsinger",
+			"race": "Quatryl",
+			"icon": {
+				"name": "Music Note",
+				"img": {
+					"px32": "assets/img/icons/class/musicnote32.png",
+					"px48": "assets/img/icons/class/musicnote48.png",
+					"px48inv": "assets/img/icons/class/musicnote48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Summoner",
+			"race": "Aesther",
+			"icon": {
+				"name": "Circles",
+				"img": {
+					"px32": "assets/img/icons/class/circles32.png",
+					"px48": "assets/img/icons/class/circles48.png",
+					"px48inv": "assets/img/icons/class/circles48inv.png"
+				}
+			}
+		},
+		{
+			"title": "Sunkeeper",
+			"race": "Valrath",
+			"icon": {
+				"name": "Sun",
+				"img": {
+					"px32": "assets/img/icons/class/sun32.png",
+					"px48": "assets/img/icons/class/sun48.png",
+					"px48inv": "assets/img/icons/class/sun48inv.png"
+				}
+			}
+		}
+	],
+	"races": [
+		{
+			"name": "Inox",
+			"description": "The Inox are a primitive and barbaric race, prefer..."
+		},
+		{
+			"name": "Quatryl",
+			"description": "Because of their diminutive size, the Quatryl feel..."
+		},
+		{
+			"name": "Orchid",
+			"description": "The Orchids are an ancient meditative race from..."
+		},
+		{
+			"name": "Human",
+			"description": "Humans are by far the most dominant of the races..."
+		},
+		{
+			"name": "Savvas",
+			"description": "The Savvas value power above all else. This severe and..."
+		},
+		{
+			"name": "Vermling",
+			"description": "Vermlings are a scavengin animalistic race. They..."
+		},
+		{
+			"name": "Aesther",
+			"description": "Thought to once be human, Aesthers were an..."
+		},
+		{
+			"name": "Harrower",
+			"description": "\"Harrower\" is only the name given to this race in the..."
+		},
+		{
+			"name": "Valrath",
+			"description": "Though their demon-like qualities make them feared by..."
+		}
+	],
+	"healthTypes": [
+		{
+			"name": "high",
+			"value": "(lvl * 2) + 8"
+		},
+		{
+			"name": "mid",
+			"value": "ceiling((lvl * 1.5) + 6)"
+		},
+		{
+			"name": "low",
+			"value": "lvl + 5"
+		}
+	]
 }

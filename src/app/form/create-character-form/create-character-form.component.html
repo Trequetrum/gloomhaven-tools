@@ -1,18 +1,12 @@
 <form [formGroup]="newCharacterForm" (ngSubmit)="createNewCharacter()">
-  <mat-form-field appearance="fill" color="accent">
-    <mat-label>Name</mat-label>
-    <input matInput type="text" formControlName="newCharacterName">
-  </mat-form-field>
-  <br>
-  <mat-form-field appearance="fill" color="accent">
-    <mat-label>Class</mat-label>
-  </mat-form-field>
-  <br>
-  <mat-radio-group aria-label="Select a class">
-    <mat-radio-button *ngFor="let icon of classIcons;" value="{{icon.name}}">
-      <img src="{{icon.img.px48}}" alt="{{icon.name}}" title="{{icon.name}}">
-    </mat-radio-button>
-  </mat-radio-group>
-  <br>
-  <button mat-raised-button type="submit" color="primary">Create</button>
+	<mat-form-field appearance="fill" color="accent">
+		<mat-label>Name</mat-label>
+		<input matInput type="text" formControlName="newCharacterName">
+	</mat-form-field>
+	<br>
+	Class: {{classPicked}}
+	<br>
+	<app-class-picker (classClick)="onClassPicked($event)"></app-class-picker>
+	<br>
+	<button mat-raised-button type="submit" color="primary">Create</button>
 </form>
