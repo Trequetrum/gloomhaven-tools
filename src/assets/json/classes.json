@@ -140,7 +140,7 @@
 				"img": {
 					"px32": "assets/img/icons/class/angryface32.png",
 					"px48": "assets/img/icons/class/angryface48.png",
-					"px48inv": "assets/img/icons/class/angryface48.png"
+					"px48inv": "assets/img/icons/class/angryface48inv.png"
 				}
 			}
 		},
@@ -292,5 +292,7 @@
 			"name": "low",
 			"value": "lvl + 5"
 		}
-	]
+	],
+	"experienceByLevel": "5 * (level - 1) * (8 + (level/2))",
+	"startingGoldByLevel": "15 * (lvl + 1)"
 }

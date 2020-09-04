@@ -1,10 +1,21 @@
+<h3 class="mat-h3">Create a new character</h3>
 <form [formGroup]="newCharacterForm" (ngSubmit)="createNewCharacter()">
 	<mat-form-field appearance="fill" color="accent">
-		<mat-label>Name</mat-label>
+		<mat-label>Character Name</mat-label>
 		<input matInput type="text" formControlName="newCharacterName">
+		<mat-error>Character Name Required</mat-error>
 	</mat-form-field>
 	<br>
-	Class: {{classPicked}}
+	<mat-form-field appearance="fill">
+		<mat-label>Character level</mat-label>
+		<mat-select formControlName="newCharacterLevel">
+			<mat-option *ngFor="let num of [1,2,3,4,5,6,7,8,9]" [value]="num">
+				{{num}}
+			</mat-option>
+		</mat-select>
+	</mat-form-field>
+	<br>
+	<span class="mat-body-strong">Character Class: </span> <span class="mat-body">{{classPicked}}</span>
 	<br>
 	<app-class-picker (classClick)="onClassPicked($event)"></app-class-picker>
 	<br>

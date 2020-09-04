@@ -21,6 +21,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
+import { MatCardModule } from '@angular/material/card';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -38,53 +39,56 @@ import { GooglePickerComponent } from './sub/google-picker/google-picker.compone
 import { ManageFilesComponent } from './page/manage-files/manage-files.component';
 import { CreateCharacterFormComponent } from './form/create-character-form/create-character-form.component';
 import { ClassPickerComponent } from './sub/class-picker/class-picker.component';
+import { PopupStringsComponent } from './dialog/popup-strings/popup-strings.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HeaderComponent,
-    HomepageComponent,
-    PageNotFoundComponent,
-    InputInitiativeComponent,
-    LogInComponent,
-    PlayerRefComponent,
-    CharScenarioComponent,
-    PartyComponent,
-    CharacterComponent,
-    SelectChiplistDialogComponent,
-    GooglePickerComponent,
-    ManageFilesComponent,
-    CreateCharacterFormComponent,
-    ClassPickerComponent,
-  ],
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    LayoutModule,
+	declarations: [
+		AppComponent,
+		HeaderComponent,
+		HomepageComponent,
+		PageNotFoundComponent,
+		InputInitiativeComponent,
+		LogInComponent,
+		PlayerRefComponent,
+		CharScenarioComponent,
+		PartyComponent,
+		CharacterComponent,
+		SelectChiplistDialogComponent,
+		GooglePickerComponent,
+		ManageFilesComponent,
+		CreateCharacterFormComponent,
+		ClassPickerComponent,
+		PopupStringsComponent,
+	],
+	imports: [
+		FormsModule,
+		ReactiveFormsModule,
+		BrowserModule,
+		AppRoutingModule,
+		BrowserAnimationsModule,
+		LayoutModule,
 
-    MatToolbarModule,
-    MatTabsModule,
-    MatButtonModule,
-    MatRadioModule,
-    MatSidenavModule,
-    MatIconModule,
-    MatListModule,
-    MatMenuModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatInputModule,
-    MatChipsModule,
-    MatExpansionModule,
-    MatProgressSpinnerModule,
-    MatTableModule,
-    MatSortModule,
-  ],
-  providers: [],
-  bootstrap: [AppComponent],
-  entryComponents: [InputInitiativeComponent, LogInComponent],
+		MatToolbarModule,
+		MatTabsModule,
+		MatButtonModule,
+		MatRadioModule,
+		MatSidenavModule,
+		MatIconModule,
+		MatListModule,
+		MatMenuModule,
+		MatDialogModule,
+		MatFormFieldModule,
+		MatSelectModule,
+		MatInputModule,
+		MatChipsModule,
+		MatExpansionModule,
+		MatProgressSpinnerModule,
+		MatTableModule,
+		MatSortModule,
+		MatCardModule,
+	],
+	providers: [],
+	bootstrap: [AppComponent],
+	entryComponents: [InputInitiativeComponent, LogInComponent],
 })
 export class AppModule {}

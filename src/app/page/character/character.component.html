@@ -1,15 +1,16 @@
-<p>character works!</p>
-
-<div *ngIf="newCharacter">
-    <p>You're making a new character</p>
-    <app-create-character-form ></app-create-character-form>
+<div class="div-page" *ngIf="newCharacter">
+	<div class="div-md-centered-text appGlm-flex-column">
+		<div class="appGlm-flex-column appGlm-div-rcorners">
+			<app-create-character-form></app-create-character-form>
+		</div>
+	</div>
 </div>
 
 <div *ngIf="errorMessage">
-    <p>{{errorMessage}}</p>
+	<p>{{errorMessage}}</p>
 </div>
 
 <div *ngIf="!newCharacter && characterFile">
-    <h1>{{characterFile.character.name}}</h1>
-    <p>{{characterFile.character.name}}'s class is {{characterFile.character.class}}</p>
+	<h1>{{characterFile.character.name}}</h1>
+	<p>{{characterFile.character.name}}'s class is {{characterFile.character.class}}</p>
 </div>
