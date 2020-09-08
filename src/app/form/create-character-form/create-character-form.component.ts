@@ -49,7 +49,6 @@ export class CreateCharacterFormComponent implements OnInit {
 			const dialogRef = this.dialog.open(PopupStringsComponent, { data: errorStrings });
 		} else {
 			// Create new character with the given values
-			console.log(this.newCharacterForm.value, this.classPicked);
 			this.loading = true;
 			const classFromName = this.classData.getClassByIconName(this.classPicked);
 			if (classFromName.title) {

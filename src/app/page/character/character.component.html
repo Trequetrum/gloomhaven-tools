@@ -1,16 +1,25 @@
-<div class="div-page" *ngIf="newCharacter">
-	<div class="div-md-centered-text appGlm-flex-column">
-		<div class="appGlm-flex-column appGlm-div-rcorners">
-			<app-create-character-form></app-create-character-form>
+<div class="div-page" *ngIf="errorMessage">
+	<div class="div-md-centered-text">
+		<div class="appGlm-div-rcorners">
+			<p>{{errorMessage}}</p>
 		</div>
 	</div>
 </div>
 
-<div *ngIf="errorMessage">
-	<p>{{errorMessage}}</p>
+<div class="div-page" *ngIf="newCharacter">
+	<div class="div-md-centered-text">
+		<div class="appGlm-div-rcorners">
+			<app-create-character-form (newDocId)="changeDocId($event)">
+			</app-create-character-form>
+		</div>
+	</div>
 </div>
 
-<div *ngIf="!newCharacter && characterFile">
-	<h1>{{characterFile.character.name}}</h1>
-	<p>{{characterFile.character.name}}'s class is {{characterFile.character.class}}</p>
+<div class="div-page" *ngIf="!newCharacter && characterFile">
+	<div class="div-md-centered-text">
+		<div class="appGlm-div-rcorners">
+			<h1>{{characterFile.character.name}}</h1>
+			<p>{{characterFile.character.name}}'s class is {{characterFile.character.class}}</p>
+		</div>
+	</div>
 </div>

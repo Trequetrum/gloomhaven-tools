@@ -1,5 +1,8 @@
 <h3 class="mat-h3">Create a new character</h3>
-<form [formGroup]="newCharacterForm" (ngSubmit)="createNewCharacter()">
+<div style="margin-top: 50px;" *ngIf="loading">
+	<mat-spinner></mat-spinner>
+</div>
+<form *ngIf="!loading" [formGroup]="newCharacterForm" (ngSubmit)="createNewCharacter()">
 	<mat-form-field appearance="fill" color="accent">
 		<mat-label>Character Name</mat-label>
 		<input matInput type="text" formControlName="newCharacterName">
