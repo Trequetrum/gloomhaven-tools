@@ -18,8 +18,7 @@
 <div class="div-page" *ngIf="!newCharacter && characterFile">
 	<div class="div-md-centered-text">
 		<div class="appGlm-div-rcorners">
-			<h1>{{characterFile.character.name}}</h1>
-			<p>{{characterFile.character.name}}'s class is {{characterFile.character.class}}</p>
+			<app-character-sheet [characterFile]="characterFile"></app-character-sheet>
 		</div>
 	</div>
 </div>

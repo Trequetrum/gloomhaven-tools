@@ -60,8 +60,6 @@ export class CharacterComponent implements OnInit {
 	}
 
 	characterFileAction(action: FileAlertAction, file: CharacterFile) {
-		console.log('Checking out subscription logic: ', { action, file });
-
 		if (file.isCharacter) {
 			if (action === 'update' || action === 'load') {
 				this.errorMessage = '';

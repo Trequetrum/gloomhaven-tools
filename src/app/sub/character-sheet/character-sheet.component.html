@@ -1,0 +1,22 @@
+<h1>{{characterFile.character.name}} <img [src]="class.icon.img.px32" [alt]="class.icon.name"
+		[title]="class.icon.name" /></h1>
+<p> {{class.race}} {{class.title}}</p>
+<mat-form-field appearance="standard">
+	<mat-label>Level</mat-label>
+	<input matInput [formControl]="levelControl">
+	<mat-icon matSuffix>model_training</mat-icon>
+</mat-form-field>
+<mat-form-field appearance="outline">
+	<mat-label>Experience</mat-label>
+	<input matInput [formControl]="experienceControl">
+	<mat-icon matSuffix>toll</mat-icon>
+</mat-form-field>
+<mat-form-field appearance="outline">
+	<mat-label>Gold</mat-label>
+	<input matInput [formControl]="goldControl">
+	<mat-icon matSuffix>account_balance</mat-icon>
+</mat-form-field>
+<p *ngIf="characterFile.character.notes">Notes: {{characterFile.character.notes}}</p>
+<p *ngIf="characterFile.character.personalQuest?.number">Personal Quest:
+	{{characterFile.character.personalQuest.number}}
+</p>

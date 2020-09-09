@@ -1,38 +1,51 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core'
 
-import ClassesJson from 'src/assets/json/classes.json';
-import { ClassData } from '../json_interfaces/class-data';
-import { RaceData } from '../json_interfaces/race-data';
-import { ImgIcon } from '../json_interfaces/img-icon';
+import ClassesJson from 'src/assets/json/classes.json'
+import { ClassData } from '../json_interfaces/class-data'
+import { RaceData } from '../json_interfaces/race-data'
+import { ImgIcon } from '../json_interfaces/img-icon'
 
 @Injectable({
 	providedIn: 'root',
 })
 export class ClassDataService {
-	private classData = new Array<ClassData>();
-	private raceData = new Array<RaceData>();
+	private classData = new Array<ClassData>()
+	private raceData = new Array<RaceData>()
 
 	constructor() {
 		// We trust that the JSON in our assets is well formed. No checks being run at all here.
-		this.classData = ClassesJson.classes as [ClassData];
-		this.raceData = ClassesJson.races;
+		this.classData = ClassesJson.classes as [ClassData]
+		this.raceData = ClassesJson.races
+	}
+
+	getClassByName(name: string): ClassData {
+		const index = this.classData.findIndex(data => data.title === name)
+		return index >= 0 ? this.classData[index] : null
 	}
 
 	getClassIcons(): ImgIcon[] {
-		return this.classData.map(data => data.icon);
+		return this.classData.map(data => data.icon)
 	}
 
 	getClassByIcon(icon: ImgIcon): ClassData {
-		const index = this.classData.findIndex(data => data.icon.name === icon.name);
-		return index >= 0 ? this.classData[index] : null;
+		const index = this.classData.findIndex(data => data.icon.name === icon.name)
+		return index >= 0 ? this.classData[index] : null
 	}
 
 	getClassByIconName(iconName: string): ClassData {
-		return this.getClassByIcon({ img: {}, name: iconName });
+		return this.getClassByIcon({ img: {}, name: iconName })
 	}
 
 	getRaceDescription(race: string): string {
-		const index = this.raceData.findIndex(data => data.name === race);
-		return index >= 0 ? this.raceData[index].description : null;
+		const index = this.raceData.findIndex(data => data.name === race)
+		return index >= 0 ? this.raceData[index].description : null
+	}
+
+	convertExpToLevel(exp: number): number {
+		return 0;
+	}
+
+	convertLevelToExp(lvl: number): number {
+		return 5 * (lvl - 1) * (8 + lvl / 2);
 	}
 }

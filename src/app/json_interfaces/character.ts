@@ -20,5 +20,6 @@ export interface Character {
 	sanctuaryDonations?: number;
 	legacyCharacterName?: string;
 	legacyCharacterDocId?: string;
+	notes?: string;
 	error?: FiledError;
 }
