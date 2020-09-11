@@ -8,6 +8,7 @@ import { CharacterMini } from '../model_data/character-mini';
 import { Character } from '../json_interfaces/character';
 import { CharacterFile } from '../model_data/character-file';
 import { JsonFile } from '../model_data/json-file';
+import { ClassDataService } from './class-data.service';
 
 @Injectable({
 	providedIn: 'root',
@@ -19,7 +20,7 @@ export class DataService {
 
 	private gloomFiles = new Array<GloomFile>();
 
-	constructor(private fileManager: GoogleFileManagerService) {
+	constructor(private fileManager: GoogleFileManagerService, private classData: ClassDataService) {
 		this.gloomFiles = Array.from(this.fileManager.currentDocuments.values())
 			.map(val => new GloomFile(val))
 			.filter(file => file.isGloomy);
@@ -131,12 +132,16 @@ export class DataService {
 
 	createNewCharacter(name: string, gclass: string, level: number): Observable<CharacterFile> {
 		const gold = 15 * (level + 1);
-		const experience = 5 * (level - 1) * (8 + level / 2);
+		const experience = this.classData.convertLevelToExp(level);
 
 		const char: Character = { name, class: gclass, level, gold, experience };
 		return this.fileManager.createAndSaveNewJsonFile(name, { Character: char }).pipe(
 			map(jsonFile => new GloomFile(jsonFile)),
 			map(gloomFile => new CharacterFile(gloomFile))
 		);
+	}
+
+	saveFile(file: GloomFile): Observable<boolean> {
+		return this.fileManager.saveJsonFile(file).pipe(map(_ => true));
 	}
 }

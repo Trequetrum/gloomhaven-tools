@@ -42,10 +42,11 @@ export class ClassDataService {
 	}
 
 	convertExpToLevel(exp: number): number {
-		return 0;
+		// Math.floor(Math.sqrt((2 / 5 * exp) + (289 / 4)) - (15 / 2));
+		return Math.floor(Math.sqrt((0.4 * exp) + (72.25)) - (7.5));
 	}
 
 	convertLevelToExp(lvl: number): number {
-		return 5 * (lvl - 1) * (8 + lvl / 2);
+		return 5 * (lvl - 1) * (8 + (lvl / 2));
 	}
 }
