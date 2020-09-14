@@ -43,7 +43,7 @@ export class ClassDataService {
 
 	convertExpToLevel(exp: number): number {
 		// Math.floor(Math.sqrt((2 / 5 * exp) + (289 / 4)) - (15 / 2));
-		return Math.floor(Math.sqrt((0.4 * exp) + (72.25)) - (7.5));
+		return Math.max(0, Math.min(9, Math.floor(Math.sqrt((0.4 * exp) + (72.25)) - (7.5))));
 	}
 
 	convertLevelToExp(lvl: number): number {

@@ -19,13 +19,15 @@ export class CharacterSheetComponent implements OnInit, OnChanges {
 	levelControl = new FormControl(1);
 	experienceControl = new FormControl(0);
 	goldControl = new FormControl(0);
+	battleGoalsControl = new FormControl(0);
 
 	constructor(private classDataS: ClassDataService, private fileData: DataService) { }
 
 	ngOnInit(): void {
 		this.levelControl.disable();
 
-		// Changing experience may update the character's level
+		// Changing experience may update the character's level alongside
+		// updating the character's exp value
 		const exp$ = this.experienceControl.valueChanges.pipe(
 			debounceTime(500),
 			tap(exp => {
@@ -46,10 +48,16 @@ export class CharacterSheetComponent implements OnInit, OnChanges {
 			tap(gp => this.characterFile.character.gold = gp)
 		);
 
-		merge(exp$, gp$).pipe(
+		// Changing battle goals updates the character's battlegoals value
+		const battleGoals$ = this.battleGoalsControl.valueChanges.pipe(
+			tap(checks => this.characterFile.character.battleGoals = checks)
+		);
+
+		merge(exp$, gp$, battleGoals$).pipe(
 			debounceTime(2000),
+			tap(_ => console.log("> Saving " + this.characterFile.character.name)),
 			switchMap(_ => this.fileData.saveFile(this.characterFile))
-		).subscribe();
+		).subscribe(_ => console.log("> Saved " + this.characterFile.character.name));
 	}
 
 	ngOnChanges(changes: SimpleChanges): void {
@@ -70,13 +78,10 @@ export class CharacterSheetComponent implements OnInit, OnChanges {
 
 	updateFromCharacterFile(changed: CharacterFile) {
 		this.class = this.classDataS.getClassByName(changed.character.class);
-		this.levelControl.setValue(changed.character.level);
-		this.experienceControl.setValue(changed.character.experience);
-		this.goldControl.setValue(changed.character.gold);
-	}
-
-	battleGoalUpdate(val) {
-		console.log("battleGoalUpdate: ", val);
+		this.levelControl.setValue(changed.character?.level || 1);
+		this.experienceControl.setValue(changed.character?.experience || 0);
+		this.goldControl.setValue(changed.character?.gold || 0);
+		this.battleGoalsControl.setValue(changed.character?.battleGoals || 0);
 	}
 
 }

@@ -1,0 +1,26 @@
+.title-bar{
+	display:flex;
+	justify-content: space-around;
+}
+
+.subtitle-bar{
+	display:flex;
+	justify-content: center;
+}
+
+.title-bar img {
+	align-self: flex-start;
+}
+
+.basic-info{
+	display:flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	align-items: stretch;
+}
+
+.sectioned-info{
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+}

@@ -1,8 +1,14 @@
-<div>
-	<ng-template ngFor let-group [ngForOf]="checkboxGroup" let-i="index">
-		<mat-icon *ngIf="group.complete">check_circle</mat-icon>
-		<mat-icon *ngIf="!group.complete">check_circle_outline</mat-icon>
-		<mat-checkbox *ngFor="let control of group.boxControls" [formControl]="control"></mat-checkbox>
-		<br *ngIf="i%2===1">
-	</ng-template>
-</div>
+<mat-card class="form-element">
+	<mat-card-title>Battle Goals</mat-card-title>
+	<mat-card-subtitle>Perks Earned: {{numPerks}}</mat-card-subtitle>
+	<mat-card-content class="form-center">
+		<ng-template ngFor let-group [ngForOf]="checkboxGroup" let-i="index">
+			<div *ngIf="i%2===1" class="big-spacer"></div>
+			<mat-icon *ngIf="group.complete">check_circle</mat-icon>
+			<mat-icon *ngIf="!group.complete">check_circle_outline</mat-icon>
+			<div class="small-spacer"></div>
+			<mat-checkbox *ngFor="let control of group.boxControls" [formControl]="control"></mat-checkbox>
+			<br *ngIf="i%2===1">
+		</ng-template>
+	</mat-card-content>
+</mat-card>

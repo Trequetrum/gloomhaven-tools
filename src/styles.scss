@@ -14,8 +14,11 @@ $primary: #7b1fa2;
 $accent: #69f0ae;
 $warn: #f44336;
 
+* {
+	box-sizing: border-box;
+}
+
 .div-page{
-    box-sizing: border-box;
     width: 100%;
     padding: 0 5px;
     /* border: dashed; */
