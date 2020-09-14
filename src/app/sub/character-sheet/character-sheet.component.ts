@@ -3,7 +3,7 @@ import { CharacterFile } from 'src/app/model_data/character-file';
 import { ClassData } from 'src/app/json_interfaces/class-data';
 import { ClassDataService } from 'src/app/service/class-data.service';
 import { FormControl } from '@angular/forms';
-import { debounceTime, tap } from 'rxjs/operators';
+import { debounceTime, tap, mergeMap, switchMap } from 'rxjs/operators';
 import { DataService } from 'src/app/service/data.service';
 import { merge } from 'rxjs';
 
@@ -24,6 +24,8 @@ export class CharacterSheetComponent implements OnInit, OnChanges {
 
 	ngOnInit(): void {
 		this.levelControl.disable();
+
+		// Changing experience may update the character's level
 		const exp$ = this.experienceControl.valueChanges.pipe(
 			debounceTime(500),
 			tap(exp => {
@@ -38,17 +40,20 @@ export class CharacterSheetComponent implements OnInit, OnChanges {
 				}
 			})
 		);
+
+		// Changing GP updates the character's gp value
 		const gp$ = this.goldControl.valueChanges.pipe(
 			tap(gp => this.characterFile.character.gold = gp)
 		);
 
-		merge(exp$, gp$).pipe(debounceTime(2000), tap(_ => console.log(">>>> Saving File...", this.characterFile))).subscribe(_ => {
-			this.fileData.saveFile(this.characterFile).subscribe(_ => console.log(">>>> ... saved"));
-		});
+		merge(exp$, gp$).pipe(
+			debounceTime(2000),
+			switchMap(_ => this.fileData.saveFile(this.characterFile))
+		).subscribe();
 	}
 
 	ngOnChanges(changes: SimpleChanges): void {
-		console.log('Character-Sheet > Logging Changes: ', changes);
+		console.log('>>>> Character-Sheet > Logging Changes: ', changes);
 
 		for (const propName in changes) {
 			if (changes.hasOwnProperty(propName)) {
@@ -68,6 +73,10 @@ export class CharacterSheetComponent implements OnInit, OnChanges {
 		this.levelControl.setValue(changed.character.level);
 		this.experienceControl.setValue(changed.character.experience);
 		this.goldControl.setValue(changed.character.gold);
+	}
+
+	battleGoalUpdate(val) {
+		console.log("battleGoalUpdate: ", val);
 	}
 
 }

@@ -22,6 +22,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -41,6 +42,7 @@ import { CreateCharacterFormComponent } from './form/create-character-form/creat
 import { ClassPickerComponent } from './sub/class-picker/class-picker.component';
 import { PopupStringsComponent } from './dialog/popup-strings/popup-strings.component';
 import { CharacterSheetComponent } from './sub/character-sheet/character-sheet.component';
+import { BattleGoalsComponent } from './sub/battle-goals/battle-goals.component';
 
 @NgModule({
 	declarations: [
@@ -61,6 +63,7 @@ import { CharacterSheetComponent } from './sub/character-sheet/character-sheet.c
 		ClassPickerComponent,
 		PopupStringsComponent,
 		CharacterSheetComponent,
+		BattleGoalsComponent,
 	],
 	imports: [
 		FormsModule,
@@ -88,9 +91,10 @@ import { CharacterSheetComponent } from './sub/character-sheet/character-sheet.c
 		MatTableModule,
 		MatSortModule,
 		MatCardModule,
+		MatCheckboxModule,
 	],
 	providers: [],
 	bootstrap: [AppComponent],
 	entryComponents: [InputInitiativeComponent, LogInComponent],
 })
-export class AppModule {}
+export class AppModule { }

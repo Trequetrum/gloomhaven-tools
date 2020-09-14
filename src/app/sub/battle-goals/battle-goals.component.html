@@ -1,0 +1,8 @@
+<div>
+	<ng-template ngFor let-group [ngForOf]="checkboxGroup" let-i="index">
+		<mat-icon *ngIf="group.complete">check_circle</mat-icon>
+		<mat-icon *ngIf="!group.complete">check_circle_outline</mat-icon>
+		<mat-checkbox *ngFor="let control of group.boxControls" [formControl]="control"></mat-checkbox>
+		<br *ngIf="i%2===1">
+	</ng-template>
+</div>
