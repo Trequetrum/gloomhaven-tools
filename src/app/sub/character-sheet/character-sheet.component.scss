@@ -3,13 +3,13 @@
 	justify-content: space-around;
 }
 
+.title-bar img {
+	align-self: flex-start;
+}
+
 .subtitle-bar{
 	display:flex;
 	justify-content: center;
-}
-
-.title-bar img {
-	align-self: flex-start;
 }
 
 .basic-info{
@@ -21,6 +21,7 @@
 
 .sectioned-info{
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: center;
 	align-items: flex-start;
 }

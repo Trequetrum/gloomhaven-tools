@@ -3,7 +3,7 @@ import { CharacterFile } from 'src/app/model_data/character-file';
 import { ClassData } from 'src/app/json_interfaces/class-data';
 import { ClassDataService } from 'src/app/service/class-data.service';
 import { FormControl } from '@angular/forms';
-import { debounceTime, tap, mergeMap, switchMap } from 'rxjs/operators';
+import { debounceTime, tap, switchMap } from 'rxjs/operators';
 import { DataService } from 'src/app/service/data.service';
 import { merge } from 'rxjs';
 

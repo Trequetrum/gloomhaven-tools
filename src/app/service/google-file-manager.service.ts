@@ -178,13 +178,13 @@ export class GoogleFileManagerService {
 	listenDocuments(): Observable<JsonFile[]> {
 		const getCurrentDocuments = () =>
 			Array.from(this.currentDocuments.values());
-		const currendDocs$ = defer(() => of(getCurrentDocuments()));
+		const currentDocs$ = defer(() => of(getCurrentDocuments()));
 		const listenFile$ = this._fileAlert$.pipe(
 			debounceTime(250),
 			map(getCurrentDocuments)
 		);
 
-		return merge(currendDocs$, listenFile$);
+		return merge(currentDocs$, listenFile$);
 	}
 
 	/****
