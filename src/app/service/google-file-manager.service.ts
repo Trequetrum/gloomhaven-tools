@@ -29,7 +29,7 @@ import { StringPair } from '../util/string-pair';
 
 declare var google: any;
 
-export type FileAlertAction = 'load' | 'unload' | 'error' | 'update';
+export type FileAlertAction = 'load' | 'unload' | 'error' | 'update' | 'save';
 
 @Injectable({
 	providedIn: 'root',
@@ -524,6 +524,14 @@ export class GoogleFileManagerService {
 	 *    - TODO: We should be patching the most recent file in the drive
 	 */
 	saveJsonFile(file: JsonFile): Observable<JsonFile> {
+
+		const diff = file.getDiffData();
+		if (!diff) {
+			console.log(">>>> Not Saving JsonFile due to no diff");
+			return of(file);
+		}
+		console.log(">>>> Saving JsonFile with diffData: ", diff);
+
 		// Ready a call to Google drive
 		const boundary = '-------314159265358979323846';
 		const delimiter = '\r\n--' + boundary + '\r\n';
@@ -559,7 +567,13 @@ export class GoogleFileManagerService {
 					body: multipartRequestBody,
 				});
 			}),
-			mapTo(file)
+			mapTo(file),
+			tap((file) => {
+				this.currentDocuments.set(file.id, file);
+				this.ngZone.run(() =>
+					this._fileAlert$.next({ action: 'save', file })
+				);
+			})
 		);
 
 		return this.ngZoneObservable(rtn);
@@ -626,7 +640,9 @@ export class GoogleFileManagerService {
 			}),
 			tap((file) => {
 				this.currentDocuments.set(file.id, file);
-				this._fileAlert$.next({ action: 'load', file });
+				this.ngZone.run(() =>
+					this._fileAlert$.next({ action: 'save', file })
+				);
 			})
 		);
 		return this.ngZoneObservable(rtn$);
