@@ -1,2 +1,3 @@
-<app-header></app-header>
-<router-outlet></router-outlet>
+<app-header *ngIf="!testComponent"></app-header>
+<router-outlet *ngIf="!testComponent"></router-outlet>
+<app-test-page *ngIf="testComponent"></app-test-page>

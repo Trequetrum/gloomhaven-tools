@@ -43,6 +43,7 @@ import { ClassPickerComponent } from './sub/class-picker/class-picker.component'
 import { PopupStringsComponent } from './dialog/popup-strings/popup-strings.component';
 import { CharacterSheetComponent } from './sub/character-sheet/character-sheet.component';
 import { BattleGoalsComponent } from './sub/battle-goals/battle-goals.component';
+import { TestPageComponent } from './page/test-page/test-page.component';
 
 @NgModule({
 	declarations: [
@@ -64,6 +65,7 @@ import { BattleGoalsComponent } from './sub/battle-goals/battle-goals.component'
 		PopupStringsComponent,
 		CharacterSheetComponent,
 		BattleGoalsComponent,
+		TestPageComponent,
 	],
 	imports: [
 		FormsModule,

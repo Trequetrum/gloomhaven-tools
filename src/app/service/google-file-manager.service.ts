@@ -504,7 +504,7 @@ export class GoogleFileManagerService {
 			mergeMap((client) => {
 				const metadata = {
 					name: file.name,
-					mimeType: file.mimeType,
+					mimeType: JsonFile.MIME_TYPE,
 				};
 				return client.request({
 					path: '/drive/v3/files/' + file.id,
@@ -541,7 +541,7 @@ export class GoogleFileManagerService {
 			mergeMap((client) => {
 				const metadata = {
 					name: file.name,
-					mimeType: file.mimeType,
+					mimeType: JsonFile.MIME_TYPE,
 				};
 
 				const multipartRequestBody =
@@ -550,7 +550,7 @@ export class GoogleFileManagerService {
 					JSON.stringify(metadata) +
 					delimiter +
 					'Content-Type: ' +
-					file.mimeType +
+					JsonFile.MIME_TYPE +
 					'\r\n\r\n' +
 					file.contentAsString(true) +
 					close_delim;
@@ -601,7 +601,7 @@ export class GoogleFileManagerService {
 				const metadata = {
 					name: newJsonFile.name,
 					parents: [folder],
-					mimeType: newJsonFile.mimeType,
+					mimeType: JsonFile.MIME_TYPE,
 				};
 
 				const multipartRequestBody =
@@ -610,7 +610,7 @@ export class GoogleFileManagerService {
 					JSON.stringify(metadata) +
 					delimiter +
 					'Content-Type: ' +
-					newJsonFile.mimeType +
+					JsonFile.MIME_TYPE +
 					'\r\n\r\n' +
 					newJsonFile.contentAsString(true) +
 					close_delim;
