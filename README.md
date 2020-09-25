@@ -11,8 +11,12 @@ checking it out and giving feedback.
 
 The most recent production build can be found here ([Gloomhaven Tools](https://trequetrum.github.io/GloomhavenTools/)) at: 
 * https://trequetrum.github.io/GloomhavenTools/
-* The last build was **Tue August 11th 2020**. It has basic Google Drive 
-      Sign in implemented with some very basic document management. 
+* The last build was **Thurs Semptember 24th 2020**. 
+* Implemented so far:
+    * Google Drive Sign-in 
+    * Partial document management.
+    * Diff and patch mechanics that allow multiple users to simultaneously edit files with automatic merge conflict resolution. 
+    * Create a new character (creates a google doc) and record some of its stats.
 
 ## Features for this project:
 * Glorified Gloomhaven document editor with built-in collaboration

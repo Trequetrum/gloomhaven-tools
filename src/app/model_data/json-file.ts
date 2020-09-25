@@ -204,7 +204,6 @@ export class JsonFile {
 		});
 	}
 
-
 	// The returned Diff Object will have deleted keys set to null and changed keys. The rest of the keys do not
 	// appear in the diff object. If the two objects do not have the same _gDocObjID, then a null is returned.
 	// This diff flattens all objects (no matter how deep) into an array of differences. 
@@ -238,7 +237,7 @@ export class JsonFile {
 			return null;
 		}
 
-
+		// The diffObject takes it's ID from the two objects it's diffing
 		diffObject._gDocObjID = sourceObj._gDocObjID;
 
 		// Loop through the source object, don't deep compare objects just check their _gDocObjID.
