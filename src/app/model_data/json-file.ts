@@ -34,7 +34,7 @@ export class JsonFile {
 		public canEdit?: boolean,
 		public modifiedTime?: string
 	) {
-		this._cleanDiffData = false;
+		this.content = { _gDocObjID: 0 };
 	}
 
 	/***

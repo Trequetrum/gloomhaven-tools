@@ -32,6 +32,8 @@ export class DataService {
 				filter(({ gloomFile }) => gloomFile.isGloomy)
 			)
 			.subscribe(({ action, gloomFile }) => {
+				console.log(">>>>> Subscribed document load", action, gloomFile);
+
 				// We've subscribed to see loaded files where gloomFile.isGloomy is true.
 				if (action === 'load') {
 					this.gloomFiles.push(gloomFile);
@@ -100,7 +102,7 @@ export class DataService {
 	listenCharacterMinis(): Observable<CharacterMini[]> {
 		const currVal$ = defer(() => of(this.getCharacterMinis()));
 		const newVal$ = this.characterFileAlert$.pipe(map(() => this.getCharacterMinis()));
-		return merge(currVal$, newVal$);
+		return merge(currVal$, newVal$).pipe(tap(_ => console.log(">>>>> listenCharacterMinis() this.gloomFiles: ", this.gloomFiles)));
 	}
 
 	getCharacterMinis(): CharacterMini[] {

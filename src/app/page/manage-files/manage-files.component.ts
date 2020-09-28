@@ -10,83 +10,83 @@ import { GloomFile } from 'src/app/model_data/gloom-file';
 import { interval } from 'rxjs';
 
 @Component({
-  selector: 'app-manage-files',
-  templateUrl: './manage-files.component.html',
-  styleUrls: ['./manage-files.component.scss']
+	selector: 'app-manage-files',
+	templateUrl: './manage-files.component.html',
+	styleUrls: ['./manage-files.component.scss']
 })
 export class ManageFilesComponent implements OnInit, AfterViewInit {
 
-  displayedColumns: string[] = ['name', 'edit', 'type', 'loaded', 'sync'];
-  dataSource = new MatTableDataSource();
+	displayedColumns: string[] = ['name', 'edit', 'type', 'loaded', 'sync'];
+	dataSource = new MatTableDataSource();
 
-  @ViewChild(MatSort, {static: true}) sort: MatSort;
-  @ViewChild(MatTable, {static:false}) table: MatTable<any>;
+	@ViewChild(MatSort, { static: true }) sort: MatSort;
+	@ViewChild(MatTable, { static: false }) table: MatTable<any>;
 
-  constructor(
-    public oauthService: GoogleOauth2Service,
-    private googlePicker: GooglePickerService,
-    private fileManager: GoogleFileManagerService){}
+	constructor(
+		public oauthService: GoogleOauth2Service,
+		private googlePicker: GooglePickerService,
+		private fileManager: GoogleFileManagerService) { }
 
-  ngOnInit() {
+	ngOnInit() {
 
-    // We get our files from the filemanager because the data service throws away any files 
-    // it doesn't need. Files that don't parse or don't contain gloomhaven data are quietly 
-    // ignored. Here, however, we want access to all the files. If only as a way to 
-    // show/explain parsing errors to the user.
-    this.fileManager.listenDocuments().pipe(
-        map(files => files.map(file => new GloomFile(file)))
-    ).subscribe(gloomfiles => {
-        this.dataSource.data = gloomfiles;
-    });
-  }
+		// We get our files from the filemanager because the data service throws away any files 
+		// it doesn't need. Files that don't parse or don't contain gloomhaven data are quietly 
+		// ignored. Here, however, we want access to all the files. If only as a way to 
+		// show/explain parsing errors to the user.
+		this.fileManager.listenDocuments().pipe(
+			map(files => files.map(file => new GloomFile(file)))
+		).subscribe(gloomfiles => {
+			this.dataSource.data = gloomfiles;
+		});
+	}
 
-  ngAfterViewInit(){
-    // Set Sort
-    this.dataSource.sort = this.sort;
+	ngAfterViewInit() {
+		// Set Sort
+		this.dataSource.sort = this.sort;
 
-    this.dataSource.sortingDataAccessor = (file: GloomFile, columnDef: string) => {
-      switch (columnDef) {
-        case 'name': return file.name.toLowerCase();
-        case 'edit': return file.canEdit? 0 : 1;
-        case 'type': return file.type.toLowerCase();
-        case 'sync': return 0;
-        case 'loaded': return 0;
-        default: return file[columnDef];
-      }
-    };
-  }
+		this.dataSource.sortingDataAccessor = (file: GloomFile, columnDef: string) => {
+			switch (columnDef) {
+				case 'name': return file.name.toLowerCase();
+				case 'edit': return file.canEdit ? 0 : 1;
+				case 'type': return file.type.toLowerCase();
+				case 'sync': return 0;
+				case 'loaded': return 0;
+				default: return file[columnDef];
+			}
+		};
+	}
 
-  renderTableRows(){
-    // This line really should work, but I just CAN NOT figure it out.
-    // this.table.renderRows();
+	renderTableRows() {
+		// This line really should work, but I just CAN NOT figure it out.
+		// this.table.renderRows();
 
-    // The work around is to create a shallow copy of the array and trigger re-rendering that way
-    this.dataSource.data = this.dataSource.data.slice();
-  }
+		// The work around is to create a shallow copy of the array and trigger re-rendering that way
+		this.dataSource.data = this.dataSource.data.slice();
+	}
 
-  load(load: boolean, file: GloomFile){
-    console.log(file.content)
-    if(load)
-      console.log("Load " + file.name);
-    else
-      console.log("unload " + file.name);
-  }
-  
-  updateDataSourcetst(){
-    this.dataSource.data.push(new GloomFile(new JsonFile("ID", "Tahomas", false, "Bleh")));
-    this.renderTableRows();
-  }
+	load(load: boolean, file: GloomFile) {
+		console.log(file.content)
+		if (load)
+			console.log("Load " + file.name);
+		else
+			console.log("unload " + file.name);
+	}
 
-  logIn(){
-    this.oauthService.getUserName().subscribe();
-  }
+	updateDataSourcetst() {
+		this.dataSource.data.push(new GloomFile(new JsonFile("ID", "Tahomas", false, "Bleh")));
+		this.renderTableRows();
+	}
 
-  loadGooglePicker(){
-    this.googlePicker.showGloomtoolsGooglePicker();
-  }
+	logIn() {
+		this.oauthService.getUserName().subscribe();
+	}
 
-  logDate(){
-    console.log(new Date().toString());
-  }
+	loadGooglePicker() {
+		this.googlePicker.showGloomtoolsGooglePicker().subscribe();
+	}
+
+	logDate() {
+		console.log(new Date().toString());
+	}
 
 }

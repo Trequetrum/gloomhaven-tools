@@ -6,9 +6,7 @@ import {
 	Observable,
 	from,
 	of,
-	throwError,
 	Subject,
-	BehaviorSubject,
 	merge,
 	defer,
 	forkJoin,
@@ -20,12 +18,10 @@ import {
 	take,
 	mapTo,
 	tap,
-	reduce,
 	debounceTime,
 	switchMap,
-	finalize,
 } from 'rxjs/operators';
-import { StringPair } from '../util/string-pair';
+import { NgZoneStreamService } from './ngzone-stream.service';
 
 declare var google: any;
 
@@ -86,11 +82,11 @@ export class GoogleFileManagerService {
 	constructor(
 		private oauthService: GoogleOauth2Service,
 		private googlePicker: GooglePickerService,
-		private ngZone: NgZone
+		private zone: NgZoneStreamService
 	) {
 		googlePicker
 			.listenFileLoad()
-			.subscribe((doc) => this.loadGooglePickerDocument(doc));
+			.subscribe(doc => this.loadGooglePickerDocument(doc));
 
 		oauthService.listenSignIn().subscribe((signin) => {
 			if (signin) {
@@ -98,21 +94,6 @@ export class GoogleFileManagerService {
 			} else {
 				this.clearAllDocuments();
 			}
-		});
-	}
-
-	/*****
-	 * If an Observable makes a call to GAPI, we can use this to transform
-	 * it into an Observable that re-enters the angular zone
-	 *****/
-	ngZoneObservable<T>(obs: Observable<T>): Observable<T> {
-		return new Observable<T>((observer) => {
-			const sub = obs.subscribe({
-				next: (val) => this.ngZone.run(() => observer.next(val)),
-				error: (err) => this.ngZone.run(() => observer.error(err)),
-				complete: () => this.ngZone.run(() => observer.complete()),
-			});
-			return { unsubscribe: () => sub.unsubscribe() };
 		});
 	}
 
@@ -210,7 +191,7 @@ export class GoogleFileManagerService {
 	 * file with the given ID. Emits the file if found
 	 *****/
 	getJsonFileFromDrive(docID: string): Observable<JsonFile> {
-		let rtnObs = this.oauthService.getClient().pipe(
+		return this.oauthService.getClient().pipe(
 			take(1),
 			mergeMap((client) =>
 				from(
@@ -260,10 +241,9 @@ export class GoogleFileManagerService {
 						return file;
 					})
 				)
-			)
+			),
+			this.zone.ngZoneEnter(),
 		);
-
-		return this.ngZoneObservable(rtnObs);
 	}
 
 	/*****
@@ -327,7 +307,7 @@ export class GoogleFileManagerService {
 	 * like any other.
 	 */
 	getAppDataByName(name: string): Observable<JsonFile> {
-		const rtn = this.oauthService.getClient().pipe(
+		return this.oauthService.getClient().pipe(
 			mergeMap((client) => {
 				return from(
 					client.drive.files.list({
@@ -361,10 +341,9 @@ export class GoogleFileManagerService {
 					})
 				);
 			}),
-			mergeMap((docID: string) => this.getJsonFileFromDrive(docID))
+			mergeMap((docID: string) => this.getJsonFileFromDrive(docID)),
+			this.zone.ngZoneEnter()
 		);
-
-		return this.ngZoneObservable(rtn);
 	}
 
 	/***
@@ -380,7 +359,7 @@ export class GoogleFileManagerService {
 		const folderType = 'application/vnd.google-apps.folder';
 		const folderName = this.folderName;
 
-		const rtn = this.oauthService.getClient().pipe(
+		return this.oauthService.getClient().pipe(
 			mergeMap((client) =>
 				from(
 					client.drive.files.list({
@@ -415,44 +394,29 @@ export class GoogleFileManagerService {
 						resource: metadata,
 					})
 				).pipe(map((resp: any) => resp.result.id));
-			})
+			}),
+			this.zone.ngZoneEnter()
 		);
-
-		return this.ngZoneObservable(rtn);
 	}
 
 	/***
 	 * Get's all JSON files that the user has given this app
 	 * access to. Doesn't verify contents or anything.
 	 ***/
-	getAllAccessibleFiles(): Observable<StringPair> {
-		const rtn = this.oauthService.getClient().pipe(
-			mergeMap((client) => {
-				return from(
-					client.drive.files.list({
-						q: "mimeType='application/json' and trashed = false", // and appProperties has { key='active' and value='true' }",
-						fields: 'files(id, name)',
-					})
-				).pipe(
-					// filter out results that don't have files
-					filter((response: any) => {
-						const files = response.result.files;
-						if (files && files.length > 0) return true;
-						return false;
-					}),
-					// map array of files into stream of (id,name) tuples
-					mergeMap((response) => {
-						const files = response.result.files;
-						// responses without files will already be filtered
-						return from(
-							files.map((file) => new StringPair(file.id, file.name))
-						);
-					})
-				) as Observable<StringPair>; // Not the right way to type this?
+	getAllAccessibleFiles(): Observable<Array<{ id: string, name: string }>> {
+		return this.oauthService.getClient().pipe(
+			mergeMap(client => client.drive.files.list({
+				q: "mimeType='application/json' and trashed = false", // and appProperties has { key='active' and value='true' }",
+				fields: 'files(id, name)',
 			})
+			),
+			// Results from gapi client back into angular zone
+			this.zone.ngZoneEnter(),
+			// map array of files into stream of (id,name) tuples
+			map((response: any) =>
+				response?.result?.files?.map(file => ({ id: file.id, name: file.name }))
+			)
 		);
-
-		return this.ngZoneObservable(rtn);
 	}
 
 	/***
@@ -462,12 +426,12 @@ export class GoogleFileManagerService {
 	listAllAccessibleFiles(): void {
 		let count = 1;
 		console.log('Listing Files (Async): ');
-		this.getAllAccessibleFiles().subscribe({
-			next: (stringPair) => {
+		this.getAllAccessibleFiles().subscribe(
+			stringPairArr => stringPairArr.forEach(stringPair => {
 				console.log('File ' + count + ': ', stringPair);
 				count++;
-			},
-		});
+			})
+		);
 	}
 
 	/***
@@ -487,10 +451,10 @@ export class GoogleFileManagerService {
 	 */
 	loadAllAccessibleFiles(): Observable<boolean> {
 		return this.getAllAccessibleFiles().pipe(
-			mergeMap(({ id }) => {
-				return this.loadById(id);
+			tap(files => {
+				files.forEach(file => this.loadById(file.id))
 			}),
-			reduce((acc, val) => acc && val, true)
+			mapTo(true)
 		);
 	}
 
@@ -500,8 +464,8 @@ export class GoogleFileManagerService {
 	 *      - name
 	 */
 	saveJsonFileMetadata(file: JsonFile): Observable<boolean> {
-		const rtn = this.oauthService.getClient().pipe(
-			mergeMap((client) => {
+		return this.oauthService.getClient().pipe(
+			mergeMap(client => {
 				const metadata = {
 					name: file.name,
 					mimeType: JsonFile.MIME_TYPE,
@@ -512,10 +476,9 @@ export class GoogleFileManagerService {
 					body: metadata,
 				});
 			}),
+			this.zone.ngZoneEnter(),
 			mapTo(true)
 		);
-
-		return this.ngZoneObservable(rtn);
 	}
 
 	/***
@@ -537,8 +500,8 @@ export class GoogleFileManagerService {
 		const delimiter = '\r\n--' + boundary + '\r\n';
 		const close_delim = '\r\n--' + boundary + '--';
 
-		const rtn = this.oauthService.getClient().pipe(
-			mergeMap((client) => {
+		return this.oauthService.getClient().pipe(
+			mergeMap(client => {
 				const metadata = {
 					name: file.name,
 					mimeType: JsonFile.MIME_TYPE,
@@ -567,31 +530,28 @@ export class GoogleFileManagerService {
 					body: multipartRequestBody,
 				});
 			}),
+			this.zone.ngZoneEnter(),
+			// If there wasn't an error, we know our file was saved succesfully
 			mapTo(file),
-			tap((file) => {
+			tap(file => {
 				this.currentDocuments.set(file.id, file);
-				this.ngZone.run(() =>
-					this._fileAlert$.next({ action: 'save', file })
-				);
+				this._fileAlert$.next({ action: 'save', file });
 			})
 		);
-
-		return this.ngZoneObservable(rtn);
 	}
 
 	createAndSaveNewJsonFile(name: string, content?: any): Observable<JsonFile> {
-		const rtn$ = forkJoin({
+		return forkJoin({
 			folder: this.getFolderId(),
 			client: this.oauthService.getClient(),
 		}).pipe(
 			switchMap(({ folder, client }) => {
-				// If we havn't been given content then give it some cheeky content ;)
-				if (!content) content = { empty: 'file ;)' };
-
 				// Create a new file.
 				const newJsonFile = new JsonFile();
 				newJsonFile.name = name + this.fileNameAffix + '.json';
-				newJsonFile.content = content;
+				if (content !== null) {
+					newJsonFile.content = content;
+				}
 
 				// Ready a call to create this file on the user's Google drive
 				const boundary = '-------314159265358979323846';
@@ -615,7 +575,7 @@ export class GoogleFileManagerService {
 					newJsonFile.contentAsString(true) +
 					close_delim;
 
-				const request$ = from(
+				return from(
 					client.request({
 						path: '/upload/drive/v3/files',
 						method: 'POST',
@@ -627,24 +587,22 @@ export class GoogleFileManagerService {
 						},
 						body: multipartRequestBody,
 					})
-				) as Observable<{ result: { id: string; modifiedTime: string } }>;
-
-				return request$.pipe(
+				).pipe(
+					this.zone.ngZoneEnter(),
 					map((response) => ({ file: newJsonFile, response }))
-				);
+				)
 			}),
-			map(({ file, response }) => {
+			map(input => {
+				const file: JsonFile = input.file;
+				const response: any = input.response;
 				file.id = response.result.id;
 				file.modifiedTime = response.result.modifiedTime;
 				return file;
 			}),
 			tap((file) => {
 				this.currentDocuments.set(file.id, file);
-				this.ngZone.run(() =>
-					this._fileAlert$.next({ action: 'save', file })
-				);
+				this._fileAlert$.next({ action: 'save', file });
 			})
 		);
-		return this.ngZoneObservable(rtn$);
 	}
 }
