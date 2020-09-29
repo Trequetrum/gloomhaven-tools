@@ -65,7 +65,6 @@ export class ManageFilesComponent implements OnInit, AfterViewInit {
 	}
 
 	load(load: boolean, file: GloomFile) {
-		console.log(file.content)
 		if (load)
 			console.log("Load " + file.name);
 		else

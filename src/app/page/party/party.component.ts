@@ -24,7 +24,7 @@ export class PartyComponent implements OnInit {
 	globalAchievementsModel: ChipMenuData;
 	globalAchievements: GlobalAchievement[];
 
-	constructor(private route: ActivatedRoute, private dataAchieve: AchievementsService, public dialog: MatDialog) {}
+	constructor(private route: ActivatedRoute, private dataAchieve: AchievementsService, public dialog: MatDialog) { }
 
 	ngOnInit(): void {
 		this.route.queryParams.subscribe(params => this.onQueryParamChange(params));
@@ -116,7 +116,7 @@ export class PartyComponent implements OnInit {
 					// If there's a result, it shouldn't make it here.
 					const error =
 						'Unrecognised result from dialogRef.afterClosed() in PartyComponent.onAddGlobalAchievements()';
-					console.log(error);
+					console.error(error);
 					throw new Error(error);
 				}
 			}

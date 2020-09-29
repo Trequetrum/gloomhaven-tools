@@ -25,7 +25,7 @@ export class CreateCharacterFormComponent implements OnInit {
 		this.classPicked = 'No Class Selected';
 	}
 
-	ngOnInit(): void {}
+	ngOnInit(): void { }
 
 	onClassPicked(val) {
 		this.classPicked = val;
@@ -61,7 +61,6 @@ export class CreateCharacterFormComponent implements OnInit {
 					.subscribe(charFile => {
 						this.newDocId.emit(charFile.id);
 						this.loading = false;
-						console.log('charFile.id: ', charFile.id);
 					});
 			} else {
 				console.log('>>>> ERROR ERROR ERROR!');

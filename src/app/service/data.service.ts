@@ -1,122 +1,116 @@
 import { Injectable } from '@angular/core';
 import { GoogleFileManagerService, FileAlertAction } from './google-file-manager.service';
-import { Observable, merge, Subject, of, defer } from 'rxjs';
+import { Observable } from 'rxjs';
 import { GloomFile } from '../model_data/gloom-file';
-import { map, filter, catchError, tap } from 'rxjs/operators';
+import { map, filter, tap, scan, debounceTime } from 'rxjs/operators';
 import { CampaignMini } from '../model_data/campaign-mini';
 import { CharacterMini } from '../model_data/character-mini';
 import { Character } from '../json_interfaces/character';
 import { CharacterFile } from '../model_data/character-file';
-import { JsonFile } from '../model_data/json-file';
 import { ClassDataService } from './class-data.service';
+import { CampaignFile } from '../model_data/campaign-file';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class DataService {
-	private gloomFileAlert$ = new Subject<boolean>();
-	private characterFileAlert$ = new Subject<boolean>();
-	private campaignFileAlert$ = new Subject<boolean>();
 
-	private gloomFiles = new Array<GloomFile>();
+	constructor(private fileManager: GoogleFileManagerService, private classData: ClassDataService) { }
 
-	constructor(private fileManager: GoogleFileManagerService, private classData: ClassDataService) {
-		this.gloomFiles = Array.from(this.fileManager.currentDocuments.values())
-			.map(val => new GloomFile(val))
-			.filter(file => file.isGloomy);
-
-		fileManager
-			.listenDocumentLoad()
-			.pipe(
-				map(({ action, file }) => ({ action, gloomFile: new GloomFile(file) })),
-				filter(({ gloomFile }) => gloomFile.isGloomy)
-			)
-			.subscribe(({ action, gloomFile }) => {
-				console.log(">>>>> Subscribed document load", action, gloomFile);
-
-				// We've subscribed to see loaded files where gloomFile.isGloomy is true.
-				if (action === 'load') {
-					this.gloomFiles.push(gloomFile);
-				} else if (action === 'unload') {
-					const i = this.gloomFiles.findIndex(gf => gf.id === gloomFile.id);
-					if (i >= 0) {
-						this.gloomFiles = this.gloomFiles.splice(i, 1);
-					} else {
-						// We shouldn't get here. Time for a reset
-						console.warn('Warning: data service and file manager out of sync. Correcting... ');
-						this.gloomFiles = Array.from(this.fileManager.currentDocuments.values()).map(
-							val => new GloomFile(val)
-						);
-					}
-				}
-				if (action === 'load' || action === 'unload') {
-					const load = action === 'load';
-					this.gloomFileAlert$.next(load);
-					if (gloomFile.isCampaign) this.campaignFileAlert$.next(load);
-					if (gloomFile.isCharacter) this.characterFileAlert$.next(load);
-				}
-			});
+	listenGloomFileAction(): Observable<{
+		action: FileAlertAction,
+		gloomFile: GloomFile
+	}> {
+		return this.fileManager.listenDocumentLoad().pipe(
+			map(({ action, file }) => ({ action, gloomFile: new GloomFile(file) })),
+			filter(({ gloomFile }) => gloomFile.isGloomy)
+		);
 	}
 
-	listenGloomFiles(): Observable<GloomFile[]> {
-		const currVal$ = defer(() => of(this.getGloomFiles()));
-		const newVal$ = this.gloomFileAlert$.pipe(map(() => this.getGloomFiles()));
-		return merge(currVal$, newVal$);
+	listenGloomCharacterFileAction(): Observable<{
+		action: FileAlertAction,
+		characterFile: CharacterFile
+	}> {
+		return this.listenGloomFileAction().pipe(
+			filter(({ gloomFile }) => gloomFile.isCharacter),
+			map(({ action, gloomFile }) => ({ action, characterFile: new CharacterFile(gloomFile) }))
+		);
 	}
 
-	getGloomFiles(): GloomFile[] {
-		return this.gloomFiles;
+	listenGloomCampaignFileAction(): Observable<{
+		action: FileAlertAction,
+		campaignFile: CampaignFile
+	}> {
+		return this.listenGloomFileAction().pipe(
+			filter(({ gloomFile }) => gloomFile.isCampaign),
+			map(({ action, gloomFile }) => ({ action, campaignFile: new CampaignFile(gloomFile) }))
+		);
 	}
 
-	listenCharactersFiles(): Observable<CharacterFile[]> {
-		const currVal$ = defer(() => of(this.getCharacterFiles()));
-		const newVal$ = this.characterFileAlert$.pipe(map(() => this.getCharacterFiles()));
-		return merge(currVal$, newVal$);
-	}
+	listenCharacterMinis(): Observable<CharacterMini[]> {
+		// Accumulate CharacterMinis in a Map
+		const accumulator = (accMap: Map<string, CharacterMini>, { action, characterMini }) => {
+			if (action === "load" || action === "update" || action === "save") {
+				accMap.set(characterMini.docId, characterMini);
+			} else if (action === "unload" || action === "error") {
+				accMap.delete(characterMini.docId);
+			} else {
+				console.error("listenCharacterMinis() Ignoring unrecognised action: " + action);
+			}
+			return accMap;
+		}
 
-	getCharacterFiles(): CharacterFile[] {
-		return this.gloomFiles.filter(file => file.isCharacter).map(charFile => new CharacterFile(charFile));
+		return this.listenGloomCharacterFileAction().pipe(
+			// Convert CharacterFile to CharacterMini
+			map(({ action, characterFile: cf }) =>
+				({
+					action,
+					characterMini: new CharacterMini(cf.id, cf.content.Character.name)
+				})
+			),
+			// Accumulate CharacterMinis
+			scan(accumulator, new Map<string, CharacterMini>()),
+			// Convert accumulated CharacterMinis to array and emit
+			map(accMap => Array.from(accMap.values())),
+			// Debounce since we're only interested in the freshest values
+			// Stops stuttering on load
+			debounceTime(250)
+		);
 	}
 
 	listenCampaignMinis(): Observable<CampaignMini[]> {
-		const currVal$ = defer(() => of(this.getCampaignMinis()));
-		const newVal$ = this.campaignFileAlert$.pipe(map(() => this.getCampaignMinis()));
-		return merge(currVal$, newVal$);
-	}
+		// Accumulate CampaignMini in a Map
+		const accumulator = (accMap: Map<string, CampaignMini>, { action, campaignMini }) => {
+			if (action === "load" || action === "update" || action === "save") {
+				accMap.set(campaignMini.docId, campaignMini);
+			} else if (action === "unload" || action === "error") {
+				accMap.delete(campaignMini.docId);
+			} else {
+				console.error("listenCampaignMini() Ignoring unrecognised action: " + action);
+			}
+			return accMap;
+		}
 
-	getCampaignMinis(): CampaignMini[] {
-		return this.gloomFiles
-			.filter(file => file.isCampaign)
-			.map(campFile => {
-				const campaign = campFile.content.Campaign;
-				const rtn = new CampaignMini(campFile.id, campaign.name);
+		return this.listenGloomCampaignFileAction().pipe(
+			// Convert CampaignFile to CampaignMini
+			map(({ action, campaignFile: cf }) => {
+				const campaign = cf.content.Campaign;
+				const rtn = new CampaignMini(cf.id, campaign.name);
 				if (campaign.parties) {
 					rtn.parties = campaign.parties
 						.filter(prty => prty.name && prty.name.length > 0)
 						.map(prty => prty.name);
 				}
-				return rtn;
-			});
-	}
-
-	listenCharacterMinis(): Observable<CharacterMini[]> {
-		const currVal$ = defer(() => of(this.getCharacterMinis()));
-		const newVal$ = this.characterFileAlert$.pipe(map(() => this.getCharacterMinis()));
-		return merge(currVal$, newVal$).pipe(tap(_ => console.log(">>>>> listenCharacterMinis() this.gloomFiles: ", this.gloomFiles)));
-	}
-
-	getCharacterMinis(): CharacterMini[] {
-		return this.gloomFiles
-			.filter(file => file.isCharacter)
-			.map(charFile => new CharacterMini(charFile.id, charFile.content.Character.name));
-	}
-
-	getCharacterFileByDocId(docId: string): CharacterFile {
-		const i = this.gloomFiles.findIndex(info => info.id === docId);
-		if (i >= 0 && this.gloomFiles[i].isCharacter) {
-			return new CharacterFile(this.gloomFiles[i]);
-		}
-		return null;
+				return { action, campaignMini: rtn };
+			}),
+			// Accumulate CampaignMini
+			scan(accumulator, new Map<string, CampaignMini>()),
+			// Convert accumulated CharacterMinis to array and emit
+			map(accMap => Array.from(accMap.values())),
+			// Debounce since we're only interested in the freshest values
+			// Stops stuttering on load
+			debounceTime(250)
+		);
 	}
 
 	listenCharacterFileByDocId(docId: string): Observable<{ action: FileAlertAction; file: CharacterFile }> {
@@ -133,7 +127,7 @@ export class DataService {
 	}
 
 	createNewCharacter(name: string, gclass: string, level: number): Observable<CharacterFile> {
-		const gold = 15 * (level + 1);
+		const gold = this.classData.convertLevelToGold(level);
 		const experience = this.classData.convertLevelToExp(level);
 
 		const char: Character = { name, class: gclass, level, gold, experience };

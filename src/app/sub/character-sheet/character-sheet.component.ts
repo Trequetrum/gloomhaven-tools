@@ -34,7 +34,6 @@ export class CharacterSheetComponent implements OnInit, OnChanges {
 				const cExp = this.characterFile.character.experience;
 
 				if (exp !== cExp) {
-					console.log(">>>> Updating exp and lvl");
 					const nLvl = this.classDataS.convertExpToLevel(exp);
 					this.levelControl.setValue(nLvl);
 					this.characterFile.character.level = nLvl;
@@ -55,14 +54,11 @@ export class CharacterSheetComponent implements OnInit, OnChanges {
 
 		merge(exp$, gp$, battleGoals$).pipe(
 			debounceTime(2000),
-			tap(_ => console.log("> Saving " + this.characterFile.character.name)),
 			switchMap(_ => this.fileData.saveFile(this.characterFile))
-		).subscribe(_ => console.log("> Saved " + this.characterFile.character.name));
+		).subscribe(_ => console.log(">>>>> Saved " + this.characterFile.character.name));
 	}
 
 	ngOnChanges(changes: SimpleChanges): void {
-		console.log('>>>> Character-Sheet > Logging Changes: ', changes);
-
 		for (const propName in changes) {
 			if (changes.hasOwnProperty(propName)) {
 				switch (propName) {

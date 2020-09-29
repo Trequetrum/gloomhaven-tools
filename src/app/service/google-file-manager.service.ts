@@ -9,7 +9,7 @@ import {
 	Subject,
 	merge,
 	defer,
-	forkJoin,
+	forkJoin
 } from 'rxjs';
 import {
 	map,
@@ -19,7 +19,7 @@ import {
 	mapTo,
 	tap,
 	debounceTime,
-	switchMap,
+	switchMap, reduce
 } from 'rxjs/operators';
 import { NgZoneStreamService } from './ngzone-stream.service';
 
@@ -146,8 +146,8 @@ export class GoogleFileManagerService {
 	 * loaded loaded/unloaded
 	 */
 	listenDocumentLoad(): Observable<{
-		action: FileAlertAction;
-		file: JsonFile;
+		action: FileAlertAction,
+		file: JsonFile
 	}> {
 		return this._fileAlert$.asObservable();
 	}
@@ -449,12 +449,18 @@ export class GoogleFileManagerService {
 	 * Loads all files that this app has access to
 	 *    TODO: Don't load files users have explicitly unloaded in the past
 	 */
+	// 
 	loadAllAccessibleFiles(): Observable<boolean> {
 		return this.getAllAccessibleFiles().pipe(
-			tap(files => {
-				files.forEach(file => this.loadById(file.id))
-			}),
-			mapTo(true)
+			mergeMap(files => merge(...files
+				// Filter out files we don't want to load
+				.filter(file => true)
+				// Convert every file into a load stream
+				.map(file => this.loadById(file.id))
+			)),
+			// return true if every file loaded successfully and load false
+			// if any of them failed to load.
+			reduce((acc, val) => acc && val)
 		);
 	}
 
@@ -490,7 +496,6 @@ export class GoogleFileManagerService {
 
 		const diff = file.getDiffData();
 		if (!diff) {
-			console.log(">>>> Not Saving JsonFile due to no diff");
 			return of(file);
 		}
 		console.log(">>>> Saving JsonFile with diffData: ", diff);

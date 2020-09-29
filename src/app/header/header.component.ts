@@ -12,56 +12,56 @@ import { CharacterMini } from '../model_data/character-mini';
 
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss']
+	selector: 'app-header',
+	templateUrl: './header.component.html',
+	styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
 
-  campaignMinis$: Observable<CampaignMini[]>;
-  characterMinis$: Observable<CharacterMini[]>;
+	campaignMinis$: Observable<CampaignMini[]>;
+	characterMinis$: Observable<CharacterMini[]>;
 
-  constructor(
-    public dialog: MatDialog, 
-    public authService: GoogleOauth2Service,
-    public data: DataService
-  ) {}
+	constructor(
+		public dialog: MatDialog,
+		public authService: GoogleOauth2Service,
+		public data: DataService
+	) { }
 
-  ngOnInit(): void {
-    // Try to authenticate the user they have a currently active google session and it's signed into this app
-    this.authService.initGapiClient().subscribe();
+	ngOnInit(): void {
+		// Try to authenticate the user they have a currently active google session and it's signed into this app
+		this.authService.initGapiClient().subscribe();
 
-    // Get campaign minis. Filter out results that don't have any parties. We don't need to show those in the header.
-    this.campaignMinis$ = this.data.listenCampaignMinis().pipe(map(minis=>minis.filter(mini=>mini.parties.length > 0)));
-    // get charater minis. If we want to limit which characters are displayed in the header, this is the place to do it
-    this.characterMinis$ = this.data.listenCharacterMinis();
-  }
+		// Get campaign minis. Filter out results that don't have any parties. We don't need to show those in the header.
+		this.campaignMinis$ = this.data.listenCampaignMinis().pipe(map(minis => minis.filter(mini => mini.parties.length > 0)));
+		// get charater minis. If we want to limit which characters are displayed in the header, this is the place to do it
+		this.characterMinis$ = this.data.listenCharacterMinis();
+	}
 
-  signIn(): void {
-    this.authService.getUserName().subscribe();
-  }
+	signIn(): void {
+		this.authService.getUserName().subscribe();
+	}
 
-  signOut(): void {
-    this.authService.signOut();
-  }
+	signOut(): void {
+		this.authService.signOut();
+	}
 
-  openInitiativeDialog(): void {
-    const dialogRef = this.dialog.open(InputInitiativeComponent);
-    dialogRef.afterClosed().subscribe(result => {
-        console.log(`TODO: EMIT initiative=${result}`);
-    })
-  }
+	openInitiativeDialog(): void {
+		const dialogRef = this.dialog.open(InputInitiativeComponent);
+		dialogRef.afterClosed().subscribe(result => {
+			console.log(`TODO: EMIT initiative=${result}`);
+		})
+	}
 
-  onPartyClick(party :any){
+	onPartyClick(party: any) {
 
-    if(party instanceof PartyMini){
-      console.log(`TODO: Something about clicking party: ${party.name}`);
-    }else{
-      console.log(`onPartyClick() without PartyMini Object: ${party}`);
-    }
-  }
+		if (party instanceof PartyMini) {
+			console.log(`TODO: Something about clicking party: ${party.name}`);
+		} else {
+			console.log(`onPartyClick() without PartyMini Object: ${party}`);
+		}
+	}
 
-  encodeURItst(val: string){
-    return encodeURI(val);
-  }
+	encodeURItst(val: string) {
+		return encodeURI(val);
+	}
 }

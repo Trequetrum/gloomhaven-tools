@@ -49,4 +49,8 @@ export class ClassDataService {
 	convertLevelToExp(lvl: number): number {
 		return 5 * (lvl - 1) * (8 + (lvl / 2));
 	}
+
+	convertLevelToGold(lvl: number): number {
+		return 15 * (lvl + 1);
+	}
 }
