@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { GoogleOauth2Service } from './google-oauth2.service';
 import { GooglePickerService } from './google-picker.service';
 import { JsonFile } from '../model_data/json-file';
@@ -19,9 +19,10 @@ import {
 	mapTo,
 	tap,
 	debounceTime,
-	switchMap, reduce
+	switchMap, reduce, startWith
 } from 'rxjs/operators';
 import { NgZoneStreamService } from './ngzone-stream.service';
+import { startWithDefer } from '../util/customRxJS';
 
 declare var google: any;
 
@@ -108,7 +109,7 @@ export class GoogleFileManagerService {
 	listenDocumentById(
 		docId: string
 	): Observable<{ action: FileAlertAction; file: JsonFile }> {
-		const streamCurrentDoc = () => {
+		const currentDoc = () => {
 			let currentDoc;
 			if (this.currentDocuments.has(docId)) {
 				currentDoc = { action: 'load', file: this.currentDocuments.get(docId) };
@@ -122,12 +123,12 @@ export class GoogleFileManagerService {
 				};
 				currentDoc = { action: 'error', file: errFile };
 			}
-			return of(currentDoc);
+			return currentDoc;
 		};
-		const alertFilter$ = this._fileAlert$.pipe(
-			filter(({ file }) => file.id === docId)
+		return this._fileAlert$.pipe(
+			filter(({ file }) => file.id === docId),
+			startWithDefer(currentDoc)
 		);
-		return merge(defer(streamCurrentDoc), alertFilter$);
 	}
 
 	/****
