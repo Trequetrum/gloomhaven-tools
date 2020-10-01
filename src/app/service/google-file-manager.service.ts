@@ -9,7 +9,7 @@ import {
 	Subject,
 	merge,
 	defer,
-	forkJoin
+	forkJoin, Subscription
 } from 'rxjs';
 import {
 	map,
@@ -19,7 +19,7 @@ import {
 	mapTo,
 	tap,
 	debounceTime,
-	switchMap, reduce, startWith
+	switchMap, reduce, startWith, scan, shareReplay
 } from 'rxjs/operators';
 import { NgZoneStreamService } from './ngzone-stream.service';
 import { startWithDefer } from '../util/customRxJS';
@@ -27,6 +27,10 @@ import { startWithDefer } from '../util/customRxJS';
 declare var google: any;
 
 export type FileAlertAction = 'load' | 'unload' | 'error' | 'update' | 'save';
+export type FileAlertEvent = {
+	action: FileAlertAction;
+	file: JsonFile;
+};
 
 @Injectable({
 	providedIn: 'root',
@@ -49,13 +53,10 @@ export class GoogleFileManagerService {
 	 ****/
 
 	// An observable stream of files changes (Load/ Save/ Drop, ect).
-	private _fileAlert$ = new Subject<{
-		action: FileAlertAction;
-		file: JsonFile;
-	}>();
+	private _fileEvent$: Subject<FileAlertEvent>;
 
-	// Listens to the fileLoad$ stream and keeps a current record
-	currentDocuments = new Map<string, JsonFile>();
+	private _cachedFiles$: Observable<Map<string, JsonFile>>;
+	private _cachedFilesSubscription: Subscription;
 
 	// Name of the folder where we save documents created by this app
 	readonly folderName = 'GloomhavenToolsDocs';
@@ -85,9 +86,14 @@ export class GoogleFileManagerService {
 		private googlePicker: GooglePickerService,
 		private zone: NgZoneStreamService
 	) {
-		googlePicker
-			.listenFileLoad()
-			.subscribe(doc => this.loadGooglePickerDocument(doc));
+		this._fileEvent$ = new Subject<FileAlertEvent>();
+		this.initializeFileCashe();
+
+		googlePicker.listenFileLoad().pipe(
+			mergeMap(doc =>
+				this.loadById(doc[google.picker.Document.ID])
+			)
+		).subscribe();
 
 		oauthService.listenSignIn().subscribe((signin) => {
 			if (signin) {
@@ -96,6 +102,30 @@ export class GoogleFileManagerService {
 				this.clearAllDocuments();
 			}
 		});
+	}
+
+	initializeFileCashe(): void {
+		// Apply the given function to the most current map
+		const accumulator = (accMap: Map<string, JsonFile>, event: FileAlertEvent): Map<string, JsonFile> => {
+			if (event.action === "error" || event.action === "unload") {
+				accMap.delete(event.file.id);
+			} else if (event.action === "load" || event.action === "save" || event.action === "update") {
+				accMap.set(event.file.id, event.file);
+			} else {
+				throw Error("Unrecognised FileAlertEvent: " + event.action);
+			}
+			return accMap;
+		};
+
+		this._cachedFiles$ = this._fileEvent$.pipe(
+			scan(accumulator, new Map<string, JsonFile>()),
+			shareReplay(1)
+		);
+
+		if (this._cachedFilesSubscription != null) {
+			this._cachedFilesSubscription.unsubscribe();
+		}
+		this._cachedFilesSubscription = this._cachedFiles$.subscribe();
 	}
 
 	/***********
@@ -108,38 +138,43 @@ export class GoogleFileManagerService {
 	 ***********/
 	listenDocumentById(
 		docId: string
-	): Observable<{ action: FileAlertAction; file: JsonFile }> {
-		const currentDoc = () => {
-			let currentDoc;
-			if (this.currentDocuments.has(docId)) {
-				currentDoc = { action: 'load', file: this.currentDocuments.get(docId) };
-			} else {
-				const errFile = new JsonFile(docId);
-				errFile.content = {
-					error: {
-						type: 'File Not Found',
-						message: "Document with id='" + docId + "' not found",
-					},
-				};
-				currentDoc = { action: 'error', file: errFile };
-			}
-			return currentDoc;
-		};
-		return this._fileAlert$.pipe(
-			filter(({ file }) => file.id === docId),
-			startWithDefer(currentDoc)
+	): Observable<FileAlertEvent> {
+
+		const createErrorEvent = (id: string) => {
+			const errFile = new JsonFile(id);
+			errFile.content = {
+				error: {
+					type: 'File Not Found',
+					message: "Document with id='" + id + "' not found",
+				},
+			};
+			return { action: 'error' as FileAlertAction, file: errFile };
+		}
+
+		const currentState$ = this._cachedFiles$.pipe(
+			take(1),
+			map(mapO => mapO.get(docId)),
+			map(file =>
+				file != null ? ({ action: 'load' as FileAlertAction, file }) : createErrorEvent(docId)
+			)
 		);
+
+		const futureState$ = this._fileEvent$.pipe(
+			filter(({ file }) => file.id === docId)
+		);
+
+		return merge(currentState$, futureState$);
 	}
 
 	/****
 	 * this.currentDocuments.clear() done via the fileLoad$ subject
 	 ****/
 	clearAllDocuments(): void {
-		const docs = this.currentDocuments;
-		this.currentDocuments = new Map<string, JsonFile>();
-		for (const [key, file] of docs) {
-			this._fileAlert$.next({ action: 'unload', file });
-		}
+		this._cachedFiles$.pipe(
+			take(1)
+		).subscribe(mapO =>
+			mapO.forEach(file => this._fileEvent$.next({ action: 'unload', file }))
+		);
 	}
 
 	/***
@@ -150,41 +185,17 @@ export class GoogleFileManagerService {
 		action: FileAlertAction,
 		file: JsonFile
 	}> {
-		return this._fileAlert$.asObservable();
+		return this._fileEvent$.asObservable();
 	}
 
 	/***
-	 * Multicast Observable that sends messages whenever a file is
-	 * loaded loaded/unloaded
+	 * Multicast Observable that sends all current files whenever a file is
+	 * loaded/unloaded
 	 */
 	listenDocuments(): Observable<JsonFile[]> {
-		const getCurrentDocuments = () =>
-			Array.from(this.currentDocuments.values());
-		const currentDocs$ = defer(() => of(getCurrentDocuments()));
-		const listenFile$ = this._fileAlert$.pipe(
-			debounceTime(250),
-			map(getCurrentDocuments)
+		return this._cachedFiles$.pipe(
+			map(mapO => Array.from(mapO.values()))
 		);
-
-		return merge(currentDocs$, listenFile$);
-	}
-
-	/****
-	 * Call back that reacts to files selected by the google picker
-	 *
-	 * Ignores docs we already have loaded with a warning
-	 ****/
-	loadGooglePickerDocument(document: any): void {
-		const docID = document[google.picker.Document.ID];
-		// const docURL = document[google.picker.Document.URL];
-		// const docName = document[google.picker.Document.NAME];
-
-		// Only load docs we don't already have
-		if (!this.currentDocuments.has(docID)) {
-			this.loadById(docID).subscribe();
-		} else {
-			console.warn('Document ID found in memory: ', docID);
-		}
 	}
 
 	/*****
@@ -255,10 +266,7 @@ export class GoogleFileManagerService {
 	 *****/
 	loadById(docID: string): Observable<boolean> {
 		return this.getJsonFileFromDrive(docID).pipe(
-			tap((file) => {
-				this.currentDocuments.set(file.id, file);
-				this._fileAlert$.next({ action: 'load', file });
-			}),
+			tap((file) => this._fileEvent$.next({ action: 'load', file })),
 			mapTo(true)
 		);
 	}
@@ -267,24 +275,25 @@ export class GoogleFileManagerService {
 	 * Remove file from currentDocuments, only emits an unload
 	 * if a file with that ID currently exists in memory
 	 ***/
-	unloadById(docID: string): void {
-		if (this.currentDocuments.has(docID)) {
-			const file = this.currentDocuments.get(docID);
-			this.currentDocuments.delete(docID);
-			this._fileAlert$.next({ action: 'unload', file });
+	unloadById(docID: string): Observable<boolean> {
+		if (docID?.length < 1) {
+			return of(false);
 		}
+		return this._cachedFiles$.pipe(
+			map(mapO => mapO.get(docID)),
+			tap(file => this.unloadFile(file)),
+			map(file => file != null)
+		);
 	}
 
 	/****
 	 * Emit a file unload event with the given file.
 	 * As a side effect, file will be removed from currentDocuments if it exists
 	 ****/
-	unloadFile(file: JsonFile) {
-		if (this.currentDocuments.has(file.id)) {
-			this.currentDocuments.delete(file.id);
+	unloadFile(file: JsonFile): void {
+		if (file != null && file?.id != null) {
+			this._fileEvent$.next({ action: 'unload', file });
 		}
-
-		this._fileAlert$.next({ action: 'unload', file });
 	}
 
 	/***
@@ -440,10 +449,12 @@ export class GoogleFileManagerService {
 	 * Logs all loaded files to the console.
 	 */
 	listAllLoadedFiles(): void {
-		let count = 1;
-		this.currentDocuments.forEach((val, key) =>
-			console.log('File ' + count++ + ': ', val)
-		);
+		this._cachedFiles$.subscribe(mapO => {
+			let count = 1;
+			mapO.forEach((val, key) =>
+				console.log('File ' + count++ + ': ', val)
+			)
+		});
 	}
 
 	/**
@@ -539,10 +550,7 @@ export class GoogleFileManagerService {
 			this.zone.ngZoneEnter(),
 			// If there wasn't an error, we know our file was saved succesfully
 			mapTo(file),
-			tap(file => {
-				this.currentDocuments.set(file.id, file);
-				this._fileAlert$.next({ action: 'save', file });
-			})
+			tap(file => this._fileEvent$.next({ action: 'save', file }))
 		);
 	}
 
@@ -605,10 +613,7 @@ export class GoogleFileManagerService {
 				file.modifiedTime = response.result.modifiedTime;
 				return file;
 			}),
-			tap((file) => {
-				this.currentDocuments.set(file.id, file);
-				this._fileAlert$.next({ action: 'save', file });
-			})
+			tap((file) => this._fileEvent$.next({ action: 'save', file }))
 		);
 	}
 }
