@@ -47,6 +47,15 @@ export class JsonFile {
 		return file;
 	}
 
+	/***
+	 * Returns a deep clone of this file without any changes tracked.
+	 */
+	updateClone(): JsonFile {
+		const file = new JsonFile(this.id, this.name, this.canEdit, this.modifiedTime);
+		file.content = JSON.parse(JSON.stringify(this.content));
+		return file;
+	}
+
 	get content(): any {
 		if (this._updatableContent == null && this._content != null)
 			this._updatableContent = JSON.parse(JSON.stringify(this._content))
@@ -68,7 +77,7 @@ export class JsonFile {
 	}
 
 	// Return a JSON string of the content. Content should be safe to serialize into
-	// JSON, wso we don't both with checking that here (For now).
+	// JSON, so we don't both with checking that here (For now).
 	contentAsString(pretty: boolean): string {
 		const content = this._updatableContent != null ? this._updatableContent : this._content;
 		return (content != null && pretty) ? JSON.stringify(content, null, 2) : JSON.stringify(content);

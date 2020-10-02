@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { Observable, of, from, BehaviorSubject, combineLatest } from 'rxjs';
-import { map, mergeMap, tap, mapTo, take } from 'rxjs/operators';
+import { map, mergeMap, tap, mapTo, take, shareReplay } from 'rxjs/operators';
 import { NgZoneStreamService } from './ngzone-stream.service';
 
 declare var gapi: any;
@@ -33,13 +33,6 @@ export class GoogleOauth2Service {
 	readonly discoveryDocs = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
 	readonly gapiScriptSrcUrl = "https://apis.google.com/js/api.js";
 
-	// This flag is for when the google api (GAPI) is loaded
-	private _apiLoaded = false;
-	// This flag is for gapi.load('client:auth2')
-	private _clientAuth2Loaded = false;
-	// This flag is for client initialization so we're sure to only initialise once
-	private _clientInit = false;
-
 	// Observable that tracks sign in and sign out
 	private _isSignedIn$ = new BehaviorSubject<boolean>(false);
 	// Observable that tracks the username. An empty string
@@ -47,16 +40,26 @@ export class GoogleOauth2Service {
 	// through isSignedIn$ is better)
 	private _username$ = new BehaviorSubject<string>("");
 
-	// Should access this without first checking that isSignedIn$.value === true
-	// getCurrentOauthInstance() is almost always the better idea.
-	currentOauthInstance = null;
+	// When subscribed, these observables only run once. All future subscriptions
+	// just get the final result
+	private _loadGapiScript$: Observable<boolean>;
+	private _loadGapiClientAuth2$: Observable<boolean>;
+	private _initGapiClient$: Observable<boolean>;
 
-	/****
-	 * ngZone Lets us re-execute in the angular zone after a google drive 
-	 * client call.
-	 ****/
-	// private ngZone: NgZone
-	constructor(private zone: NgZoneStreamService) { }
+	// Use the constructor to define out load nad init streams
+	constructor(private zone: NgZoneStreamService) {
+		this._loadGapiScript$ = this._loadGapiScript().pipe(
+			zone.ngZoneEnter(),
+			shareReplay(1)
+		);
+		this._loadGapiClientAuth2$ = this._loadGapiClientAuth2().pipe(
+			zone.ngZoneEnter(),
+			shareReplay(1)
+		);
+		this._initGapiClient$ = this._initGapiClient().pipe(
+			shareReplay(1)
+		);
+	}
 
 	listenSignIn(): Observable<boolean> {
 		return this._isSignedIn$.asObservable();
@@ -73,38 +76,25 @@ export class GoogleOauth2Service {
 	 */
 	private _loadGapiScript(): Observable<boolean> {
 		return new Observable<boolean>(observer => {
-			let suppress = false;
+			// inject into the DOM
+			// <script src="https://apis.google.com/js/api.js"></script>
 
-			if (this._apiLoaded && !suppress) {
+			const script = document.createElement('script');
+			script.type = 'text/javascript';
+			script.src = this.gapiScriptSrcUrl;
+			script.onload = () => {
 				observer.next(true);
 				observer.complete();
-			} else if (!this._apiLoaded) {
-
-				// inject into the DOM
-				// <script src="https://apis.google.com/js/api.js"></script>
-
-				const script = document.createElement('script');
-				script.type = 'text/javascript';
-				script.src = this.gapiScriptSrcUrl;
-				script.onload = () => {
-					this._apiLoaded = true;
-					if (!suppress) {
-						observer.next(true);
-						observer.complete();
-					}
-				};
-				script.onerror = error => {
-					if (!suppress) observer.error(error);
-				};
-				document.getElementsByTagName('head')[0].appendChild(script);
-			}
+			};
+			script.onerror = error => {
+				observer.error(error);
+			};
+			document.getElementsByTagName('head')[0].appendChild(script);
 
 			return {
-				unsubscribe: () => suppress = true
+				unsubscribe: () => {/*Nothing to do here*/ }
 			};
-		}).pipe(
-			this.zone.ngZoneEnter()
-		);
+		});
 	}
 
 	/****
@@ -114,11 +104,9 @@ export class GoogleOauth2Service {
 	 * return true immediately.
 	 ****/
 	private _loadGapiClientAuth2(): Observable<boolean> {
-		return this._loadGapiScript().pipe(
-			mergeMap(() => {
-				if (this._clientAuth2Loaded) return of(true);
-
-				return new Observable<boolean>(observer => {
+		return this._loadGapiScript$.pipe(
+			mergeMap(_ =>
+				new Observable<boolean>(observer => {
 					const good = () => {
 						observer.next(true);
 						observer.complete();
@@ -130,10 +118,8 @@ export class GoogleOauth2Service {
 						ontimeout: () => observer.error("gapi.load timeout")
 					})
 					return { unsubscribe: () => {/* Do Nothing */ } }
-				}).pipe(
-					this.zone.ngZoneEnter()
-				);
-			})
+				})
+			)
 		);
 	}
 
@@ -144,22 +130,17 @@ export class GoogleOauth2Service {
 	 * return true immediately. This means you can only set the API key
 	 * (etc) once.
 	 */
-	initGapiClient(): Observable<boolean> {
-		return this._loadGapiClientAuth2().pipe(
-			mergeMap(() => {
-				if (this._clientInit) return of(true);
-				return gapi.client.init({
-					'apiKey': this.developerKey,
-					'clientId': this.clientId,
-					'discoveryDocs': this.discoveryDocs,
-					'scope': this.scopes
-				})
-			}),
+	private _initGapiClient(): Observable<boolean> {
+		return this._loadGapiClientAuth2$.pipe(
+			mergeMap(_ => gapi.client.init({
+				'apiKey': this.developerKey,
+				'clientId': this.clientId,
+				'discoveryDocs': this.discoveryDocs,
+				'scope': this.scopes
+			})),
 			this.zone.ngZoneEnter(),
-			tap(() => {
+			tap(_ => {
 				// GAPI Client is initialized
-				this._clientInit = true;
-
 				// Listen for sign-in state changes.
 				gapi.auth2.getAuthInstance().isSignedIn.listen(isSignedIn => this.updateSigninStatus(isSignedIn));
 				// Handle the initial sign-in state.
@@ -177,11 +158,9 @@ export class GoogleOauth2Service {
 		if (isSignedIn) {
 			this._isSignedIn$.next(true);
 			this._username$.next(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getGivenName());
-			this.currentOauthInstance = gapi.auth2.getAuthInstance();
 		} else {
 			this._isSignedIn$.next(false);
 			this._username$.next("");
-			this.currentOauthInstance = null;
 		}
 	}
 
@@ -192,7 +171,7 @@ export class GoogleOauth2Service {
 	getOauthInstance(): Observable<any> {
 		return combineLatest([
 			this._isSignedIn$,
-			this.initGapiClient()
+			this._initGapiClient$
 		]).pipe(
 			// _isSignedIn$ is long-running and we're only interested in one (current) 
 			// value, so we need to unsubscribe once we have a value.
@@ -275,14 +254,10 @@ export class GoogleOauth2Service {
 	 * permissions
 	 ***/
 	getClient(): Observable<any> {
-		// The client gets call fairly often and this bypasses doing the
-		// initGapiClient() check each time.
-		if (this._clientInit) return of(gapi.client);
-
 		// This is safe to return even if the client is initialized before
 		// the this Observable is subscribed. 
-		return this.initGapiClient().pipe(
-			map(() => gapi.client),
+		return this._initGapiClient$.pipe(
+			map(_ => gapi.client),
 			this.zone.ngZoneEnter()
 		);
 	}

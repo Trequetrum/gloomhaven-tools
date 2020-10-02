@@ -39,10 +39,10 @@ import { SelectChiplistDialogComponent } from './dialog/select-chiplist-dialog/s
 import { GooglePickerComponent } from './sub/google-picker/google-picker.component';
 import { ManageFilesComponent } from './page/manage-files/manage-files.component';
 import { CreateCharacterFormComponent } from './form/create-character-form/create-character-form.component';
-import { ClassPickerComponent } from './sub/class-picker/class-picker.component';
+import { ClassPickerComponent } from './page/character/class-picker/class-picker.component';
 import { PopupStringsComponent } from './dialog/popup-strings/popup-strings.component';
-import { CharacterSheetComponent } from './sub/character-sheet/character-sheet.component';
-import { BattleGoalsComponent } from './sub/battle-goals/battle-goals.component';
+import { CharacterSheetComponent } from './page/character/character-sheet/character-sheet.component';
+import { BattleGoalsComponent } from './page/character/character-sheet/battle-goals/battle-goals.component';
 import { TestPageComponent } from './page/test-page/test-page.component';
 
 @NgModule({

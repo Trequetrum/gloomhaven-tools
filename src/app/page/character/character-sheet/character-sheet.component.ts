@@ -5,15 +5,23 @@ import { ClassDataService } from 'src/app/service/class-data.service';
 import { FormControl } from '@angular/forms';
 import { debounceTime, tap, switchMap } from 'rxjs/operators';
 import { DataService } from 'src/app/service/data.service';
-import { merge } from 'rxjs';
+import { merge, Observable } from 'rxjs';
 
 @Component({
 	selector: 'app-character-sheet',
 	templateUrl: './character-sheet.component.html',
 	styleUrls: ['./character-sheet.component.scss'],
 })
-export class CharacterSheetComponent implements OnInit, OnChanges {
-	@Input() characterFile: CharacterFile;
+export class CharacterSheetComponent implements OnInit {
+	private _characterFile: CharacterFile;
+	@Input() set characterFile(charVal: CharacterFile) {
+		this._characterFile = charVal;
+		this.updateFromCharacterFile(charVal);
+	}
+	get characterFile(): CharacterFile {
+		return this._characterFile;
+	}
+
 	class: ClassData;
 
 	levelControl = new FormControl(1);
@@ -26,9 +34,12 @@ export class CharacterSheetComponent implements OnInit, OnChanges {
 	ngOnInit(): void {
 		this.levelControl.disable();
 
+		// ControlStreams
+		const controlStreams = new Array<Observable<any>>();
+
 		// Changing experience may update the character's level alongside
 		// updating the character's exp value
-		const exp$ = this.experienceControl.valueChanges.pipe(
+		controlStreams.push(this.experienceControl.valueChanges.pipe(
 			debounceTime(500),
 			tap(exp => {
 				const cExp = this.characterFile.character.experience;
@@ -40,44 +51,33 @@ export class CharacterSheetComponent implements OnInit, OnChanges {
 					this.characterFile.character.experience = exp;
 				}
 			})
-		);
+		));
 
 		// Changing GP updates the character's gp value
-		const gp$ = this.goldControl.valueChanges.pipe(
+		controlStreams.push(this.goldControl.valueChanges.pipe(
 			tap(gp => this.characterFile.character.gold = gp)
-		);
+		));
 
 		// Changing battle goals updates the character's battlegoals value
-		const battleGoals$ = this.battleGoalsControl.valueChanges.pipe(
+		controlStreams.push(this.battleGoalsControl.valueChanges.pipe(
 			tap(checks => this.characterFile.character.battleGoals = checks)
-		);
+		));
 
-		merge(exp$, gp$, battleGoals$).pipe(
+		// Save after changes on the controls
+		merge(...controlStreams).pipe(
 			debounceTime(2000),
 			switchMap(_ => this.fileData.saveFile(this.characterFile))
-		).subscribe(_ => console.log(">>>>> Saved " + this.characterFile.character.name));
-	}
-
-	ngOnChanges(changes: SimpleChanges): void {
-		for (const propName in changes) {
-			if (changes.hasOwnProperty(propName)) {
-				switch (propName) {
-					case 'characterFile': {
-						this.updateFromCharacterFile(changes[propName].currentValue);
-						break;
-					}
-				}
-			}
-		}
-
+		).subscribe(_ => console.log());
 	}
 
 	updateFromCharacterFile(changed: CharacterFile) {
-		this.class = this.classDataS.getClassByName(changed.character.class);
-		this.levelControl.setValue(changed.character?.level || 1);
-		this.experienceControl.setValue(changed.character?.experience || 0);
-		this.goldControl.setValue(changed.character?.gold || 0);
-		this.battleGoalsControl.setValue(changed.character?.battleGoals || 0);
+		if (changed != null) {
+			this.class = this.classDataS.getClassByName(changed.character.class);
+			this.levelControl.setValue(changed.character?.level || 1);
+			this.experienceControl.setValue(changed.character?.experience || 0);
+			this.goldControl.setValue(changed.character?.gold || 0);
+			this.battleGoalsControl.setValue(changed.character?.battleGoals || 0);
+		}
 	}
 
 }

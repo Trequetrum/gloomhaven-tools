@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { GoogleOauth2Service } from './google-oauth2.service';
 import { Subject, Observable } from 'rxjs';
-import { mapTo, mergeMap, tap } from 'rxjs/operators';
+import { mapTo, mergeMap, shareReplay, tap } from 'rxjs/operators';
 import { NgZoneStreamService } from './ngzone-stream.service';
 
 declare var gapi: any;
@@ -12,48 +12,40 @@ declare var google: any;
 })
 export class GooglePickerService {
 
-	// We lazy load the google picker api only if it's needed, this
-	// is a flag to check if it's been loaded.
-	private _apiLoaded = false
+	private _loadPickerApi$: Observable<boolean>;
 
 	// An observable stream of loaded files.
 	private _fileLoad$ = new Subject<any>();
 
 	constructor(
 		private oauthService: GoogleOauth2Service,
-		private zone: NgZoneStreamService) { }
+		private zone: NgZoneStreamService
+	) {
+		this._loadPickerApi$ = this._loadPickerApi().pipe(
+			zone.ngZoneEnter(),
+			shareReplay(1)
+		);
+	}
 
 	/***
 	 * An observable that returns true once the Picker
 	 * API is loaded.
 	 */
-	loadPickerApi(): Observable<boolean> {
+	private _loadPickerApi(): Observable<boolean> {
 		return new Observable<boolean>(observer => {
-			let suppress = false;
-
-			if (this._apiLoaded && !suppress) {
+			gapi.load('picker', () => {
 				observer.next(true);
 				observer.complete();
-			} else if (!this._apiLoaded) {
-				gapi.load('picker', () => {
-					if (!suppress) {
-						this._apiLoaded = true;
-						observer.next(true);
-						observer.complete();
-					}
-				});
-			}
+			});
 
 			// Error if the picker takes too long to load.
-			setTimeout(() => {
+			const timer = setTimeout(() => {
 				console.error("Loading Google Picker Timed out after 5 seconds");
-				if (!suppress) {
-					observer.error("Loading Google Picker Timed out after 5 seconds");
-				}
+				observer.error("Loading Google Picker Timed out after 5 seconds");
 			}, 5000);
 
 			return {
-				unsubscribe: () => suppress = true
+				unsubscribe: () => clearTimeout(timer)
 			};
 		})
 	}
@@ -77,7 +69,7 @@ export class GooglePickerService {
 	 * scropes requested by the oauthService.
 	 ***/
 	showGloomtoolsGooglePicker(): Observable<boolean> {
-		return this.loadPickerApi().pipe(
+		return this._loadPickerApi$.pipe(
 			mergeMap(_ => this.oauthService.getOauthToken()),
 			tap(oauthToken => {
 				// Now that we have an OAuthToken, we can load a new google picker and display it.

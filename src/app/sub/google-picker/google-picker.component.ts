@@ -169,6 +169,6 @@ export class GooglePickerComponent implements OnInit {
 	}
 
 	initClient() {
-		this.oauthService.initGapiClient().subscribe(() => console.log("HHEHEHE"));
+		this.oauthService.getClient().subscribe(() => console.log("HHEHEHE"));
 	}
 }

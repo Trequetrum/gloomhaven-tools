@@ -549,7 +549,7 @@ export class GoogleFileManagerService {
 			}),
 			this.zone.ngZoneEnter(),
 			// If there wasn't an error, we know our file was saved succesfully
-			mapTo(file),
+			map(_ => file.updateClone()),
 			tap(file => this._fileEvent$.next({ action: 'save', file }))
 		);
 	}

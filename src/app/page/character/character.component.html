@@ -1,12 +1,12 @@
-<div class="div-page" *ngIf="errorMessage">
+<div class="div-page" *ngIf="(errorMessage$ | async).length > 0">
 	<div class="div-md-centered-text">
 		<div class="appGlm-div-rcorners">
-			<p>{{errorMessage}}</p>
+			<p>{{errorMessage$ | async}}</p>
 		</div>
 	</div>
 </div>
 
-<div class="div-page" *ngIf="newCharacter">
+<div class="div-page" *ngIf="newCharacter$ | async">
 	<div class="div-md-centered-text">
 		<div class="appGlm-div-rcorners">
 			<app-create-character-form (newDocId)="changeDocId($event)">
@@ -15,10 +15,10 @@
 	</div>
 </div>
 
-<div class="div-page" *ngIf="!newCharacter && characterFile">
+<div class="div-page" *ngIf="!(newCharacter$ | async) && (characterFile$ | async) != null">
 	<div class="div-md-centered-text">
 		<div class="appGlm-div-rcorners">
-			<app-character-sheet [characterFile]="characterFile"></app-character-sheet>
+			<app-character-sheet [characterFile]="characterFile$ | async"></app-character-sheet>
 		</div>
 	</div>
 </div>
