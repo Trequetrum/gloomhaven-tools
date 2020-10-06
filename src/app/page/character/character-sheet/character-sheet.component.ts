@@ -28,6 +28,7 @@ export class CharacterSheetComponent implements OnInit {
 	experienceControl = new FormControl(0);
 	goldControl = new FormControl(0);
 	battleGoalsControl = new FormControl(0);
+	notesControl = new FormControl("");
 
 	constructor(private classDataS: ClassDataService, private fileData: DataService) { }
 
@@ -63,6 +64,11 @@ export class CharacterSheetComponent implements OnInit {
 			tap(checks => this.characterFile.character.battleGoals = checks)
 		));
 
+		// Changes updates character file
+		controlStreams.push(this.notesControl.valueChanges.pipe(
+			tap(note => this.characterFile.character.notes = note)
+		));
+
 		// Save after changes on the controls
 		merge(...controlStreams).pipe(
 			debounceTime(2000),
@@ -77,6 +83,7 @@ export class CharacterSheetComponent implements OnInit {
 			this.experienceControl.setValue(changed.character?.experience || 0);
 			this.goldControl.setValue(changed.character?.gold || 0);
 			this.battleGoalsControl.setValue(changed.character?.battleGoals || 0);
+			this.notesControl.setValue(changed.character?.notes || "");
 		}
 	}
 

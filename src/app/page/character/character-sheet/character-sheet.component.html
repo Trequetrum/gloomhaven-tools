@@ -27,8 +27,13 @@
 		</div>
 		<app-battle-goals [formControl]="battleGoalsControl"></app-battle-goals>
 	</div>
-	<p *ngIf="characterFile.character.notes">Notes: {{characterFile.character.notes}}</p>
-	<p *ngIf="characterFile.character.personalQuest?.number">Personal Quest:
-		{{characterFile.character.personalQuest.number}}
-	</p>
+	<div class="sectioned-info">
+		<mat-form-field appearance="fill" class="notes">
+			<mat-label>Character Notes:</mat-label>
+			<textarea matInput [formControl]="notesControl"></textarea>
+		</mat-form-field>
+		<p>Personal Quest:
+			{{characterFile?.character?.personalQuest?.number}}
+		</p>
+	</div>
 </div>

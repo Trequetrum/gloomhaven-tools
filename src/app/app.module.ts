@@ -44,6 +44,7 @@ import { PopupStringsComponent } from './dialog/popup-strings/popup-strings.comp
 import { CharacterSheetComponent } from './page/character/character-sheet/character-sheet.component';
 import { BattleGoalsComponent } from './page/character/character-sheet/battle-goals/battle-goals.component';
 import { TestPageComponent } from './page/test-page/test-page.component';
+import { PersonalQuestComponent } from './page/character/character-sheet/personal-quest/personal-quest.component';
 
 @NgModule({
 	declarations: [
@@ -66,6 +67,7 @@ import { TestPageComponent } from './page/test-page/test-page.component';
 		CharacterSheetComponent,
 		BattleGoalsComponent,
 		TestPageComponent,
+		PersonalQuestComponent,
 	],
 	imports: [
 		FormsModule,
