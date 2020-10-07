@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output, forwardRef } from '@angular/core';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { merge, Observable } from 'rxjs';
-import { tap, debounceTime } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 
 export interface checkmarkGoals {
 	boxControls: FormControl[];
@@ -77,11 +77,7 @@ export class BattleGoalsComponent implements OnInit, ControlValueAccessor {
 			);
 
 			// Merge each grouping into checkboxes$
-			if (checkboxes$) {
-				checkboxes$ = merge(checkboxes$, grouping$);
-			} else {
-				checkboxes$ = grouping$;
-			}
+			checkboxes$ = checkboxes$ ? merge(checkboxes$, grouping$) : grouping$;
 
 			// Each grouping tracks whether the group is complete. This happens when all contained
 			// checkboxes are checked (true).
@@ -93,9 +89,7 @@ export class BattleGoalsComponent implements OnInit, ControlValueAccessor {
 		});
 
 		// Whenever a checkbox changes state, we count up the checkmarks and re-arrange if nessesary
-		checkboxes$.pipe(
-			debounceTime(50)
-		).subscribe(_ => {
+		checkboxes$.subscribe(_ => {
 			const numChecks = this.countCheckmarks();
 			if (numChecks !== this._checkmarks) {
 				this._checkmarks = numChecks;

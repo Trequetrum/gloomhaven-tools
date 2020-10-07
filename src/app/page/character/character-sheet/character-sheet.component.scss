@@ -17,13 +17,14 @@
 	flex-direction: column;
 	justify-content: space-evenly;
 	align-items: stretch;
+	margin-right: 1em;
 }
 
 .sectioned-info{
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
-	align-items: flex-start;
+	align-items: stretch;
 }
 
 .notes{

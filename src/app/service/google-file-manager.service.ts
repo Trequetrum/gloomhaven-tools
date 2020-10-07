@@ -1,28 +1,10 @@
 import { Injectable } from '@angular/core';
+import { forkJoin, from, merge, Observable, of, Subject, Subscription } from 'rxjs';
+import { filter, map, mapTo, mergeMap, reduce, scan, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { JsonFile } from '../model_data/json-file';
 import { GoogleOauth2Service } from './google-oauth2.service';
 import { GooglePickerService } from './google-picker.service';
-import { JsonFile } from '../model_data/json-file';
-import {
-	Observable,
-	from,
-	of,
-	Subject,
-	merge,
-	defer,
-	forkJoin, Subscription
-} from 'rxjs';
-import {
-	map,
-	mergeMap,
-	filter,
-	take,
-	mapTo,
-	tap,
-	debounceTime,
-	switchMap, reduce, startWith, scan, shareReplay
-} from 'rxjs/operators';
 import { NgZoneStreamService } from './ngzone-stream.service';
-import { startWithDefer } from '../util/customRxJS';
 
 declare var google: any;
 
@@ -107,6 +89,9 @@ export class GoogleFileManagerService {
 	initializeFileCashe(): void {
 		// Apply the given function to the most current map
 		const accumulator = (accMap: Map<string, JsonFile>, event: FileAlertEvent): Map<string, JsonFile> => {
+			if (event.file == null) {
+				return accMap;
+			}
 			if (event.action === "error" || event.action === "unload") {
 				accMap.delete(event.file.id);
 			} else if (event.action === "load" || event.action === "save" || event.action === "update") {
@@ -118,6 +103,7 @@ export class GoogleFileManagerService {
 		};
 
 		this._cachedFiles$ = this._fileEvent$.pipe(
+			startWith({ action: 'error', file: null }),
 			scan(accumulator, new Map<string, JsonFile>()),
 			shareReplay(1)
 		);
@@ -200,7 +186,7 @@ export class GoogleFileManagerService {
 
 	/*****
 	 * Goes to the user's google drive and tries to retrieve a
-	 * file with the given ID. Emits the file if found
+	 * file with the given ID. This does not cache the file.
 	 *****/
 	getJsonFileFromDrive(docID: string): Observable<JsonFile> {
 		return this.oauthService.getClient().pipe(
@@ -260,13 +246,14 @@ export class GoogleFileManagerService {
 
 	/*****
 	 * Goes to the user's google drive and tries to load a
-	 * file with the given ID. If this file already exists in currentDocuments,
-	 * it will be replaced and any saved changes will be lost unless they've
-	 * been kept elsewhere.
+	 * file with the given ID. This will cache the file and emit
+	 * a load event. Listeners will need to patch their changes
+	 * into the new file or just save their changes and wait for a
+	 * save event with the patched file
 	 *****/
 	loadById(docID: string): Observable<boolean> {
 		return this.getJsonFileFromDrive(docID).pipe(
-			tap((file) => this._fileEvent$.next({ action: 'load', file })),
+			tap(file => this._fileEvent$.next({ action: 'load', file })),
 			mapTo(true)
 		);
 	}

@@ -52,8 +52,6 @@ export class GooglePickerComponent implements OnInit {
 		}
 	};
 
-
-
 	constructor(
 		private oauthService: GoogleOauth2Service,
 		private googlePicker: GooglePickerService,
@@ -62,10 +60,6 @@ export class GooglePickerComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-	}
-
-	listFiles() {
-		this.googleFileLoader.listAllAccessibleFiles();
 	}
 
 	loadGooglePicker() {
@@ -88,53 +82,6 @@ export class GooglePickerComponent implements OnInit {
 		this.oauthService.revokeAccess();
 	}
 
-	createFile() {
-		console.log("Trying to create a file");
-		this.googleFileLoader.createAndSaveNewJsonFile("HeyThere2", this.testObj).subscribe({
-			next: file => {
-				console.log("createNewJsonFile: ", file);
-				this.testFile = file;
-			},
-			error: err => console.log("Error!", err),
-			complete: () => console.log("Completed createNewJsonFile()")
-		});
-		console.log("Creating...");
-	}
-
-	updateFile() {
-		const file = this.testFile;
-		if (file) {
-			file.name = "ThisIsANewName-gloomtools.json"
-			file.content = this.testObj2;
-			this.googleFileLoader.saveJsonFile(file).subscribe({
-				next: fileI => console.log("UpdatedFile: ", fileI),
-				error: console.error,
-				complete: () => console.log("saveJsonFile() complete")
-			});
-			console.log("called googleFileLoader.saveJsonFile");
-		} else {
-			console.log("No test File created yet");
-		}
-	}
-
-	updateFileMetaData() {
-		const file = this.testFile;
-		if (file) {
-			file.name = "ThisIsANewNameMEATADATA-gloomtools.json"
-			file.content = this.testObj2;
-			this.googleFileLoader.saveJsonFileMetadata(file).subscribe({
-				next: fileI => {
-					console.log("UpdatedFile: ", fileI);
-				},
-				error: console.error,
-				complete: () => console.log("updateFileMetaData() complete")
-			});
-			console.log("called googleFileLoader.saveJsonFile");
-		} else {
-			console.log("No test File created yet");
-		}
-	}
-
 	setFolder() {
 		this.googleFileLoader.getFolderId().subscribe({
 			next: id => console.log("getGloomtoolsFolderId(): ", id)
@@ -147,28 +94,15 @@ export class GooglePickerComponent implements OnInit {
 		});
 	}
 
+	listFiles() {
+		this.googleFileLoader.listAllAccessibleFiles();
+	}
+
 	listLoadedFiles() {
 		this.googleFileLoader.listAllLoadedFiles();
 	}
 
-	getFileManagerAppFile() {
-		this.googleFileLoader.getFileManagerAppFile().pipe(
-			mergeMap(file => {
-				console.log("file1: ", file);
-				file.content = { You: "are", a: "guup", doncha: "know" };
-				console.log("file1 content Update: ", file);
-				return this.googleFileLoader.saveJsonFile(file)
-			}),
-			mergeMap(file => {
-				console.log("file2: ", file);
-				return this.googleFileLoader.getJsonFileFromDrive(file.id);
-			})
-		).subscribe(val => {
-			console.log("Returned Val: ", val);
-		});
-	}
-
-	initClient() {
-		this.oauthService.getClient().subscribe(() => console.log("HHEHEHE"));
+	clearAllDocuments() {
+		this.googleFileLoader.clearAllDocuments();
 	}
 }

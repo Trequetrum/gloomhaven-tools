@@ -32,8 +32,6 @@
 			<mat-label>Character Notes:</mat-label>
 			<textarea matInput [formControl]="notesControl"></textarea>
 		</mat-form-field>
-		<p>Personal Quest:
-			{{characterFile?.character?.personalQuest?.number}}
-		</p>
+		<app-personal-quest></app-personal-quest>
 	</div>
 </div>
