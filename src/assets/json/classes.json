@@ -6,7 +6,10 @@
 			"handSize": 10,
 			"healthType": "high",
 			"description": "There is a class of Inox, however, who have abando...",
-			"abilitiesrange": [1, 29],
+			"abilitiesrange": [
+				1,
+				29
+			],
 			"perks": [
 				{
 					"description": "Remove two -1 cards"
@@ -34,7 +37,10 @@
 			"handSize": 12,
 			"healthType": "mid",
 			"description": "The Tinkerer is a fairly common class of Quatryl to be...",
-			"abilitiesRange": [30, 60],
+			"abilitiesRange": [
+				30,
+				60
+			],
 			"icon": {
 				"name": "Tinkerer",
 				"img": {
@@ -50,7 +56,10 @@
 			"handSize": 8,
 			"healthType": "low",
 			"description": "Through deep meditation, some Orchids arrive at the...",
-			"abilitiesRange": [61, 87],
+			"abilitiesRange": [
+				61,
+				87
+			],
 			"icon": {
 				"name": "Spellweaver",
 				"img": {
@@ -66,7 +75,10 @@
 			"handSize": 9,
 			"healthType": "mid",
 			"description": "It is natural, then, that while many humans work to build...",
-			"abilitiesRange": [88, 115],
+			"abilitiesRange": [
+				88,
+				115
+			],
 			"icon": {
 				"name": "Scoundrel",
 				"img": {
@@ -82,7 +94,10 @@
 			"handSize": 11,
 			"healthType": "high",
 			"description": "There are many savvas, however, who never attain the...",
-			"abilitiesRange": [116, 145],
+			"abilitiesRange": [
+				116,
+				145
+			],
 			"icon": {
 				"name": "Cragheart",
 				"img": {
@@ -98,7 +113,10 @@
 			"handSize": 10,
 			"healthType": "low",
 			"description": "There are many, however, who never attain the...",
-			"abilitiesRange": [146, 174],
+			"abilitiesRange": [
+				146,
+				174
+			],
 			"icon": {
 				"name": "Mindthief",
 				"img": {

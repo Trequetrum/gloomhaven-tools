@@ -9,6 +9,7 @@ import { Character } from '../json_interfaces/character';
 import { CharacterFile } from '../model_data/character-file';
 import { ClassDataService } from './class-data.service';
 import { CampaignFile } from '../model_data/campaign-file';
+import { JsonFile } from '../model_data/json-file';
 
 @Injectable({
 	providedIn: 'root',
@@ -47,81 +48,90 @@ export class DataService {
 		);
 	}
 
-	listenCharacterMinis(): Observable<CharacterMini[]> {
-		// Accumulate CharacterMinis in a Map
-		const accumulator = (accMap: Map<string, CharacterMini>, { action, characterMini }) => {
-			if (action === "load" || action === "update" || action === "save") {
-				accMap.set(characterMini.docId, characterMini);
-			} else if (action === "unload" || action === "error") {
-				accMap.delete(characterMini.docId);
-			} else {
-				console.error("listenCharacterMinis() Ignoring unrecognised action: " + action);
-			}
-			return accMap;
-		}
+	listenGloomFileCache(): Observable<GloomFile[]> {
+		return this.fileManager.listenDocuments().pipe(
+			map(
+				(docs: JsonFile[]) => docs
+					.map(doc => new GloomFile(doc))
+					.filter(gloomFile => gloomFile.isGloomy)
+			)
+		);
+	}
 
-		return this.listenGloomCharacterFileAction().pipe(
-			// Convert CharacterFile to CharacterMini
-			map(({ action, characterFile: cf }) =>
-				({
-					action,
-					characterMini: new CharacterMini(cf.id, cf.content.Character.name)
-				})
-			),
-			// Accumulate CharacterMinis
-			scan(accumulator, new Map<string, CharacterMini>()),
-			// Convert accumulated CharacterMinis to array and emit
-			map(accMap => Array.from(accMap.values())),
+	listenCharacterFileCache(): Observable<CharacterFile[]> {
+		return this.listenGloomFileCache().pipe(
+			map((gloomfiles: GloomFile[]) =>
+				gloomfiles
+					.filter(file => file.isCharacter)
+					.map(file => new CharacterFile(file))
+			)
+		);
+	}
+
+	listenCampaignFileCache(): Observable<CampaignFile[]> {
+		return this.listenGloomFileCache().pipe(
+			map((gloomfiles: GloomFile[]) =>
+				gloomfiles
+					.filter(file => file.isCampaign)
+					.map(file => new CampaignFile(file))
+			)
+		);
+	}
+
+	listenCharacterMinis(): Observable<CharacterMini[]> {
+		return this.listenCharacterFileCache().pipe(
 			// Debounce since we're only interested in the freshest values
 			// Stops stuttering on load
-			debounceTime(250)
+			debounceTime(250),
+			map((charFiles: CharacterFile[]) =>
+				charFiles.map(file => new CharacterMini(file.id, file.content.Character.name))
+			)
 		);
 	}
 
 	listenCampaignMinis(): Observable<CampaignMini[]> {
-		// Accumulate CampaignMini in a Map
-		const accumulator = (accMap: Map<string, CampaignMini>, { action, campaignMini }) => {
-			if (action === "load" || action === "update" || action === "save") {
-				accMap.set(campaignMini.docId, campaignMini);
-			} else if (action === "unload" || action === "error") {
-				accMap.delete(campaignMini.docId);
-			} else {
-				console.error("listenCampaignMini() Ignoring unrecognised action: " + action);
-			}
-			return accMap;
-		}
-
-		return this.listenGloomCampaignFileAction().pipe(
-			// Convert CampaignFile to CampaignMini
-			map(({ action, campaignFile: cf }) => {
-				const campaign = cf.content.Campaign;
-				const rtn = new CampaignMini(cf.id, campaign.name);
-				if (campaign.parties) {
-					rtn.parties = campaign.parties
-						.filter(prty => prty.name && prty.name.length > 0)
-						.map(prty => prty.name);
-				}
-				return { action, campaignMini: rtn };
-			}),
-			// Accumulate CampaignMini
-			scan(accumulator, new Map<string, CampaignMini>()),
-			// Convert accumulated CharacterMinis to array and emit
-			map(accMap => Array.from(accMap.values())),
+		return this.listenCampaignFileCache().pipe(
 			// Debounce since we're only interested in the freshest values
 			// Stops stuttering on load
-			debounceTime(250)
+			debounceTime(250),
+			map((campFiles: CampaignFile[]) =>
+				campFiles.map(file => {
+					const campaign = file.content.Campaign;
+					const rtn = new CampaignMini(file.id, campaign.name);
+					if (campaign.parties) {
+						rtn.parties = campaign.parties
+							.filter(prty => prty.name && prty.name.length > 0)
+							.map(prty => prty.name);
+					}
+					return rtn;
+				})
+			)
 		);
 	}
 
-	listenCharacterFileByDocId(docId: string): Observable<{ action: FileAlertAction; file: CharacterFile }> {
+	listenGloomFileByDocId(docId: string): Observable<{ action: FileAlertAction; file: GloomFile }> {
 		return this.fileManager.listenDocumentById(docId).pipe(
 			map(({ action, file: jsonFile }) => ({
 				action,
 				file: new GloomFile(jsonFile),
 			})),
+		);
+	}
+
+	listenCharacterFileByDocId(docId: string): Observable<{ action: FileAlertAction; file: CharacterFile }> {
+		return this.listenGloomFileByDocId(docId).pipe(
 			map(({ action, file: GloomFile }) => ({
 				action,
 				file: new CharacterFile(GloomFile),
+			}))
+		);
+	}
+
+	listenCampaignFileByDocId(docId: string): Observable<{ action: FileAlertAction; file: CampaignFile }> {
+		return this.listenGloomFileByDocId(docId).pipe(
+			map(({ action, file: GloomFile }) => ({
+				action,
+				file: new CampaignFile(GloomFile),
 			}))
 		);
 	}

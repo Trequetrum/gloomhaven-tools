@@ -1,0 +1,479 @@
+{
+	"personalQuests": [
+		{
+			"number": 510,
+			"name": "Seeker of Xorn",
+			"description": "Complete three \"Crypt\" Scenarios. Then unlock \"Noxious Cellar\" and follow it to a conclusion",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Cthulhu"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Crypt Scenarios",
+					"count": 3
+				},
+				{
+					"type": "check",
+					"description": "Scenario 52"
+				}
+			]
+		},
+		{
+			"number": 511,
+			"name": "Merchant Class",
+			"description": "Collect the following items",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Three Spears"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Head gear",
+					"count": 2
+				},
+				{
+					"type": "check",
+					"description": "Torso gear",
+					"count": 2
+				},
+				{
+					"type": "check",
+					"description": "Foot gear",
+					"count": 2
+				},
+				{
+					"type": "check",
+					"description": "Hand gear",
+					"count": 2
+				},
+				{
+					"type": "check",
+					"description": "Small items",
+					"count": 2
+				}
+			]
+		},
+		{
+			"number": 512,
+			"name": "Greed Is Good",
+			"description": "Have 200 gold in your possession",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Three Spears"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "200gp"
+				}
+			]
+		},
+		{
+			"number": 513,
+			"name": "Finding the Cure",
+			"description": "Kill eight Forest Imps. Then unlock \"Forgotten Grove\" and follow it to a conclusion",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Three Spears"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Forest Imps",
+					"count": 8
+				},
+				{
+					"type": "check",
+					"description": "Scenario 59"
+				}
+			]
+		},
+		{
+			"number": 514,
+			"name": "A study of Anatomy",
+			"description": "Experience your party members becoming exhausted fifteen times",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Saw"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Exhausted",
+					"count": 15
+				}
+			]
+		},
+		{
+			"number": 515,
+			"name": "Law Bringer",
+			"description": "Kill twenty Bandits or Cultists",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Sun"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Kills",
+					"count": 20
+				}
+			]
+		},
+		{
+			"number": 516,
+			"name": "Pounds of Flesh",
+			"description": "Kill fifteen Vermlings",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Lightning"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Kills",
+					"count": 15
+				}
+			]
+		},
+		{
+			"number": 517,
+			"name": "Trophy Hunt",
+			"description": "Kill twenty different types of monsters",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Beast"
+			},
+			"tasks": [
+				{
+					"type": "list",
+					"description": "Types Killed",
+					"count": 20
+				}
+			]
+		},
+		{
+			"number": 518,
+			"name": "Eternal Wanderer",
+			"description": "Complete fifteen different scenarios",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Circles"
+			},
+			"tasks": [
+				{
+					"type": "list",
+					"description": "Scenarios",
+					"count": 15
+				}
+			]
+		},
+		{
+			"number": 519,
+			"name": "Battle Legend",
+			"description": "Earn fifteen checkmarks from completed battle goals",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Music Note"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "15 Checkmarks",
+					"count": 15
+				}
+			]
+		},
+		{
+			"number": 520,
+			"name": "Implement of Light",
+			"description": "Find the Skullbane Axe in the Necromancer's Sanctum and then use it to kill seven Living Bones, Living Corpses, or Living Spirits",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Sun"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "SkullBane Axe"
+				},
+				{
+					"type": "check",
+					"description": "Kills",
+					"count": 7
+				}
+			]
+		},
+		{
+			"number": 521,
+			"name": "Take back the Trees",
+			"description": "Complete three scenarios in the Dagger Forest. Then unlock \"Foggy Thicket\" and follow it to a conclcusion",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Angry Face"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Dagger Forest Scenarios",
+					"count": 3
+				},
+				{
+					"type": "check",
+					"description": "Scenario 55"
+				}
+			]
+		},
+		{
+			"number": 522,
+			"name": "The Thin Places",
+			"description": "Complete six side scenarios (scenario number > 51)",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Eclipse"
+			},
+			"tasks": [
+				{
+					"type": "list",
+					"description": "Side Scenarios",
+					"count": 6
+				}
+			]
+		},
+		{
+			"number": 523,
+			"name": "Aberrant Slayer",
+			"description": "Kill one of each type of Demon",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Eclipse"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Flame Demon"
+				},
+				{
+					"type": "check",
+					"description": "Frost Demon"
+				},
+				{
+					"type": "check",
+					"description": "Wind Demon"
+				},
+				{
+					"type": "check",
+					"description": "Earth Demon"
+				},
+				{
+					"type": "check",
+					"description": "Night Demon"
+				},
+				{
+					"type": "check",
+					"description": "Sun Demon"
+				}
+			]
+		},
+		{
+			"number": 524,
+			"name": "Fearless Stand",
+			"description": "Kill twenty elite monsters",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Beast"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Kills",
+					"count": 20
+				}
+			]
+		},
+		{
+			"number": 525,
+			"name": "Piety in All Things",
+			"description": "Donate 120 gold to the Sanctuary of the Great Oak",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Saw"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "12 Donations",
+					"count": 12
+				}
+			]
+		},
+		{
+			"number": 526,
+			"name": "Vengeance",
+			"description": "Complete four scenarios in Gloomhaven. Then unlock \"Investigation\" and follow it to a conclusion",
+			"reward": {
+				"type": "OpenEnvelope",
+				"value": "X"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Gloomhaven Scenarios",
+					"count": 4
+				},
+				{
+					"type": "check",
+					"description": "Scenario 57"
+				}
+			]
+		},
+		{
+			"number": 527,
+			"name": "Zealot of the Blood God",
+			"description": "Become exhausted twelve times",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Lightning"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Exhausted",
+					"count": 12
+				}
+			]
+		},
+		{
+			"number": 528,
+			"name": "Goliath Toppler",
+			"description": "Complete four boss scenarios",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Angry Face"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Boss scenarios",
+					"count": 4
+				}
+			]
+		},
+		{
+			"number": 529,
+			"name": "The Fall of Man",
+			"description": "Complete two scenarios in the Lingering Swamp. Then unlock \"Fading Lighthouse\" and follow it to a conclusion",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Eclipse"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Lingering Swamp Scenarios",
+					"count": 2
+				},
+				{
+					"type": "check",
+					"description": "Scenario 61 + ?"
+				}
+			]
+		},
+		{
+			"number": 530,
+			"name": "Augmented Abilities",
+			"description": "Purchase four enhancements (requires \"The Power of Enhancement\" global achievement)",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Circles"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Enhancements",
+					"count": 4
+				}
+			]
+		},
+		{
+			"number": 531,
+			"name": "Elemental Samples",
+			"description": "Complete a scenario in each of the following areas:",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Triangles"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Gloomhaven"
+				},
+				{
+					"type": "check",
+					"description": "Dagger Forest"
+				},
+				{
+					"type": "check",
+					"description": "Lingering Swamp"
+				},
+				{
+					"type": "check",
+					"description": "Watcher Mountains"
+				},
+				{
+					"type": "check",
+					"description": "Copperneck Mountains"
+				},
+				{
+					"type": "check",
+					"description": "Misty Sea"
+				}
+			]
+		},
+		{
+			"number": 532,
+			"name": "Augmented Abilities",
+			"description": "Experience two other characters achieving their personal quests",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Music Note"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Quests",
+					"count": 2
+				}
+			]
+		},
+		{
+			"number": 533,
+			"name": "The perfect Poison",
+			"description": "Kill poisonous enemies",
+			"reward": {
+				"type": "OpenCharacterWithIcon",
+				"value": "Cthulhu"
+			},
+			"tasks": [
+				{
+					"type": "check",
+					"description": "Ooze",
+					"count": 3
+				},
+				{
+					"type": "check",
+					"description": "Lurker",
+					"count": 3
+				},
+				{
+					"type": "check",
+					"description": "Spitting Drake",
+					"count": 3
+				}
+			]
+		}
+	]
+}
