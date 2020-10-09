@@ -7,11 +7,7 @@ export interface Character {
 	experience?: number;
 	gold?: number;
 	battleGoals?: number;
-	personalQuest?: {
-		number: number;
-		count?: number;
-		note?: string;
-	};
+	personalQuest?: PersonalQuestTracker;
 	perks?: string[];
 	abilities?: number[];
 	items?: number[];
@@ -22,4 +18,16 @@ export interface Character {
 	legacyCharacterDocId?: string;
 	notes?: string;
 	error?: FiledError;
+}
+
+export interface PersonalQuestTracker {
+	number: number;
+	tasks?: PersonalQuestTrackerTask[];
+}
+
+export interface PersonalQuestTrackerTask {
+	type: "check" | "list";
+	description: string;
+	checkCount?: number;
+	listValues?: string[];
 }

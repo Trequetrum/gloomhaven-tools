@@ -315,7 +315,7 @@
 			"name": "Vengeance",
 			"description": "Complete four scenarios in Gloomhaven. Then unlock \"Investigation\" and follow it to a conclusion",
 			"reward": {
-				"type": "OpenEnvelope",
+				"type": "OpenEnvelopeWithIcon",
 				"value": "X"
 			},
 			"tasks": [

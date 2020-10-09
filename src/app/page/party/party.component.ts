@@ -6,8 +6,8 @@ import { Party } from 'src/app/model_data/party';
 import { MatDialog } from '@angular/material/dialog';
 import { SelectChiplistDialogComponent } from 'src/app/dialog/select-chiplist-dialog/select-chiplist-dialog.component';
 import { ChipMenuData, ChipMenuItem, ChipSubmenuItem } from 'src/app/model_ui/chip-menu-data';
-import { AchievementsService } from 'src/app/service/achievements.service';
 import { GlobalAchievement } from 'src/app/model_data/achievement';
+import { AchievementsService } from 'src/app/service/json/achievements.service';
 
 @Component({
 	selector: 'app-party',
