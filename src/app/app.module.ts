@@ -45,6 +45,8 @@ import { CharacterSheetComponent } from './page/character/character-sheet/charac
 import { BattleGoalsComponent } from './page/character/character-sheet/battle-goals/battle-goals.component';
 import { TestPageComponent } from './page/test-page/test-page.component';
 import { PersonalQuestComponent } from './page/character/character-sheet/personal-quest/personal-quest.component';
+import { SelectPersonalQuestComponent } from './page/character/dialog/select-personal-quest/select-personal-quest.component';
+import { UpdatePersonalQuestComponent } from './page/character/dialog/update-personal-quest/update-personal-quest.component';
 
 @NgModule({
 	declarations: [
@@ -68,6 +70,8 @@ import { PersonalQuestComponent } from './page/character/character-sheet/persona
 		BattleGoalsComponent,
 		TestPageComponent,
 		PersonalQuestComponent,
+		SelectPersonalQuestComponent,
+		UpdatePersonalQuestComponent,
 	],
 	imports: [
 		FormsModule,

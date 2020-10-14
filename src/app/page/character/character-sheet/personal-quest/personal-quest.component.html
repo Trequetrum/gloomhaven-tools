@@ -1,11 +1,11 @@
-<mat-card class="form-element">
-	<mat-card-title>Personal Quest</mat-card-title>
-	<mat-card-content class="form-center">
+<mat-card class="container">
+	<mat-card-title (click)="updatePersonalQuest()" class="buttonIcon">Personal Quest</mat-card-title>
+	<mat-card-content>
 		<mat-form-field *ngIf="pQService.isPersonalQuestNumber(pQControl.value)" appearance="standard">
 
 			<mat-label>Card</mat-label>
 			<input matInput [formControl]="pQControl">
-			<mat-icon matSuffix (click)=" updatePersonalQuest()" color="accent">loyalty</mat-icon>
+			<mat-icon matSuffix (click)="updatePersonalQuest()" color="accent" class="buttonIcon">loyalty</mat-icon>
 		</mat-form-field>
 		<br>
 		<button mat-raised-button color="accent" (click)="selectPersonalQuest()">Select Personal Quest</button>
