@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { Observable, of, from, BehaviorSubject, combineLatest } from 'rxjs';
 import { map, mergeMap, tap, mapTo, take, shareReplay } from 'rxjs/operators';
-import { NgZoneStreamService } from './ngzone-stream.service';
+import { NgZoneStreamService } from '../ngzone-stream.service';
 
 declare var gapi: any;
 
@@ -183,7 +183,7 @@ export class GoogleOauth2Service {
 				// Start the Oauth flow for the user, then return an 
 				// Oauth instance
 				return from(gapi.auth2.getAuthInstance().signIn()).pipe(
-					map(() => gapi.auth2.getAuthInstance()),
+					map(_ => gapi.auth2.getAuthInstance()),
 					this.zone.ngZoneEnter()
 				);
 			})

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { GoogleOauth2Service } from './google-oauth2.service';
 import { Subject, Observable } from 'rxjs';
 import { mapTo, mergeMap, shareReplay, tap } from 'rxjs/operators';
-import { NgZoneStreamService } from './ngzone-stream.service';
+import { NgZoneStreamService } from '../ngzone-stream.service';
 
 declare var gapi: any;
 declare var google: any;
@@ -102,11 +102,6 @@ export class GooglePickerService {
 		// Check that the user picked at least one file
 		if (response[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
 			response[google.picker.Response.DOCUMENTS].forEach(doc => this._fileLoad$.next(doc));
-			/*
-			let doc = data[google.picker.Response.DOCUMENTS][0];
-			let src = doc[google.picker.Document.URL];
-			console.log("Document selected is", doc,"and URL is ",src)
-			*/
 		}
 	}
 }

@@ -1,0 +1,15 @@
+{
+	"Campaign": {
+		"name": "testing campaign",
+		"globalAchievements": [
+			"One",
+			"Two",
+			"Three"
+		],
+		"parties": [{
+			"Name": "testing party 1"
+		},{
+			"Name": "testing party 2"
+		}]
+	}
+}

@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { mergeMap } from 'rxjs/operators';
 import { JsonFile } from 'src/app/model_data/json-file';
-import { GoogleFileManagerService } from 'src/app/service/google-file-manager.service';
-import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
-import { GooglePickerService } from 'src/app/service/google-picker.service';
+import { GoogleFileManagerService } from 'src/app/service/google-service/google-file-manager.service';
+import { GoogleOauth2Service } from 'src/app/service/google-service/google-oauth2.service';
+import { GooglePickerService } from 'src/app/service/google-service/google-picker.service';
 
 @Component({
 	selector: 'app-google-picker',

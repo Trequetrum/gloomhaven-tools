@@ -1,0 +1,13 @@
+{
+  "Character": {
+    "name": "Purp",
+    "class": "Mindthief",
+    "level": 4,
+    "gold": "300",
+    "experience": "200",
+    "_gDocObjID": 1,
+    "battleGoals": 12,
+    "notes": ""
+  },
+  "_gDocObjID": 0
+}

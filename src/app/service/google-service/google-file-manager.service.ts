@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { forkJoin, from, merge, Observable, of, Subject, Subscription } from 'rxjs';
 import { filter, map, mapTo, mergeMap, reduce, scan, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
-import { JsonFile } from '../model_data/json-file';
+import { JsonFile } from '../../model_data/json-file';
+import { NgZoneStreamService } from '../ngzone-stream.service';
 import { GoogleOauth2Service } from './google-oauth2.service';
 import { GooglePickerService } from './google-picker.service';
-import { NgZoneStreamService } from './ngzone-stream.service';
 
 declare var google: any;
 
@@ -77,7 +77,7 @@ export class GoogleFileManagerService {
 			)
 		).subscribe();
 
-		oauthService.listenSignIn().subscribe((signin) => {
+		oauthService.listenSignIn().subscribe(signin => {
 			if (signin) {
 				this.loadAllAccessibleFiles().subscribe();
 			} else {
@@ -600,7 +600,7 @@ export class GoogleFileManagerService {
 				file.modifiedTime = response.result.modifiedTime;
 				return file;
 			}),
-			tap((file) => this._fileEvent$.next({ action: 'save', file }))
+			tap(file => this._fileEvent$.next({ action: 'save', file }))
 		);
 	}
 }

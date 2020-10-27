@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core'
+import { ClassData } from 'src/app/json_interfaces/class-data'
+import { ImgIcon } from 'src/app/json_interfaces/img-icon'
+import { RaceData } from 'src/app/json_interfaces/race-data'
 
 import ClassesJson from 'src/assets/json/classes.json'
-import { ClassData } from '../json_interfaces/class-data'
-import { RaceData } from '../json_interfaces/race-data'
-import { ImgIcon } from '../json_interfaces/img-icon'
 
 @Injectable({
 	providedIn: 'root',

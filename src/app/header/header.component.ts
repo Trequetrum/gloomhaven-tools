@@ -4,11 +4,11 @@ import { InputInitiativeComponent } from '../dialog/input-initiative/input-initi
 import { MenuDisplayItem } from '../model_ui/menu-display-item';
 import { CampaignMini } from '../model_data/campaign-mini';
 import { PartyMini } from '../model_data/party-mini';
-import { GoogleOauth2Service } from '../service/google-oauth2.service';
 import { DataService } from '../service/data.service';
 import { Observable } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 import { CharacterMini } from '../model_data/character-mini';
+import { GoogleOauth2Service } from '../service/google-service/google-oauth2.service';
 
 
 @Component({

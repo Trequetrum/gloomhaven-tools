@@ -1,9 +1,9 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { DataService } from 'src/app/service/data.service';
-import { ClassDataService } from 'src/app/service/class-data.service';
 import { PopupStringsComponent } from 'src/app/dialog/popup-strings/popup-strings.component';
 import { MatDialog } from '@angular/material/dialog';
+import { ClassDataService } from 'src/app/service/json-service/class-data.service';
 
 @Component({
 	selector: 'app-create-character-form',

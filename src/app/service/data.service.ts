@@ -1,22 +1,23 @@
 import { Injectable } from '@angular/core';
-import { GoogleFileManagerService, FileAlertAction } from './google-file-manager.service';
 import { Observable } from 'rxjs';
 import { GloomFile } from '../model_data/gloom-file';
-import { map, filter, tap, scan, debounceTime } from 'rxjs/operators';
+import { map, filter, tap, scan, debounceTime, mapTo } from 'rxjs/operators';
 import { CampaignMini } from '../model_data/campaign-mini';
 import { CharacterMini } from '../model_data/character-mini';
 import { Character } from '../json_interfaces/character';
 import { CharacterFile } from '../model_data/character-file';
-import { ClassDataService } from './class-data.service';
 import { CampaignFile } from '../model_data/campaign-file';
 import { JsonFile } from '../model_data/json-file';
+import { ClassDataService } from './json-service/class-data.service';
+import { GoogleFileManagerService, FileAlertAction } from './google-service/google-file-manager.service';
+import { StubFileManagerService } from './stub-service/stub-file-manager.service';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class DataService {
 
-	constructor(private fileManager: GoogleFileManagerService, private classData: ClassDataService) { }
+	constructor(private fileManager: StubFileManagerService, private classData: ClassDataService) { }
 
 	listenGloomFileAction(): Observable<{
 		action: FileAlertAction,
@@ -148,6 +149,6 @@ export class DataService {
 	}
 
 	saveFile(file: GloomFile): Observable<boolean> {
-		return this.fileManager.saveJsonFile(file).pipe(map(_ => true));
+		return this.fileManager.saveJsonFile(file).pipe(mapTo(true));
 	}
 }

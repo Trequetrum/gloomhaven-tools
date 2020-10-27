@@ -1,0 +1,13 @@
+{
+  "Character": {
+    "name": "Willow",
+    "class": "Sawbones",
+    "level": 4,
+    "gold": "750",
+    "experience": 150,
+    "_gDocObjID": 1,
+    "battleGoals": 11,
+    "notes": "Willow is an interesting character to think about [...] in a way. Don't you think so?"
+  },
+  "_gDocObjID": 0
+}

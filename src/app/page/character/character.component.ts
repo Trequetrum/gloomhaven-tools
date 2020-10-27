@@ -2,10 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Params, ActivatedRoute, Router } from '@angular/router';
 import { filter, map, share, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 import { DataService } from 'src/app/service/data.service';
-import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
 import { Observable, Subscription } from 'rxjs';
 import { CharacterFile } from 'src/app/model_data/character-file';
-import { FileAlertAction } from 'src/app/service/google-file-manager.service';
+import { GoogleOauth2Service } from 'src/app/service/google-service/google-oauth2.service';
 
 @Component({
 	selector: 'app-character',

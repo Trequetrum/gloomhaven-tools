@@ -1,0 +1,13 @@
+{
+  "Character": {
+    "name": "Bob's Your Uncle",
+    "class": "Sawbones",
+    "level": 9,
+    "gold": "31",
+    "experience": "500",
+    "_gDocObjID": 1,
+    "battleGoals": 12,
+    "notes": ""
+  },
+  "_gDocObjID": 0
+}

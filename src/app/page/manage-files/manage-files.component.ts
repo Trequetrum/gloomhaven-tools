@@ -1,13 +1,13 @@
 import { Component, OnInit, AfterViewInit, ViewChild, NgZone } from '@angular/core';
-import { GoogleOauth2Service } from 'src/app/service/google-oauth2.service';
-import { GooglePickerService } from 'src/app/service/google-picker.service';
-import { GoogleFileManagerService } from 'src/app/service/google-file-manager.service';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource, MatTable } from '@angular/material/table';
 import { map, tap, take, mergeMap } from 'rxjs/operators';
 import { JsonFile } from 'src/app/model_data/json-file';
 import { GloomFile } from 'src/app/model_data/gloom-file';
 import { interval } from 'rxjs';
+import { GoogleFileManagerService } from 'src/app/service/google-service/google-file-manager.service';
+import { GoogleOauth2Service } from 'src/app/service/google-service/google-oauth2.service';
+import { GooglePickerService } from 'src/app/service/google-service/google-picker.service';
 
 @Component({
 	selector: 'app-manage-files',

@@ -1,6 +1,6 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { ImgIcon } from 'src/app/json_interfaces/img-icon';
-import { ClassDataService } from 'src/app/service/class-data.service';
+import { ClassDataService } from 'src/app/service/json-service/class-data.service';
 
 @Component({
 	selector: 'app-class-picker',
@@ -11,7 +11,7 @@ export class ClassPickerComponent implements OnInit {
 	@Output() classClick: EventEmitter<string> = new EventEmitter<string>();
 	classIcons = new Array<ImgIcon>();
 
-	constructor(private classData: ClassDataService) {}
+	constructor(private classData: ClassDataService) { }
 
 	clickClass(picked: string): void {
 		this.classIcons.forEach(icon => {

@@ -1,11 +1,11 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CharacterFile } from 'src/app/model_data/character-file';
 import { ClassData } from 'src/app/json_interfaces/class-data';
-import { ClassDataService } from 'src/app/service/class-data.service';
 import { FormControl } from '@angular/forms';
 import { debounceTime, tap, switchMap } from 'rxjs/operators';
 import { DataService } from 'src/app/service/data.service';
 import { merge, Observable } from 'rxjs';
+import { ClassDataService } from 'src/app/service/json-service/class-data.service';
 
 @Component({
 	selector: 'app-character-sheet',

@@ -1,0 +1,37 @@
+{
+    "Character": {
+		"name": "Scabbers & Patchy",
+		"class": "Beast Tyrant",
+		"level": 9,
+		"experience": 500,
+		"gold": 171,
+		"battleGoals": 14, 
+		"personalQuest": {
+			"number": 519,
+			"count": 14,
+			"notes": "Completed Battle Goals: 14/15"
+		},
+		"perks": [
+			"Remove two -1 cards",
+			"Replace one -1 card with one +1 card",
+			"Replace one -1 card with one +1 card",
+			"Replace one -1 card with one +1 card",
+			"Replace one +0 card with one +2 card",
+			"Replace one +0 card with one +2 card",
+			"Add one +1 Wound card",
+			"Add one +1 Wound card",
+			"Add one +1 Immodilize card",
+			"Add two Rolling Heal 1, Self cards",
+			"Add two Rolling Heal 1, Self cards",
+			"Add two Rolling Heal 1, Self cards",
+			"Ignore negative scenario effects"
+		],
+		"abilities": [491,492,494,496,499,501,502,504],
+		"items": [13,17,28,34,36,41,42,100,150],
+		"notes": "Question: Is Scabbers a bear slaver?",
+		"scenarioWins": 10,
+		"scenarioLosses": 10,
+		"sanctuaryDonations": 10,
+		"legacyCharacterDocId": "a;lskdhjasd908q273e9addfsd=2309uaasd"
+	}
+}
