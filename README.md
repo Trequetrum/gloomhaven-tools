@@ -6,8 +6,8 @@ Learning Angular and building a Gloomhaven app at the same time :)
 
 There’s no official documentation yet. The code should be written/maintained in a reasonably well documented state in the master branch. Usage details/documentation is a must-have for once the first features are implemented and friends are checking it out and giving feedback.
 
-The most recent production build can be found here ([Gloomhaven Tools](https://trequetrum.github.io/GloomhavenTools/)) at: 
-* https://trequetrum.github.io/GloomhavenTools/
+The most recent production build can be found here ([Gloomhaven Tools](https://trequetrum.github.io/gloomhaven-tools/)) at: 
+* https://trequetrum.github.io/gloomhaven-tools/
 * The most recent build was on **Wed October 7th 2020**. 
     * Build Highlight: Rework how data is streamed from google docs to frontend Angular Material components. It no longer relies on *Angular Change Detection*. If this project ever gets to the point that we're eeking out every last bit of performance, we can stop re-entering the angular zone after calls to any Google APIs. The real benefit on this change, however, is that cashing data is implemented via RxJS basically for free. 
 * Build on **Thurs September 24th 2020**.
